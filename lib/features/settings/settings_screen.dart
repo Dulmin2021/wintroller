@@ -37,60 +37,109 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 10),
             Container(
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: AppColors.surfaceContainer,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(24),
                 border: Border.all(color: AppColors.outlineVariant, width: 0.8),
               ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ListTile(
-                    leading: const Icon(Icons.style_rounded, color: AppColors.primary),
-                    title: const Text('Theme Style', style: TextStyle(fontWeight: FontWeight.w600)),
-                    subtitle: Text(
-                      themeStyle == AppThemeStyle.stitchCyber
-                          ? 'Stitch Cyber (Proton Remote)'
-                          : 'Midnight Slate',
-                    ),
-                    trailing: DropdownButton<AppThemeStyle>(
-                      value: themeStyle,
-                      dropdownColor: AppColors.surfaceContainerHigh,
-                      underline: const SizedBox(),
-                      items: const [
-                        DropdownMenuItem(
-                          value: AppThemeStyle.stitchCyber,
-                          child: Text('Stitch Cyber (Proton)'),
-                        ),
-                        DropdownMenuItem(
-                          value: AppThemeStyle.midnight,
-                          child: Text('Midnight Slate'),
-                        ),
-                      ],
-                      onChanged: (style) {
-                        if (style != null) {
-                          ref.read(themeStyleProvider.notifier).setThemeStyle(style);
-                        }
-                      },
-                    ),
+                  const Row(
+                    children: [
+                      Icon(Icons.palette_rounded, color: AppColors.primary, size: 20),
+                      SizedBox(width: 8),
+                      Text(
+                        'Theme Style',
+                        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                      ),
+                    ],
                   ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _ThemeStyleOptionCard(
+                          title: 'Stitch Cyber',
+                          subtitle: 'Proton Remote',
+                          bgColor: const Color(0xFF0B1326),
+                          accentColor: AppColors.primaryContainer,
+                          isSelected: themeStyle == AppThemeStyle.stitchCyber,
+                          onTap: () {
+                            ref
+                                .read(themeStyleProvider.notifier)
+                                .setThemeStyle(AppThemeStyle.stitchCyber);
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _ThemeStyleOptionCard(
+                          title: 'Midnight Slate',
+                          subtitle: 'Charcoal Cyan',
+                          bgColor: const Color(0xFF0F172A),
+                          accentColor: const Color(0xFF38BDF8),
+                          isSelected: themeStyle == AppThemeStyle.midnight,
+                          onTap: () {
+                            ref
+                                .read(themeStyleProvider.notifier)
+                                .setThemeStyle(AppThemeStyle.midnight);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
                   const Divider(color: AppColors.outlineVariant, height: 1),
-                  ListTile(
-                    leading: const Icon(Icons.dark_mode_rounded, color: AppColors.primary),
-                    title: const Text('Theme Mode', style: TextStyle(fontWeight: FontWeight.w600)),
-                    subtitle: Text(themeMode.name.toUpperCase()),
-                    trailing: DropdownButton<ThemeMode>(
-                      value: themeMode,
-                      dropdownColor: AppColors.surfaceContainerHigh,
-                      underline: const SizedBox(),
-                      items: const [
-                        DropdownMenuItem(value: ThemeMode.dark, child: Text('Dark')),
-                        DropdownMenuItem(value: ThemeMode.light, child: Text('Light')),
-                        DropdownMenuItem(value: ThemeMode.system, child: Text('System')),
+                  const SizedBox(height: 16),
+                  const Row(
+                    children: [
+                      Icon(Icons.brightness_6_rounded, color: AppColors.primary, size: 20),
+                      SizedBox(width: 8),
+                      Text(
+                        'Mode',
+                        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: SegmentedButton<ThemeMode>(
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.resolveWith<Color?>(
+                          (Set<MaterialState> states) {
+                            if (states.contains(MaterialState.selected)) {
+                              return AppColors.primaryContainer.withOpacity(0.3);
+                            }
+                            return AppColors.surfaceContainerHigh;
+                          },
+                        ),
+                        side: MaterialStateProperty.all(
+                          const BorderSide(color: AppColors.outlineVariant, width: 0.8),
+                        ),
+                      ),
+                      segments: const [
+                        ButtonSegment(
+                          value: ThemeMode.dark,
+                          label: Text('Dark'),
+                          icon: Icon(Icons.dark_mode_rounded, size: 18),
+                        ),
+                        ButtonSegment(
+                          value: ThemeMode.light,
+                          label: Text('Light'),
+                          icon: Icon(Icons.light_mode_rounded, size: 18),
+                        ),
+                        ButtonSegment(
+                          value: ThemeMode.system,
+                          label: Text('System'),
+                          icon: Icon(Icons.settings_suggest_rounded, size: 18),
+                        ),
                       ],
-                      onChanged: (mode) {
-                        if (mode != null) {
-                          ref.read(themeModeProvider.notifier).setThemeMode(mode);
-                        }
+                      selected: {themeMode},
+                      onSelectionChanged: (modes) {
+                        ref.read(themeModeProvider.notifier).setThemeMode(modes.first);
                       },
                     ),
                   ),
@@ -249,6 +298,83 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 32),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ThemeStyleOptionCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final Color bgColor;
+  final Color accentColor;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _ThemeStyleOptionCard({
+    required this.title,
+    required this.subtitle,
+    required this.bgColor,
+    required this.accentColor,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Ink(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isSelected ? accentColor : AppColors.outlineVariant.withOpacity(0.6),
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: accentColor,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  if (isSelected)
+                    Icon(Icons.check_circle_rounded, color: accentColor, size: 18),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Colors.white.withOpacity(0.6),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

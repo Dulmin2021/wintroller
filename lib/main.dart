@@ -31,9 +31,14 @@ class WintrollerApp extends ConsumerStatefulWidget {
 }
 
 class _WintrollerAppState extends ConsumerState<WintrollerApp> {
+  late final Widget _initialHome;
+
   @override
   void initState() {
     super.initState();
+    // Cache the initial home widget so MaterialApp does not replace the Navigator on theme rebuilds
+    _initialHome = _getInitialHome();
+
     // Auto-connect to default or last used device if available
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _autoConnectIfAvailable();
@@ -86,7 +91,7 @@ class _WintrollerAppState extends ConsumerState<WintrollerApp> {
       theme: AppTheme.lightTheme,
       darkTheme: activeDarkTheme,
       themeMode: themeMode,
-      home: _getInitialHome(),
+      home: _initialHome,
     );
   }
 }
