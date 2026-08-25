@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Proton Remote - Trackpad</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "surface-container-highest": "#2d3449",
+                "error-container": "#93000a",
+                "on-tertiary-container": "#00311f",
+                "surface-container": "#171f33",
+                "inverse-primary": "#005ac2",
+                "primary": "#adc6ff",
+                "inverse-on-surface": "#283044",
+                "on-secondary-fixed-variant": "#38485d",
+                "on-primary-fixed": "#001a42",
+                "surface-tint": "#adc6ff",
+                "primary-container": "#4d8eff",
+                "surface-container-lowest": "#060e20",
+                "surface-bright": "#31394d",
+                "secondary-fixed-dim": "#b7c8e1",
+                "surface-container-low": "#131b2e",
+                "secondary-fixed": "#d3e4fe",
+                "on-surface": "#dae2fd",
+                "on-secondary-container": "#a9bad3",
+                "outline-variant": "#424754",
+                "tertiary-fixed-dim": "#4edea3",
+                "tertiary-container": "#00a572",
+                "inverse-surface": "#dae2fd",
+                "on-surface-variant": "#c2c6d6",
+                "on-error-container": "#ffdad6",
+                "background": "#0b1326",
+                "error": "#ffb4ab",
+                "on-secondary-fixed": "#0b1c30",
+                "surface": "#0b1326",
+                "on-tertiary-fixed": "#002113",
+                "on-background": "#dae2fd",
+                "on-tertiary": "#003824",
+                "surface-variant": "#2d3449",
+                "surface-dim": "#0b1326",
+                "surface-container-high": "#222a3d",
+                "on-secondary": "#213145",
+                "tertiary-fixed": "#6ffbbe",
+                "primary-fixed": "#d8e2ff",
+                "on-error": "#690005",
+                "on-primary-fixed-variant": "#004395",
+                "primary-fixed-dim": "#adc6ff",
+                "on-primary-container": "#00285d",
+                "secondary-container": "#3a4a5f",
+                "on-tertiary-fixed-variant": "#005236",
+                "tertiary": "#4edea3",
+                "outline": "#8c909f",
+                "on-primary": "#002e6a",
+                "secondary": "#b7c8e1"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "stack-lg": "24px",
+                "margin-mobile": "20px",
+                "gutter": "16px",
+                "stack-md": "16px",
+                "stack-sm": "8px",
+                "touch-target-min": "48px"
+        },
+        "fontFamily": {
+                "body-lg": [
+                        "Inter"
+                ],
+                "headline-md": [
+                        "Inter"
+                ],
+                "body-md": [
+                        "Inter"
+                ],
+                "headline-sm": [
+                        "Inter"
+                ],
+                "headline-lg": [
+                        "Inter"
+                ],
+                "label-lg": [
+                        "Inter"
+                ],
+                "label-sm": [
+                        "Inter"
+                ],
+                "mono-ui": [
+                        "JetBrains Mono"
+                ]
+        },
+        "fontSize": {
+                "body-lg": [
+                        "18px",
+                        {
+                                "lineHeight": "28px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-md": [
+                        "24px",
+                        {
+                                "lineHeight": "32px",
+                                "letterSpacing": "-0.01em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "body-md": [
+                        "16px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-sm": [
+                        "20px",
+                        {
+                                "lineHeight": "28px",
+                                "fontWeight": "600"
+                        }
+                ],
+                "headline-lg": [
+                        "32px",
+                        {
+                                "lineHeight": "40px",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "label-lg": [
+                        "14px",
+                        {
+                                "lineHeight": "20px",
+                                "letterSpacing": "0.05em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "label-sm": [
+                        "12px",
+                        {
+                                "lineHeight": "16px",
+                                "fontWeight": "500"
+                        }
+                ],
+                "mono-ui": [
+                        "14px",
+                        {
+                                "lineHeight": "20px",
+                                "fontWeight": "500"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+<style>
+  body {
+    background-color: theme('colors.background');
+    color: theme('colors.on-background');
+    overscroll-behavior-y: none;
+  }
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom, 16px); }
+</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased selection:bg-primary-container selection:text-on-primary-container h-[884px] w-full flex flex-col">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-[56px] bg-surface border-b border-outline-variant transition-colors duration-200">
+<button class="text-primary hover:bg-surface-container-highest active:scale-95 transition-all duration-200 w-10 h-10 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">settings_remote</span>
+</button>
+<div class="flex flex-col items-center justify-center">
+<h1 class="text-headline-sm font-headline-sm font-bold text-primary">Proton Remote</h1>
+</div>
+<button class="text-on-surface-variant hover:bg-surface-container-highest active:scale-95 transition-all duration-200 w-10 h-10 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">sensors</span>
+</button>
+</header>
+<!-- Main Content: Trackpad Surface -->
+<main class="flex-1 w-full pt-[56px] pb-[72px] flex flex-col relative px-margin-mobile py-margin-mobile">
+<div class="flex-1 flex flex-col mt-4 mb-2 bg-surface-container rounded-xl border border-outline-variant shadow-sm overflow-hidden">
+<!-- Gesture Area -->
+<div class="flex-1 touch-none relative group cursor-crosshair">
+<!-- Subtle inner glow on interaction -->
+<div class="absolute inset-0 bg-primary/0 group-active:bg-primary/5 transition-colors duration-300 pointer-events-none"></div>
+<!-- Center Icon / Indicator -->
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<span class="material-symbols-outlined text-[64px] text-surface-bright opacity-30 group-active:text-primary group-active:opacity-20 transition-all duration-500">touchpad_mouse</span>
+</div>
+</div>
+<!-- Divider -->
+<div class="w-full h-px bg-outline-variant"></div>
+<!-- Mouse Buttons -->
+<div class="flex h-[80px] bg-surface-container-high">
+<button class="flex-1 flex items-center justify-center hover:bg-surface-container-highest active:bg-primary active:text-on-primary transition-colors duration-150">
+<span class="font-label-lg text-label-lg tracking-wider">Left Click</span>
+</button>
+<div class="w-px h-full bg-outline-variant"></div>
+<button class="flex-1 flex items-center justify-center hover:bg-surface-container-highest active:bg-primary active:text-on-primary transition-colors duration-150">
+<span class="font-label-lg text-label-lg tracking-wider">Right Click</span>
+</button>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter py-2 pb-safe bg-surface/80 backdrop-blur-xl border-t border-outline-variant shadow-[0_-4px_24px_rgba(0,0,0,0.4)]">
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary active:scale-90 transition-transform duration-150">
+<span class="material-symbols-outlined text-[24px] mb-1">dashboard</span>
+<span class="font-label-sm text-label-sm">Dashboard</span>
+</button>
+<!-- Active Tab: Controls -->
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-4 py-1 hover:text-primary active:scale-90 transition-transform duration-150">
+<span class="material-symbols-outlined text-[24px] mb-1" style="font-variation-settings: 'FILL' 1;">videogame_asset</span>
+<span class="font-label-sm text-label-sm">Controls</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary active:scale-90 transition-transform duration-150">
+<span class="material-symbols-outlined text-[24px] mb-1">folder_open</span>
+<span class="font-label-sm text-label-sm">Files</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary active:scale-90 transition-transform duration-150">
+<span class="material-symbols-outlined text-[24px] mb-1">settings</span>
+<span class="font-label-sm text-label-sm">Settings</span>
+</button>
+</nav>
+</body></html>

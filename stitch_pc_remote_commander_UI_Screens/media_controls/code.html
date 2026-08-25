@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Proton Remote - Media Controls</title>
+<!-- Google Fonts & Material Symbols -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-highest": "#2d3449",
+                      "error-container": "#93000a",
+                      "on-tertiary-container": "#00311f",
+                      "surface-container": "#171f33",
+                      "inverse-primary": "#005ac2",
+                      "primary": "#adc6ff",
+                      "inverse-on-surface": "#283044",
+                      "on-secondary-fixed-variant": "#38485d",
+                      "on-primary-fixed": "#001a42",
+                      "surface-tint": "#adc6ff",
+                      "primary-container": "#4d8eff",
+                      "surface-container-lowest": "#060e20",
+                      "surface-bright": "#31394d",
+                      "secondary-fixed-dim": "#b7c8e1",
+                      "surface-container-low": "#131b2e",
+                      "secondary-fixed": "#d3e4fe",
+                      "on-surface": "#dae2fd",
+                      "on-secondary-container": "#a9bad3",
+                      "outline-variant": "#424754",
+                      "tertiary-fixed-dim": "#4edea3",
+                      "tertiary-container": "#00a572",
+                      "inverse-surface": "#dae2fd",
+                      "on-surface-variant": "#c2c6d6",
+                      "on-error-container": "#ffdad6",
+                      "background": "#0b1326",
+                      "error": "#ffb4ab",
+                      "on-secondary-fixed": "#0b1c30",
+                      "surface": "#0b1326",
+                      "on-tertiary-fixed": "#002113",
+                      "on-background": "#dae2fd",
+                      "on-tertiary": "#003824",
+                      "surface-variant": "#2d3449",
+                      "surface-dim": "#0b1326",
+                      "surface-container-high": "#222a3d",
+                      "on-secondary": "#213145",
+                      "tertiary-fixed": "#6ffbbe",
+                      "primary-fixed": "#d8e2ff",
+                      "on-error": "#690005",
+                      "on-primary-fixed-variant": "#004395",
+                      "primary-fixed-dim": "#adc6ff",
+                      "on-primary-container": "#00285d",
+                      "secondary-container": "#3a4a5f",
+                      "on-tertiary-fixed-variant": "#005236",
+                      "tertiary": "#4edea3",
+                      "outline": "#8c909f",
+                      "on-primary": "#002e6a",
+                      "secondary": "#b7c8e1"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-lg": "24px",
+                      "margin-mobile": "20px",
+                      "gutter": "16px",
+                      "stack-md": "16px",
+                      "stack-sm": "8px",
+                      "touch-target-min": "48px"
+              },
+              "fontFamily": {
+                      "body-lg": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "body-md": ["Inter"],
+                      "headline-sm": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "label-lg": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "mono-ui": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "mono-ui": ["14px", {"lineHeight": "20px", "fontWeight": "500"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: linear-gradient(145deg, rgba(23, 31, 51, 0.8) 0%, rgba(11, 19, 38, 0.9) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .fluid-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+            gap: 16px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-touch-target-min bg-surface border-b border-outline-variant flat no shadows transition-colors duration-200 active:scale-95 hidden md:flex">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-[24px]">settings_remote</span>
+<span class="font-headline-sm text-headline-sm font-bold text-primary">Proton Remote</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-tertiary"></div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Connected</span>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-highest transition-colors text-primary">
+<span class="material-symbols-outlined">sensors</span>
+</button>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="relative w-full min-h-screen pt-[env(safe-area-inset-top,20px)] md:pt-[64px] pb-[100px] flex flex-col items-center justify-center px-margin-mobile">
+<!-- Ambient Background Glow -->
+<div class="absolute inset-0 z-0 flex items-center justify-center pointer-events-none opacity-30">
+<div class="w-[80vw] h-[80vw] max-w-[600px] max-h-[600px] bg-primary-container rounded-full blur-[120px]"></div>
+</div>
+<!-- Media Control Center Card -->
+<section class="glass-panel w-full max-w-lg rounded-[32px] p-8 flex flex-col gap-10 border border-outline-variant shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-10 relative overflow-hidden">
+<!-- Now Playing Header -->
+<div class="flex flex-col items-center text-center gap-2">
+<div class="w-16 h-16 rounded-2xl bg-surface-container-high border border-outline flex items-center justify-center mb-2 shadow-inner">
+<span class="material-symbols-outlined text-primary text-[32px]">album</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Bohemian Rhapsody</h1>
+<div class="flex items-center gap-2 bg-surface-container-highest px-3 py-1 rounded-full border border-outline-variant">
+<span class="material-symbols-outlined text-[16px] text-tertiary">music_note</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Spotify</span>
+</div>
+</div>
+<!-- Primary Transport Controls (Ergonomic placement) -->
+<div class="flex items-center justify-center gap-8 py-4">
+<button class="w-14 h-14 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center text-on-surface hover:bg-surface-container-highest hover:text-primary transition-all active:scale-95 shadow-md">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">skip_previous</span>
+</button>
+<button class="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-on-primary hover:bg-primary-fixed transition-all active:scale-90 shadow-[0_0_24px_rgba(77,142,255,0.4)]">
+<span class="material-symbols-outlined text-[48px]" style="font-variation-settings: 'FILL' 1;">pause</span>
+</button>
+<button class="w-14 h-14 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center text-on-surface hover:bg-surface-container-highest hover:text-primary transition-all active:scale-95 shadow-md">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">skip_next</span>
+</button>
+</div>
+<!-- Secondary Controls: Volume & Toggles -->
+<div class="flex flex-col gap-6 bg-surface-container/50 p-6 rounded-2xl border border-outline-variant/50">
+<!-- Volume Row -->
+<div class="flex items-center gap-4">
+<button class="w-12 h-12 flex-shrink-0 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-colors active:scale-95">
+<span class="material-symbols-outlined">volume_mute</span>
+</button>
+<!-- Custom 8px Thick Slider -->
+<div class="flex-grow h-8 flex items-center cursor-pointer group">
+<div class="w-full h-2 bg-surface-container-highest rounded-full overflow-hidden relative border border-surface-bright">
+<div class="absolute top-0 left-0 h-full w-[65%] bg-primary rounded-full group-hover:bg-primary-fixed transition-colors"></div>
+</div>
+</div>
+<button class="w-12 h-12 flex-shrink-0 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-colors active:scale-95">
+<span class="material-symbols-outlined">volume_up</span>
+</button>
+</div>
+<!-- Toggles Row -->
+<div class="flex items-center justify-center gap-12 pt-2 border-t border-outline-variant/30">
+<button class="flex flex-col items-center gap-2 group">
+<div class="w-14 h-14 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center text-on-surface group-hover:bg-surface-container-highest group-active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[24px]">mic</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Mic On</span>
+</button>
+<button class="flex flex-col items-center gap-2 group">
+<div class="w-14 h-14 rounded-full bg-primary-container border border-primary/30 flex items-center justify-center text-on-primary-container group-hover:bg-primary-fixed group-active:scale-95 transition-all shadow-[0_0_12px_rgba(77,142,255,0.2)]">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">speaker</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary">Living Room</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Shell) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter py-2 pb-[env(safe-area-inset-bottom,16px)] bg-surface/80 backdrop-blur-xl border-t border-outline-variant md:hidden">
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary active:scale-90 transition-transform duration-150 group">
+<span class="material-symbols-outlined mb-1 group-hover:scale-110 transition-transform">dashboard</span>
+<span class="font-label-sm text-label-sm">Dashboard</span>
+</button>
+<!-- ACTIVE STATE: Controls -->
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-4 py-1 active:scale-90 transition-transform duration-150">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">videogame_asset</span>
+<span class="font-label-sm text-label-sm">Controls</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary active:scale-90 transition-transform duration-150 group">
+<span class="material-symbols-outlined mb-1 group-hover:scale-110 transition-transform">folder_open</span>
+<span class="font-label-sm text-label-sm">Files</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary active:scale-90 transition-transform duration-150 group">
+<span class="material-symbols-outlined mb-1 group-hover:scale-110 transition-transform">settings</span>
+<span class="font-label-sm text-label-sm">Settings</span>
+</button>
+</nav>
+</body></html>

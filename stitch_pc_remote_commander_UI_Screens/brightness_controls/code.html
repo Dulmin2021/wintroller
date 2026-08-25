@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Brightness Control</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#2d3449",
+                        "error-container": "#93000a",
+                        "on-tertiary-container": "#00311f",
+                        "surface-container": "#171f33",
+                        "inverse-primary": "#005ac2",
+                        "primary": "#adc6ff",
+                        "inverse-on-surface": "#283044",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "on-primary-fixed": "#001a42",
+                        "surface-tint": "#adc6ff",
+                        "primary-container": "#4d8eff",
+                        "surface-container-lowest": "#060e20",
+                        "surface-bright": "#31394d",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "surface-container-low": "#131b2e",
+                        "secondary-fixed": "#d3e4fe",
+                        "on-surface": "#dae2fd",
+                        "on-secondary-container": "#a9bad3",
+                        "outline-variant": "#424754",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "tertiary-container": "#00a572",
+                        "inverse-surface": "#dae2fd",
+                        "on-surface-variant": "#c2c6d6",
+                        "on-error-container": "#ffdad6",
+                        "background": "#0b1326",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed": "#0b1c30",
+                        "surface": "#0b1326",
+                        "on-tertiary-fixed": "#002113",
+                        "on-background": "#dae2fd",
+                        "on-tertiary": "#003824",
+                        "surface-variant": "#2d3449",
+                        "surface-dim": "#0b1326",
+                        "surface-container-high": "#222a3d",
+                        "on-secondary": "#213145",
+                        "tertiary-fixed": "#6ffbbe",
+                        "primary-fixed": "#d8e2ff",
+                        "on-error": "#690005",
+                        "on-primary-fixed-variant": "#004395",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-primary-container": "#00285d",
+                        "secondary-container": "#3a4a5f",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "tertiary": "#4edea3",
+                        "outline": "#8c909f",
+                        "on-primary": "#002e6a",
+                        "secondary": "#b7c8e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-lg": "24px",
+                        "margin-mobile": "20px",
+                        "gutter": "16px",
+                        "stack-md": "16px",
+                        "stack-sm": "8px",
+                        "touch-target-min": "48px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "mono-ui": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "mono-ui": ["14px", { "lineHeight": "20px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Custom styles for the vertical slider interaction */
+        .slider-thumb-active {
+            box-shadow: 0 0 20px rgba(173, 198, 255, 0.4); /* primary color glow */
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md h-screen w-screen overflow-hidden flex flex-col selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-touch-target-min bg-surface dark:bg-surface border-b border-outline-variant dark:border-outline-variant transition-colors duration-200">
+<button aria-label="Menu" class="h-touch-target-min w-touch-target-min flex items-center justify-center hover:bg-surface-container-highest dark:hover:bg-surface-container-highest rounded-full transition-colors active:scale-95 text-primary dark:text-primary">
+<span class="material-symbols-outlined text-[24px]">settings_remote</span>
+</button>
+<div class="text-headline-sm font-headline-sm font-bold text-primary dark:text-primary">
+            Proton Remote
+        </div>
+<!-- Desktop Nav (Hidden on Mobile) -->
+<nav class="hidden md:flex space-x-6 items-center">
+<a class="text-label-lg font-label-lg text-on-surface-variant hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-label-lg font-label-lg text-primary" href="#">Controls</a>
+<a class="text-label-lg font-label-lg text-on-surface-variant hover:text-primary transition-colors" href="#">Files</a>
+<a class="text-label-lg font-label-lg text-on-surface-variant hover:text-primary transition-colors" href="#">Settings</a>
+</nav>
+<div class="h-touch-target-min flex items-center justify-center text-on-surface-variant dark:text-on-surface-variant">
+<span class="material-symbols-outlined text-[24px]">sensors</span>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col items-center justify-center pt-[calc(var(--touch-target-min)+20px)] pb-[calc(var(--touch-target-min)+40px)] px-margin-mobile relative">
+<!-- Background ambient glow -->
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
+<div class="w-[300px] h-[300px] bg-primary rounded-full blur-[100px]"></div>
+</div>
+<div class="relative z-10 flex flex-col items-center space-y-stack-lg w-full max-w-sm">
+<!-- Header Label -->
+<div class="flex flex-col items-center space-y-2">
+<span class="material-symbols-outlined text-primary text-[32px] opacity-80" style="font-variation-settings: 'FILL' 1;">light_mode</span>
+<h1 class="text-label-lg font-label-lg text-on-surface-variant uppercase tracking-widest">Brightness</h1>
+</div>
+<!-- Value Display -->
+<div class="text-headline-lg font-headline-lg text-on-surface" id="brightnessValueDisplay">
+                75%
+            </div>
+<!-- Large Vertical Slider -->
+<div class="relative w-24 h-64 bg-surface-container-highest border border-outline-variant rounded-[32px] overflow-hidden cursor-pointer touch-none shadow-inner" id="verticalSlider">
+<!-- Track Fill -->
+<div class="absolute bottom-0 left-0 w-full bg-primary transition-all duration-100 ease-out" id="sliderFill" style="height: 75%;">
+<!-- Subtle gradient overlay on fill -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+</div>
+<!-- Thumb indicator line -->
+<div class="absolute w-12 h-1 bg-surface rounded-full left-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-100 ease-out shadow-sm" id="sliderThumb" style="bottom: calc(75% - 2px);"></div>
+</div>
+<!-- Quick Presets -->
+<div class="w-full pt-stack-md">
+<div class="flex justify-between items-center w-full gap-2">
+<button class="flex-1 h-touch-target-min rounded-lg border border-outline-variant bg-transparent text-on-surface-variant text-label-sm font-label-sm hover:bg-surface-container-high transition-colors active:scale-95 preset-btn" data-value="0">0%</button>
+<button class="flex-1 h-touch-target-min rounded-lg border border-outline-variant bg-transparent text-on-surface-variant text-label-sm font-label-sm hover:bg-surface-container-high transition-colors active:scale-95 preset-btn" data-value="25">25%</button>
+<button class="flex-1 h-touch-target-min rounded-lg border border-outline-variant bg-transparent text-on-surface-variant text-label-sm font-label-sm hover:bg-surface-container-high transition-colors active:scale-95 preset-btn" data-value="50">50%</button>
+<button class="flex-1 h-touch-target-min rounded-lg border-transparent bg-primary text-on-primary text-label-sm font-label-sm shadow-md transition-colors active:scale-95 preset-btn" data-value="75">75%</button>
+<button class="flex-1 h-touch-target-min rounded-lg border border-outline-variant bg-transparent text-on-surface-variant text-label-sm font-label-sm hover:bg-surface-container-high transition-colors active:scale-95 preset-btn" data-value="100">100%</button>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter py-2 pb-safe bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-t border-outline-variant dark:border-outline-variant shadow-[0_-4px_24px_rgba(0,0,0,0.2)]">
+<!-- Dashboard (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary active:scale-90 transition-transform duration-150 group" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1 group-hover:opacity-100 opacity-80">dashboard</span>
+<span class="font-label-sm text-label-sm">Dashboard</span>
+</a>
+<!-- Controls (Active) -->
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary-container text-on-primary-container dark:text-on-primary-container rounded-xl px-4 py-1 active:scale-90 transition-transform duration-150 shadow-sm" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1" style="font-variation-settings: 'FILL' 1;">videogame_asset</span>
+<span class="font-label-sm text-label-sm font-bold">Controls</span>
+</a>
+<!-- Files (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary active:scale-90 transition-transform duration-150 group" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1 group-hover:opacity-100 opacity-80">folder_open</span>
+<span class="font-label-sm text-label-sm">Files</span>
+</a>
+<!-- Settings (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary active:scale-90 transition-transform duration-150 group" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1 group-hover:opacity-100 opacity-80">settings</span>
+<span class="font-label-sm text-label-sm">Settings</span>
+</a>
+</nav>
+<script>
+        // Simple Interaction Logic for the Slider and Presets
+        document.addEventListener('DOMContentLoaded', () => {
+            const slider = document.getElementById('verticalSlider');
+            const fill = document.getElementById('sliderFill');
+            const thumb = document.getElementById('sliderThumb');
+            const display = document.getElementById('brightnessValueDisplay');
+            const presets = document.querySelectorAll('.preset-btn');
+            
+            let isDragging = false;
+
+            const updateSlider = (percentage) => {
+                // Clamp between 0 and 100
+                percentage = Math.max(0, Math.min(100, Math.round(percentage)));
+                
+                fill.style.height = `${percentage}%`;
+                thumb.style.bottom = `calc(${percentage}% - 2px)`;
+                display.textContent = `${percentage}%`;
+
+                // Update preset button states visually
+                presets.forEach(btn => {
+                    if (parseInt(btn.dataset.value) === percentage) {
+                        btn.classList.remove('bg-transparent', 'border-outline-variant', 'text-on-surface-variant');
+                        btn.classList.add('bg-primary', 'text-on-primary', 'border-transparent', 'shadow-md');
+                    } else {
+                        btn.classList.add('bg-transparent', 'border-outline-variant', 'text-on-surface-variant');
+                        btn.classList.remove('bg-primary', 'text-on-primary', 'border-transparent', 'shadow-md');
+                    }
+                });
+            };
+
+            const calculatePercentage = (clientY) => {
+                const rect = slider.getBoundingClientRect();
+                // Y increases downwards, so we invert the calculation for a bottom-up slider
+                const yPos = rect.bottom - clientY;
+                const percentage = (yPos / rect.height) * 100;
+                return percentage;
+            };
+
+            // Touch / Mouse Events for Slider
+            const startDrag = (e) => {
+                isDragging = true;
+                slider.classList.add('slider-thumb-active');
+                updateFromEvent(e);
+            };
+
+            const doDrag = (e) => {
+                if (!isDragging) return;
+                e.preventDefault(); // Prevent scrolling while sliding
+                updateFromEvent(e);
+            };
+
+            const endDrag = () => {
+                isDragging = false;
+                slider.classList.remove('slider-thumb-active');
+            };
+
+            const updateFromEvent = (e) => {
+                const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+                updateSlider(calculatePercentage(clientY));
+            };
+
+            slider.addEventListener('mousedown', startDrag);
+            document.addEventListener('mousemove', doDrag);
+            document.addEventListener('mouseup', endDrag);
+
+            slider.addEventListener('touchstart', startDrag, { passive: false });
+            document.addEventListener('touchmove', doDrag, { passive: false });
+            document.addEventListener('touchend', endDrag);
+
+            // Preset Button Clicks
+            presets.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const value = parseInt(btn.dataset.value);
+                    updateSlider(value);
+                });
+            });
+        });
+    </script>
+</body></html>

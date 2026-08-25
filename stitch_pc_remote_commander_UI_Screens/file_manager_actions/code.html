@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Proton Remote - File Details</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#2d3449",
+                        "error-container": "#93000a",
+                        "on-tertiary-container": "#00311f",
+                        "surface-container": "#171f33",
+                        "inverse-primary": "#005ac2",
+                        "primary": "#adc6ff",
+                        "inverse-on-surface": "#283044",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "on-primary-fixed": "#001a42",
+                        "surface-tint": "#adc6ff",
+                        "primary-container": "#4d8eff",
+                        "surface-container-lowest": "#060e20",
+                        "surface-bright": "#31394d",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "surface-container-low": "#131b2e",
+                        "secondary-fixed": "#d3e4fe",
+                        "on-surface": "#dae2fd",
+                        "on-secondary-container": "#a9bad3",
+                        "outline-variant": "#424754",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "tertiary-container": "#00a572",
+                        "inverse-surface": "#dae2fd",
+                        "on-surface-variant": "#c2c6d6",
+                        "on-error-container": "#ffdad6",
+                        "background": "#0b1326",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed": "#0b1c30",
+                        "surface": "#0b1326",
+                        "on-tertiary-fixed": "#002113",
+                        "on-background": "#dae2fd",
+                        "on-tertiary": "#003824",
+                        "surface-variant": "#2d3449",
+                        "surface-dim": "#0b1326",
+                        "surface-container-high": "#222a3d",
+                        "on-secondary": "#213145",
+                        "tertiary-fixed": "#6ffbbe",
+                        "primary-fixed": "#d8e2ff",
+                        "on-error": "#690005",
+                        "on-primary-fixed-variant": "#004395",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-primary-container": "#00285d",
+                        "secondary-container": "#3a4a5f",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "tertiary": "#4edea3",
+                        "outline": "#8c909f",
+                        "on-primary": "#002e6a",
+                        "secondary": "#b7c8e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-lg": "24px",
+                        "margin-mobile": "20px",
+                        "gutter": "16px",
+                        "stack-md": "16px",
+                        "stack-sm": "8px",
+                        "touch-target-min": "48px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "mono-ui": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "mono-ui": ["14px", { "lineHeight": "20px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar for dark mode aesthetic */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b1326; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #424754; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8c909f; 
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased overflow-hidden min-h-screen flex flex-col">
+<!-- Mock Background (File Manager) -->
+<div class="flex-1 flex flex-col p-margin-mobile opacity-30 pointer-events-none transition-opacity duration-300">
+<header class="mb-stack-lg">
+<h1 class="font-headline-lg text-headline-lg">C:\Users\Admin\Documents</h1>
+</header>
+<div class="grid grid-cols-2 gap-gutter">
+<div class="bg-surface-container p-4 rounded-xl border border-outline-variant flex items-center space-x-4">
+<span class="material-symbols-outlined fill text-primary text-3xl">folder</span>
+<div>
+<div class="font-label-lg text-label-lg text-on-surface">Projects</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Folder</div>
+</div>
+</div>
+<div class="bg-surface-container p-4 rounded-xl border border-outline-variant flex items-center space-x-4">
+<span class="material-symbols-outlined text-primary text-3xl">description</span>
+<div>
+<div class="font-label-lg text-label-lg text-on-surface">Presentation.pptx</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">2.4 MB</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Overlay Backdrop -->
+<div aria-hidden="true" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300" id="backdrop"></div>
+<!-- Bottom Sheet -->
+<div aria-labelledby="sheet-title" aria-modal="true" class="fixed bottom-0 left-0 w-full bg-surface-container rounded-t-[24px] z-50 flex flex-col max-h-[90vh] shadow-2xl border-t border-outline-variant transform transition-transform duration-300 translate-y-0" id="bottom-sheet" role="dialog">
+<!-- Drag Handle -->
+<div class="w-full flex justify-center pt-4 pb-2 cursor-grab active:cursor-grabbing" id="drag-handle">
+<div class="w-12 h-1.5 bg-outline-variant rounded-full"></div>
+</div>
+<div class="px-margin-mobile pb-stack-lg overflow-y-auto">
+<!-- File Header -->
+<div class="flex flex-col items-center mb-stack-lg mt-2 text-center">
+<div class="w-20 h-20 bg-surface-variant rounded-2xl flex items-center justify-center mb-4 border border-outline-variant shadow-sm">
+<!-- Assuming generic presentation icon for generic PPTX -->
+<span class="material-symbols-outlined fill text-primary text-5xl">co_present</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-1 truncate w-full px-4" id="sheet-title">Presentation.pptx</h2>
+<p class="font-mono-ui text-mono-ui text-on-surface-variant">2.4 MB • Modified Today 14:32</p>
+</div>
+<hr class="border-outline-variant mb-stack-lg"/>
+<!-- Action List -->
+<div class="flex flex-col gap-2">
+<!-- Action: Download -->
+<button class="w-full h-touch-target-min flex items-center px-4 bg-surface-container-high hover:bg-surface-container-highest rounded-xl border border-outline-variant transition-colors duration-200 group text-left">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors mr-4">download</span>
+<span class="font-label-lg text-label-lg text-on-surface flex-1">Download</span>
+</button>
+<!-- Action: Rename -->
+<button class="w-full h-touch-target-min flex items-center px-4 bg-surface-container-high hover:bg-surface-container-highest rounded-xl border border-outline-variant transition-colors duration-200 group text-left">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors mr-4">edit</span>
+<span class="font-label-lg text-label-lg text-on-surface flex-1">Rename</span>
+</button>
+<!-- Action: Move -->
+<button class="w-full h-touch-target-min flex items-center px-4 bg-surface-container-high hover:bg-surface-container-highest rounded-xl border border-outline-variant transition-colors duration-200 group text-left">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors mr-4">drive_file_move</span>
+<span class="font-label-lg text-label-lg text-on-surface flex-1">Move</span>
+</button>
+<!-- Action: Share -->
+<button class="w-full h-touch-target-min flex items-center px-4 bg-surface-container-high hover:bg-surface-container-highest rounded-xl border border-outline-variant transition-colors duration-200 group text-left">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors mr-4">share</span>
+<span class="font-label-lg text-label-lg text-on-surface flex-1">Share</span>
+</button>
+<!-- Action: Delete (Destructive) -->
+<button class="w-full h-touch-target-min flex items-center px-4 bg-error-container/10 hover:bg-error-container/20 rounded-xl border border-error/30 transition-colors duration-200 group text-left mt-2">
+<span class="material-symbols-outlined text-error mr-4">delete</span>
+<span class="font-label-lg text-label-lg text-error flex-1">Delete</span>
+</button>
+</div>
+<!-- Cancel/Close Button -->
+<button class="w-full h-touch-target-min mt-stack-md flex items-center justify-center font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface transition-colors duration-200" id="close-btn">
+                Cancel
+            </button>
+</div>
+</div>
+<!-- Minimal Script for basic interaction -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sheet = document.getElementById('bottom-sheet');
+            const backdrop = document.getElementById('backdrop');
+            const closeBtn = document.getElementById('close-btn');
+            
+            // Simple close animation setup (for demonstration, as requested view is 'open' state)
+            const closeSheet = () => {
+                sheet.style.transform = 'translateY(100%)';
+                backdrop.style.opacity = '0';
+                setTimeout(() => {
+                    // In a real app, this might navigate back or hide the DOM element
+                    console.log('Sheet closed');
+                    // Reset for demo purposes if needed
+                    // sheet.style.transform = 'translateY(0)';
+                    // backdrop.style.opacity = '1';
+                }, 300);
+            };
+
+            closeBtn.addEventListener('click', closeSheet);
+            backdrop.addEventListener('click', closeSheet);
+            
+            // Simulate drag to close (very basic)
+            let startY;
+            document.getElementById('drag-handle').addEventListener('touchstart', (e) => {
+                startY = e.touches[0].clientY;
+            });
+            document.getElementById('drag-handle').addEventListener('touchend', (e) => {
+                let endY = e.changedTouches[0].clientY;
+                if (endY - startY > 50) { // Dragged down sufficiently
+                    closeSheet();
+                }
+            });
+        });
+    </script>
+</body></html>

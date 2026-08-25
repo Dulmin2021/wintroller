@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Proton Remote - Offline</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container-highest": "#2d3449",
+                        "error-container": "#93000a",
+                        "on-tertiary-container": "#00311f",
+                        "surface-container": "#171f33",
+                        "inverse-primary": "#005ac2",
+                        "primary": "#adc6ff",
+                        "inverse-on-surface": "#283044",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "on-primary-fixed": "#001a42",
+                        "surface-tint": "#adc6ff",
+                        "primary-container": "#4d8eff",
+                        "surface-container-lowest": "#060e20",
+                        "surface-bright": "#31394d",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "surface-container-low": "#131b2e",
+                        "secondary-fixed": "#d3e4fe",
+                        "on-surface": "#dae2fd",
+                        "on-secondary-container": "#a9bad3",
+                        "outline-variant": "#424754",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "tertiary-container": "#00a572",
+                        "inverse-surface": "#dae2fd",
+                        "on-surface-variant": "#c2c6d6",
+                        "on-error-container": "#ffdad6",
+                        "background": "#0b1326",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed": "#0b1c30",
+                        "surface": "#0b1326",
+                        "on-tertiary-fixed": "#002113",
+                        "on-background": "#dae2fd",
+                        "on-tertiary": "#003824",
+                        "surface-variant": "#2d3449",
+                        "surface-dim": "#0b1326",
+                        "surface-container-high": "#222a3d",
+                        "on-secondary": "#213145",
+                        "tertiary-fixed": "#6ffbbe",
+                        "primary-fixed": "#d8e2ff",
+                        "on-error": "#690005",
+                        "on-primary-fixed-variant": "#004395",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-primary-container": "#00285d",
+                        "secondary-container": "#3a4a5f",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "tertiary": "#4edea3",
+                        "outline": "#8c909f",
+                        "on-primary": "#002e6a",
+                        "secondary": "#b7c8e1"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px"
+                    },
+                    spacing: {
+                        "stack-lg": "24px",
+                        "margin-mobile": "20px",
+                        "gutter": "16px",
+                        "stack-md": "16px",
+                        "stack-sm": "8px",
+                        "touch-target-min": "48px"
+                    },
+                    fontFamily: {
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "mono-ui": ["JetBrains Mono"]
+                    },
+                    fontSize: {
+                        "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+                        "headline-md": ["24px", { lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "600" }],
+                        "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+                        "headline-sm": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+                        "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "700" }],
+                        "label-lg": ["14px", { lineHeight: "20px", letterSpacing: "0.05em", fontWeight: "600" }],
+                        "label-sm": ["12px", { lineHeight: "16px", fontWeight: "500" }],
+                        "mono-ui": ["14px", { lineHeight: "20px", fontWeight: "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: theme('colors.background'); color: theme('colors.on-background'); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        
+        @keyframes pulse-error {
+            0% { box-shadow: 0 0 0 0 rgba(255, 180, 171, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(255, 180, 171, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 180, 171, 0); }
+        }
+        .error-pulse { animation: pulse-error 2s infinite; }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col font-body-md overflow-hidden">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface border-b border-outline-variant dark:border-outline-variant fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-touch-target-min transition-colors duration-200">
+<button aria-label="Settings" class="w-touch-target-min h-touch-target-min flex items-center justify-start text-primary dark:text-primary hover:bg-surface-container-highest dark:hover:bg-surface-container-highest rounded-full transition-colors active:scale-95">
+<span class="material-symbols-outlined text-primary">settings_remote</span>
+</button>
+<h1 class="text-headline-sm font-headline-sm font-bold text-primary dark:text-primary pointer-events-none">
+            Proton Remote
+        </h1>
+<button aria-label="Sensors" class="w-touch-target-min h-touch-target-min flex items-center justify-end text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-highest dark:hover:bg-surface-container-highest rounded-full transition-colors active:scale-95">
+<span class="material-symbols-outlined">sensors</span>
+</button>
+</header>
+<!-- Main Content Canvas (Navigation Shell Suppressed for Error Flow) -->
+<main class="flex-1 flex flex-col items-center justify-center px-margin-mobile pt-touch-target-min mt-stack-lg relative w-full max-w-md mx-auto h-full">
+<!-- Error Illustration Area -->
+<div class="relative w-64 h-64 mb-stack-lg flex items-center justify-center">
+<!-- Background Glow -->
+<div class="absolute inset-0 bg-error/10 rounded-full blur-3xl error-pulse"></div>
+<!-- AI Generated Illustration -->
+<div class="relative w-48 h-48 rounded-full border border-error-container bg-surface-container flex items-center justify-center overflow-hidden shadow-lg z-10" data-alt="A highly detailed, 3D digital illustration of a severed glowing fiber optic cable inside a dark, modern server chassis. The scene is illuminated by low-key, moody lighting with deep charcoal shadows and striking neon red accents signifying a critical connection failure. The aesthetic is high-tech corporate, photorealistic, and cinematic, emphasizing the physical break in connectivity against a sleek slate-blue and black technological background." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB-ZS3fz4mdjrVBeYQMX-2EnvLds6U_N_XYIg9JTgZTzjPRYleVdEpa3z-FjkdXB0y3uDq6Z2niRy8U_Le6ORyS16l0nY_lc4wnmQNL8kxWizHjIdw41lyKAxFW3xjl2G91Z1TrKFvpUohKcboZtmQH1EJVLLtWtZUxF09hwdXww1vcEkfiOwUE8RZK4k9hfuPBpTkQ3kGkBF8RQowoDelnqmgfqHfeIL7I_o4ja19F9wzolyPrTxNM4Q')">
+<!-- Fallback icon overlay to reinforce meaning if image takes a moment -->
+<div class="absolute inset-0 bg-background/40 flex items-center justify-center backdrop-blur-[2px]">
+<span class="material-symbols-outlined text-[64px] text-error">cloud_off</span>
+</div>
+</div>
+<!-- Floating particles / decor -->
+<div class="absolute top-4 left-4 w-2 h-2 rounded-full bg-error animate-ping"></div>
+<div class="absolute bottom-10 right-10 w-3 h-3 rounded-full bg-error/50"></div>
+</div>
+<!-- Typography -->
+<div class="text-center mb-stack-lg w-full">
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-stack-sm tracking-tight">
+                Can't reach Gaming-PC
+            </h2>
+<p class="font-body-md text-body-md text-on-surface-variant mx-auto max-w-[280px]">
+                Make sure your PC is on and Proton Remote is running.
+            </p>
+</div>
+<!-- Action Area -->
+<div class="flex flex-col items-center w-full gap-stack-md mt-auto mb-[20vh]">
+<button class="w-full max-w-[300px] h-touch-target-min bg-primary text-on-primary font-label-lg text-label-lg rounded-full hover:bg-primary-container active:scale-95 transition-all duration-200 shadow-[0_0_20px_rgba(173,198,255,0.15)] flex justify-center items-center gap-2">
+<span class="material-symbols-outlined text-[20px]">refresh</span>
+                Retry Connection
+            </button>
+<a class="h-touch-target-min flex items-center justify-center text-primary font-label-lg text-label-lg hover:text-primary-fixed hover:underline transition-colors px-4" href="#">
+                Switch PC
+            </a>
+</div>
+</main>
+<!-- BottomNavBar Suppressed - The user is in a "dead end" error state preventing primary navigation until resolved. -->
+</body></html>

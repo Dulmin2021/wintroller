@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Proton Remote - Pair Device</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config from Design System -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-highest": "#2d3449",
+                    "error-container": "#93000a",
+                    "on-tertiary-container": "#00311f",
+                    "surface-container": "#171f33",
+                    "inverse-primary": "#005ac2",
+                    "primary": "#adc6ff",
+                    "inverse-on-surface": "#283044",
+                    "on-secondary-fixed-variant": "#38485d",
+                    "on-primary-fixed": "#001a42",
+                    "surface-tint": "#adc6ff",
+                    "primary-container": "#4d8eff",
+                    "surface-container-lowest": "#060e20",
+                    "surface-bright": "#31394d",
+                    "secondary-fixed-dim": "#b7c8e1",
+                    "surface-container-low": "#131b2e",
+                    "secondary-fixed": "#d3e4fe",
+                    "on-surface": "#dae2fd",
+                    "on-secondary-container": "#a9bad3",
+                    "outline-variant": "#424754",
+                    "tertiary-fixed-dim": "#4edea3",
+                    "tertiary-container": "#00a572",
+                    "inverse-surface": "#dae2fd",
+                    "on-surface-variant": "#c2c6d6",
+                    "on-error-container": "#ffdad6",
+                    "background": "#0b1326",
+                    "error": "#ffb4ab",
+                    "on-secondary-fixed": "#0b1c30",
+                    "surface": "#0b1326",
+                    "on-tertiary-fixed": "#002113",
+                    "on-background": "#dae2fd",
+                    "on-tertiary": "#003824",
+                    "surface-variant": "#2d3449",
+                    "surface-dim": "#0b1326",
+                    "surface-container-high": "#222a3d",
+                    "on-secondary": "#213145",
+                    "tertiary-fixed": "#6ffbbe",
+                    "primary-fixed": "#d8e2ff",
+                    "on-error": "#690005",
+                    "on-primary-fixed-variant": "#004395",
+                    "primary-fixed-dim": "#adc6ff",
+                    "on-primary-container": "#00285d",
+                    "secondary-container": "#3a4a5f",
+                    "on-tertiary-fixed-variant": "#005236",
+                    "tertiary": "#4edea3",
+                    "outline": "#8c909f",
+                    "on-primary": "#002e6a",
+                    "secondary": "#b7c8e1"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px",
+                    "3xl": "1.5rem"
+            },
+            "spacing": {
+                    "stack-lg": "24px",
+                    "margin-mobile": "20px",
+                    "gutter": "16px",
+                    "stack-md": "16px",
+                    "stack-sm": "8px",
+                    "touch-target-min": "48px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Inter", "sans-serif"],
+                    "headline-md": ["Inter", "sans-serif"],
+                    "body-md": ["Inter", "sans-serif"],
+                    "headline-sm": ["Inter", "sans-serif"],
+                    "headline-lg": ["Inter", "sans-serif"],
+                    "label-lg": ["Inter", "sans-serif"],
+                    "label-sm": ["Inter", "sans-serif"],
+                    "mono-ui": ["JetBrains Mono", "monospace"]
+            },
+            "fontSize": {
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "mono-ui": ["14px", {"lineHeight": "20px", "fontWeight": "500"}]
+            },
+            "animation": {
+                'scanline': 'scan 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite',
+            },
+            "keyframes": {
+                scan: {
+                    '0%, 100%': { top: '0%', opacity: '0' },
+                    '10%': { opacity: '1' },
+                    '50%': { top: '100%', opacity: '1' },
+                    '90%': { opacity: '1' },
+                }
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        /* Base styles for material symbols to match design system weight */
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Utility for safe area padding on mobile */
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom, 24px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md h-screen w-full flex flex-col relative overflow-hidden select-none">
+<!-- Note on Navigation Shell: 
+         Following the Conflict Resolution Protocol "Shell Visibility & Relevance", 
+         the BottomNavBar and TopAppBar are SUPPRESSED because this is a 
+         "Linear/Transactional" pairing screen focused entirely on the scanning task. 
+         A custom contextual exit action (Close) is provided instead. 
+    -->
+<!-- Camera Viewfinder Background Layer -->
+<div class="absolute inset-0 z-0 bg-cover bg-center" data-alt="A blurred, cinematic view of a dimly lit, high-end computer desk setup in a modern corporate environment. The monitor emits a faint, cool blue glow displaying a complex dashboard, contrasting with deep charcoal blacks. Shot from a first-person smartphone perspective, creating a depth-of-field effect suitable for a camera viewfinder background." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAFxoV1YFsUahrISG7l0Gla-8SQTnbjCOrTDPemhXzOT7Jmlhf1DMbR1CJS2xh33t5CfJp7FbHrfxWnlOK5uOWgboBRSe-EpIjjPXTWhC7ElOC2YOhS5MlFIodP2OkLQyBmfWT_sq1HxnAxuq6mYKKZASOMoPq-8BA8ncgVX0HTeeHGz2G-z1669u3P3LEh-PDchvEVhcsUPka28gNKMyZK7sS6aGZYx6T05ufwZgsBkkx5cymNFITLcA')">
+<!-- Optical darkening overlay to ensure UI legibility over bright environments -->
+<div class="absolute inset-0 bg-background/50"></div>
+</div>
+<!-- Top Action Bar (Contextual/Transactional) -->
+<div class="relative z-10 flex items-center justify-between px-margin-mobile pt-margin-mobile pb-stack-sm">
+<button class="w-[48px] h-[48px] flex items-center justify-center rounded-full bg-surface-container/60 backdrop-blur-md border border-outline-variant text-on-surface hover:bg-surface-container-high transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined">close</span>
+</button>
+<!-- Optional contextual status, kept minimal to focus on canvas -->
+<div class="px-4 py-2 rounded-full bg-surface-container/40 backdrop-blur-md border border-outline-variant/50">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                Searching
+            </span>
+</div>
+</div>
+<!-- Main Viewfinder Area -->
+<div class="relative z-10 flex-1 flex flex-col items-center justify-center px-margin-mobile">
+<!-- Reticle Overlay -->
+<div class="relative w-64 h-64 sm:w-72 sm:h-72 mb-12">
+<!-- Reticle Corners (Level 2 Active indication via Primary color) -->
+<!-- Top Left -->
+<div class="absolute top-0 left-0 w-10 h-10 border-t-[3px] border-l-[3px] border-primary rounded-tl-xl transition-all duration-300"></div>
+<!-- Top Right -->
+<div class="absolute top-0 right-0 w-10 h-10 border-t-[3px] border-r-[3px] border-primary rounded-tr-xl transition-all duration-300"></div>
+<!-- Bottom Left -->
+<div class="absolute bottom-0 left-0 w-10 h-10 border-b-[3px] border-l-[3px] border-primary rounded-bl-xl transition-all duration-300"></div>
+<!-- Bottom Right -->
+<div class="absolute bottom-0 right-0 w-10 h-10 border-b-[3px] border-r-[3px] border-primary rounded-br-xl transition-all duration-300"></div>
+<!-- Subtle inner bounding box for framing -->
+<div class="absolute inset-1 border border-outline-variant/30 rounded-lg pointer-events-none"></div>
+<!-- Animated Scanning Laser Line -->
+<div class="absolute left-0 right-0 h-[2px] bg-primary rounded-full shadow-[0_0_12px_rgba(173,198,255,0.9)] animate-scanline"></div>
+</div>
+</div>
+<!-- Bottom Instruction & Action Panel (Glassmorphism) -->
+<div class="relative z-20 w-full bg-surface-container/80 backdrop-blur-xl border-t border-outline-variant rounded-t-3xl pt-stack-lg px-margin-mobile pb-safe flex flex-col items-center shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.5)]">
+<!-- Instruction Content -->
+<div class="flex flex-col items-center text-center max-w-sm w-full mb-stack-lg">
+<div class="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center mb-stack-md border border-outline-variant">
+<span class="material-symbols-outlined text-primary text-[24px]" style="font-variation-settings: 'FILL' 1;">qr_code_scanner</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-stack-sm">
+                Pair Device
+            </h2>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                Scan the QR code shown on your PC's Proton Remote app.
+            </p>
+</div>
+<!-- Ghost Button for Secondary Action -->
+<button class="w-full max-w-sm h-touch-target-min flex items-center justify-center gap-2 bg-transparent border border-outline-variant rounded-xl text-primary hover:bg-surface-container-high transition-colors active:scale-[0.98] duration-200">
+<span class="material-symbols-outlined text-[20px]">pin</span>
+<span class="font-label-lg text-label-lg">Enter PIN manually</span>
+</button>
+</div>
+</body></html>

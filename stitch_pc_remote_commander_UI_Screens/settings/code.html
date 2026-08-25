@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Settings - Proton Remote</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#2d3449",
+                        "error-container": "#93000a",
+                        "on-tertiary-container": "#00311f",
+                        "surface-container": "#171f33",
+                        "inverse-primary": "#005ac2",
+                        "primary": "#adc6ff",
+                        "inverse-on-surface": "#283044",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "on-primary-fixed": "#001a42",
+                        "surface-tint": "#adc6ff",
+                        "primary-container": "#4d8eff",
+                        "surface-container-lowest": "#060e20",
+                        "surface-bright": "#31394d",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "surface-container-low": "#131b2e",
+                        "secondary-fixed": "#d3e4fe",
+                        "on-surface": "#dae2fd",
+                        "on-secondary-container": "#a9bad3",
+                        "outline-variant": "#424754",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "tertiary-container": "#00a572",
+                        "inverse-surface": "#dae2fd",
+                        "on-surface-variant": "#c2c6d6",
+                        "on-error-container": "#ffdad6",
+                        "background": "#0b1326",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed": "#0b1c30",
+                        "surface": "#0b1326",
+                        "on-tertiary-fixed": "#002113",
+                        "on-background": "#dae2fd",
+                        "on-tertiary": "#003824",
+                        "surface-variant": "#2d3449",
+                        "surface-dim": "#0b1326",
+                        "surface-container-high": "#222a3d",
+                        "on-secondary": "#213145",
+                        "tertiary-fixed": "#6ffbbe",
+                        "primary-fixed": "#d8e2ff",
+                        "on-error": "#690005",
+                        "on-primary-fixed-variant": "#004395",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-primary-container": "#00285d",
+                        "secondary-container": "#3a4a5f",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "tertiary": "#4edea3",
+                        "outline": "#8c909f",
+                        "on-primary": "#002e6a",
+                        "secondary": "#b7c8e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-lg": "24px",
+                        "margin-mobile": "20px",
+                        "gutter": "16px",
+                        "stack-md": "16px",
+                        "stack-sm": "8px",
+                        "touch-target-min": "48px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "mono-ui": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "mono-ui": ["14px", { "lineHeight": "20px", "fontWeight": "500" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* Custom Toggle Switch Styles */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #4d8eff; /* primary-container */
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #4d8eff; /* primary-container */
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-24 font-body-md">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-touch-target-min bg-surface border-b border-outline-variant flat no shadows transition-colors duration-200">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="settings_remote">settings_remote</span>
+<h1 class="text-headline-sm font-headline-sm font-bold text-primary">Proton Remote</h1>
+</div>
+<button aria-label="Sensors" class="w-touch-target-min h-touch-target-min flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest rounded-full transition-colors active:scale-95">
+<span class="material-symbols-outlined" data-icon="sensors">sensors</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-[calc(48px+20px)] px-margin-mobile max-w-2xl mx-auto space-y-stack-lg">
+<!-- Header -->
+<div>
+<h2 class="text-headline-lg font-headline-lg">Settings</h2>
+<p class="text-body-md font-body-md text-on-surface-variant mt-2">Manage your remote connection preferences and app behavior.</p>
+</div>
+<!-- Theme Selection (Bento Style) -->
+<section class="bg-surface-container rounded-xl p-stack-md border border-outline-variant/30">
+<h3 class="text-headline-sm font-headline-sm mb-stack-md flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">palette</span>
+                Appearance
+            </h3>
+<div class="grid grid-cols-3 gap-gutter">
+<button class="flex flex-col items-center justify-center p-stack-md rounded-lg border border-outline-variant bg-surface-container-highest hover:border-primary transition-colors h-24">
+<span class="material-symbols-outlined mb-2 text-on-surface-variant" data-icon="light_mode">light_mode</span>
+<span class="text-label-sm font-label-sm">Light</span>
+</button>
+<button class="flex flex-col items-center justify-center p-stack-md rounded-lg border-2 border-primary bg-primary-container/10 transition-colors h-24">
+<span class="material-symbols-outlined mb-2 text-primary" data-icon="dark_mode" style="font-variation-settings: 'FILL' 1;">dark_mode</span>
+<span class="text-label-sm font-label-sm text-primary">Dark</span>
+</button>
+<button class="flex flex-col items-center justify-center p-stack-md rounded-lg border border-outline-variant bg-surface-container-highest hover:border-primary transition-colors h-24">
+<span class="material-symbols-outlined mb-2 text-on-surface-variant" data-icon="settings_suggest">settings_suggest</span>
+<span class="text-label-sm font-label-sm">System</span>
+</button>
+</div>
+</section>
+<!-- Device & Connection Toggles -->
+<section class="bg-surface-container rounded-xl p-stack-md border border-outline-variant/30 space-y-stack-md">
+<h3 class="text-headline-sm font-headline-sm mb-stack-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">tune</span>
+                Preferences
+            </h3>
+<!-- Haptics Toggle -->
+<div class="flex items-center justify-between py-2">
+<div>
+<h4 class="text-body-lg font-body-lg">Haptic Feedback</h4>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Vibrate on control presses</p>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in h-6">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-surface-container-highest checked:right-0 checked:border-primary-container transition-all duration-300 z-10" id="haptics-toggle" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-surface-container-highest cursor-pointer transition-colors duration-300" for="haptics-toggle"></label>
+</div>
+</div>
+<!-- Auto-reconnect Toggle -->
+<div class="flex items-center justify-between py-2 border-t border-outline-variant/30">
+<div>
+<h4 class="text-body-lg font-body-lg">Auto-Reconnect</h4>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Connect to last PC on launch</p>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in h-6">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-surface-container-highest checked:right-0 checked:border-primary-container transition-all duration-300 z-10" id="reconnect-toggle" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-surface-container-highest cursor-pointer transition-colors duration-300" for="reconnect-toggle"></label>
+</div>
+</div>
+</section>
+<!-- About Section -->
+<section class="bg-surface-container rounded-xl p-stack-md border border-outline-variant/30">
+<div class="flex items-center gap-4 mb-4">
+<div class="w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-primary" data-icon="settings_remote">settings_remote</span>
+</div>
+<div>
+<h3 class="text-body-lg font-body-lg">Proton Remote</h3>
+<p class="text-mono-ui font-mono-ui text-on-surface-variant text-sm">v2.4.1 (Build 8492)</p>
+</div>
+</div>
+<div class="flex gap-4 border-t border-outline-variant/30 pt-4">
+<button class="text-label-sm font-label-sm text-primary hover:underline">Privacy Policy</button>
+<button class="text-label-sm font-label-sm text-primary hover:underline">Terms of Service</button>
+<button class="text-label-sm font-label-sm text-primary hover:underline ml-auto">Check for Updates</button>
+</div>
+</section>
+<!-- Disconnect Button -->
+<div class="pt-stack-md">
+<button class="w-full h-14 bg-error-container text-on-error-container rounded-xl font-label-lg text-label-lg flex items-center justify-center gap-2 hover:bg-error transition-colors active:scale-95 shadow-sm border border-error/20">
+<span class="material-symbols-outlined" data-icon="power_settings_new" style="font-variation-settings: 'FILL' 1;">power_settings_new</span>
+                Disconnect DESKTOP-X92M
+            </button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter py-2 pb-safe bg-surface/80 backdrop-blur-xl border-t border-outline-variant flat no shadows">
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="dashboard">dashboard</span>
+<span class="font-label-sm text-label-sm">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="videogame_asset">videogame_asset</span>
+<span class="font-label-sm text-label-sm">Controls</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="folder_open">folder_open</span>
+<span class="font-label-sm text-label-sm">Files</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-4 py-1 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="settings" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="font-label-sm text-label-sm">Settings</span>
+</a>
+</nav>
+<script>
+        // Simple haptic feedback simulation for buttons
+        document.querySelectorAll('button, a').forEach(el => {
+            el.addEventListener('click', () => {
+                if(document.getElementById('haptics-toggle').checked && navigator.vibrate) {
+                    navigator.vibrate(10);
+                }
+            });
+        });
+    </script>
+</body></html>

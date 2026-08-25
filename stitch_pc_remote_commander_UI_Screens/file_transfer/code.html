@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Proton Remote - File Transfer</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#2d3449",
+                        "error-container": "#93000a",
+                        "on-tertiary-container": "#00311f",
+                        "surface-container": "#171f33",
+                        "inverse-primary": "#005ac2",
+                        "primary": "#adc6ff",
+                        "inverse-on-surface": "#283044",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "on-primary-fixed": "#001a42",
+                        "surface-tint": "#adc6ff",
+                        "primary-container": "#4d8eff",
+                        "surface-container-lowest": "#060e20",
+                        "surface-bright": "#31394d",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "surface-container-low": "#131b2e",
+                        "secondary-fixed": "#d3e4fe",
+                        "on-surface": "#dae2fd",
+                        "on-secondary-container": "#a9bad3",
+                        "outline-variant": "#424754",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "tertiary-container": "#00a572",
+                        "inverse-surface": "#dae2fd",
+                        "on-surface-variant": "#c2c6d6",
+                        "on-error-container": "#ffdad6",
+                        "background": "#0b1326",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed": "#0b1c30",
+                        "surface": "#0b1326",
+                        "on-tertiary-fixed": "#002113",
+                        "on-background": "#dae2fd",
+                        "on-tertiary": "#003824",
+                        "surface-variant": "#2d3449",
+                        "surface-dim": "#0b1326",
+                        "surface-container-high": "#222a3d",
+                        "on-secondary": "#213145",
+                        "tertiary-fixed": "#6ffbbe",
+                        "primary-fixed": "#d8e2ff",
+                        "on-error": "#690005",
+                        "on-primary-fixed-variant": "#004395",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-primary-container": "#00285d",
+                        "secondary-container": "#3a4a5f",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "tertiary": "#4edea3",
+                        "outline": "#8c909f",
+                        "on-primary": "#002e6a",
+                        "secondary": "#b7c8e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-lg": "24px",
+                        "margin-mobile": "20px",
+                        "gutter": "16px",
+                        "stack-md": "16px",
+                        "stack-sm": "8px",
+                        "touch-target-min": "48px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "mono-ui": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "mono-ui": ["14px", { "lineHeight": "20px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .circular-progress {
+            transform: rotate(-90deg);
+        }
+        .circular-progress circle {
+            transition: stroke-dashoffset 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen font-body-md antialiased selection:bg-primary-container selection:text-on-primary-container pb-24 md:pb-0 pt-16">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-touch-target-min bg-surface dark:bg-surface text-primary dark:text-primary font-headline-sm text-headline-sm border-b border-outline-variant dark:border-outline-variant">
+<div class="flex items-center gap-4">
+<button aria-label="Settings Remote" class="flex items-center justify-center hover:bg-surface-container-highest dark:hover:bg-surface-container-highest transition-colors duration-200 active:scale-95 rounded-full p-2">
+<span class="material-symbols-outlined text-primary dark:text-primary">settings_remote</span>
+</button>
+<h1 class="text-headline-sm font-headline-sm font-bold text-primary dark:text-primary tracking-tight">Proton Remote</h1>
+</div>
+<button aria-label="Sensors" class="flex items-center justify-center hover:bg-surface-container-highest dark:hover:bg-surface-container-highest transition-colors duration-200 active:scale-95 rounded-full p-2">
+<span class="material-symbols-outlined text-on-surface-variant dark:text-on-surface-variant">sensors</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="max-w-3xl mx-auto px-margin-mobile mt-stack-lg">
+<!-- File Transfer Overlay / Modal Equivalent -->
+<section class="bg-surface-container rounded-xl border border-outline-variant shadow-lg p-stack-lg flex flex-col items-center justify-center relative overflow-hidden backdrop-blur-md">
+<!-- Subtle background effect -->
+<div class="absolute inset-0 bg-gradient-to-br from-primary-container/10 to-transparent pointer-events-none"></div>
+<div class="flex items-center gap-2 mb-stack-md z-10 w-full justify-between">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">File Transfer</h2>
+<span class="font-mono-ui text-mono-ui text-primary animate-pulse">In Progress</span>
+</div>
+<!-- Transfer Details Bento -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter w-full mb-stack-lg z-10">
+<!-- Circular Progress -->
+<div class="bg-surface-container-highest rounded-lg border border-outline-variant p-stack-md flex flex-col items-center justify-center relative min-h-[200px]">
+<svg class="circular-progress w-32 h-32" viewbox="0 0 100 100">
+<!-- Background Circle -->
+<circle class="text-surface-variant stroke-current" cx="50" cy="50" fill="transparent" r="40" stroke-width="8"></circle>
+<!-- Progress Circle -->
+<circle class="text-primary stroke-current" cx="50" cy="50" fill="transparent" r="40" stroke-dasharray="251.2" stroke-dashoffset="138.16" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center flex-col">
+<span class="font-headline-lg text-headline-lg text-on-surface">45%</span>
+</div>
+</div>
+<!-- Text Details & Stats -->
+<div class="flex flex-col gap-stack-sm justify-center">
+<div class="bg-surface-container-highest rounded-lg border border-outline-variant p-stack-sm flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant text-3xl">description</span>
+<div class="flex-1 min-w-0">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Uploading</p>
+<p class="font-body-md text-body-md text-on-surface truncate">Q3_Financial_Report_Final_v2.pdf</p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-stack-sm">
+<div class="bg-surface-container-highest rounded-lg border border-outline-variant p-stack-sm flex flex-col items-start">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">speed</span> Speed</p>
+<p class="font-mono-ui text-mono-ui text-tertiary">5.2 MB/s</p>
+</div>
+<div class="bg-surface-container-highest rounded-lg border border-outline-variant p-stack-sm flex flex-col items-start">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">timer</span> ETA</p>
+<p class="font-mono-ui text-mono-ui text-on-surface">00:02:14</p>
+</div>
+<div class="col-span-2 bg-surface-container-highest rounded-lg border border-outline-variant p-stack-sm flex justify-between items-center">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Size</p>
+<p class="font-mono-ui text-mono-ui text-on-surface">1.2 GB / 2.8 GB</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Linear Progress Fallback/Detail -->
+<div class="w-full bg-surface-container-lowest rounded-full h-2 mb-stack-md overflow-hidden z-10 border border-outline-variant">
+<div class="bg-primary h-2 rounded-full relative" style="width: 45%">
+<div class="absolute top-0 left-0 bottom-0 right-0 bg-white/20 animate-[pulse_2s_ease-in-out_infinite]"></div>
+</div>
+</div>
+<!-- Action Area -->
+<div class="w-full flex justify-end mt-stack-md z-10">
+<button class="h-touch-target-min px-6 rounded-lg font-label-lg text-label-lg border border-error text-error hover:bg-error/10 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">cancel</span>
+                    Cancel Transfer
+                </button>
+</div>
+</section>
+<!-- Decorative Recent Transfers List (to fill canvas) -->
+<div class="mt-stack-lg">
+<h3 class="font-label-lg text-label-lg text-on-surface-variant mb-stack-md uppercase tracking-wider">Recent Activity</h3>
+<ul class="flex flex-col gap-stack-sm">
+<li class="bg-surface-container rounded-lg border border-outline-variant p-stack-sm flex justify-between items-center opacity-70">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary">check_circle</span>
+<div>
+<p class="font-body-md text-body-md text-on-surface">Server_Logs_Archive.zip</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant">450 MB • Complete</p>
+</div>
+</div>
+<span class="font-mono-ui text-mono-ui text-on-surface-variant">10:42 AM</span>
+</li>
+<li class="bg-surface-container rounded-lg border border-outline-variant p-stack-sm flex justify-between items-center opacity-70">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-error">error</span>
+<div>
+<p class="font-body-md text-body-md text-on-surface">UI_Assets_V3.psd</p>
+<p class="font-label-sm text-label-sm text-error">Failed • Connection Lost</p>
+</div>
+</div>
+<span class="font-mono-ui text-mono-ui text-on-surface-variant">09:15 AM</span>
+</li>
+</ul>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) - Using "Files" as active state -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter py-2 pb-safe bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-t border-outline-variant dark:border-outline-variant">
+<!-- Dashboard -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1">dashboard</span>
+<span class="font-label-sm text-label-sm">Dashboard</span>
+</a>
+<!-- Controls -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1">videogame_asset</span>
+<span class="font-label-sm text-label-sm">Controls</span>
+</a>
+<!-- Files (Active) -->
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary-container text-on-primary-container dark:text-on-primary-container rounded-xl px-4 py-1 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">folder_open</span>
+<span class="font-label-sm text-label-sm font-bold">Files</span>
+</a>
+<!-- Settings -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1">settings</span>
+<span class="font-label-sm text-label-sm">Settings</span>
+</a>
+</nav>
+<!-- Desktop Sidebar Navigation (Hidden on mobile) - Using "Files" as active state -->
+<aside class="hidden md:flex flex-col fixed left-0 top-16 h-[calc(100vh-64px)] w-20 bg-surface border-r border-outline-variant items-center py-stack-lg gap-stack-lg z-40">
+<a class="w-12 h-12 flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-highest rounded-lg transition-colors" href="#" title="Dashboard">
+<span class="material-symbols-outlined">dashboard</span>
+</a>
+<a class="w-12 h-12 flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-highest rounded-lg transition-colors" href="#" title="Controls">
+<span class="material-symbols-outlined">videogame_asset</span>
+</a>
+<a class="w-12 h-12 flex items-center justify-center bg-primary-container text-on-primary-container rounded-lg transition-colors" href="#" title="Files">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">folder_open</span>
+</a>
+<a class="w-12 h-12 flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-highest rounded-lg transition-colors mt-auto" href="#" title="Settings">
+<span class="material-symbols-outlined">settings</span>
+</a>
+</aside>
+</body></html>

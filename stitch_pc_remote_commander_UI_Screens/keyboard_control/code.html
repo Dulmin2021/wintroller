@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Proton Remote - Keyboard Control</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#2d3449",
+                        "error-container": "#93000a",
+                        "on-tertiary-container": "#00311f",
+                        "surface-container": "#171f33",
+                        "inverse-primary": "#005ac2",
+                        "primary": "#adc6ff",
+                        "inverse-on-surface": "#283044",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "on-primary-fixed": "#001a42",
+                        "surface-tint": "#adc6ff",
+                        "primary-container": "#4d8eff",
+                        "surface-container-lowest": "#060e20",
+                        "surface-bright": "#31394d",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "surface-container-low": "#131b2e",
+                        "secondary-fixed": "#d3e4fe",
+                        "on-surface": "#dae2fd",
+                        "on-secondary-container": "#a9bad3",
+                        "outline-variant": "#424754",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "tertiary-container": "#00a572",
+                        "inverse-surface": "#dae2fd",
+                        "on-surface-variant": "#c2c6d6",
+                        "on-error-container": "#ffdad6",
+                        "background": "#0b1326",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed": "#0b1c30",
+                        "surface": "#0b1326",
+                        "on-tertiary-fixed": "#002113",
+                        "on-background": "#dae2fd",
+                        "on-tertiary": "#003824",
+                        "surface-variant": "#2d3449",
+                        "surface-dim": "#0b1326",
+                        "surface-container-high": "#222a3d",
+                        "on-secondary": "#213145",
+                        "tertiary-fixed": "#6ffbbe",
+                        "primary-fixed": "#d8e2ff",
+                        "on-error": "#690005",
+                        "on-primary-fixed-variant": "#004395",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-primary-container": "#00285d",
+                        "secondary-container": "#3a4a5f",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "tertiary": "#4edea3",
+                        "outline": "#8c909f",
+                        "on-primary": "#002e6a",
+                        "secondary": "#b7c8e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-lg": "24px",
+                        "margin-mobile": "20px",
+                        "gutter": "16px",
+                        "stack-md": "16px",
+                        "stack-sm": "8px",
+                        "touch-target-min": "48px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "mono-ui": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "mono-ui": ["14px", { "lineHeight": "20px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined[data-weight="fill"] {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Hide scrollbar for clean UI */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        * {
+            scrollbar-width: none;
+        }
+        
+        body {
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background antialiased min-h-screen flex flex-col pt-[calc(env(safe-area-inset-top)+48px)] pb-[calc(env(safe-area-inset-bottom)+70px)]">
+<!-- TopAppBar from JSON -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-touch-target-min bg-surface dark:bg-surface border-b border-outline-variant dark:border-outline-variant flat no shadows transition-colors duration-200 active:scale-95 text-primary dark:text-primary pt-[env(safe-area-inset-top)] box-content">
+<div class="flex items-center gap-stack-sm cursor-pointer hover:bg-surface-container-highest dark:hover:bg-surface-container-highest p-2 rounded-lg">
+<span class="material-symbols-outlined text-primary dark:text-primary">settings_remote</span>
+</div>
+<h1 class="text-headline-sm font-headline-sm font-bold text-primary dark:text-primary flex items-center gap-2">
+            Proton Remote
+            <span class="w-2 h-2 rounded-full bg-tertiary animate-pulse" title="Connected"></span>
+</h1>
+<div class="flex items-center gap-stack-sm cursor-pointer hover:bg-surface-container-highest dark:hover:bg-surface-container-highest p-2 rounded-lg">
+<span class="material-symbols-outlined text-primary dark:text-primary">sensors</span>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-grow flex flex-col px-margin-mobile py-stack-lg gap-stack-lg relative overflow-hidden">
+<!-- Live Toggle -->
+<div class="flex justify-between items-center bg-surface-container p-4 rounded-xl border border-surface-variant">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg text-on-surface">Input Mode</span>
+<span class="font-body-md text-body-md text-on-surface-variant text-sm">Send keystrokes immediately</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer h-touch-target-min">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[12px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+<!-- Text Input Area -->
+<div class="relative flex-grow flex flex-col">
+<textarea class="w-full flex-grow bg-surface-container-low border border-surface-variant rounded-xl p-4 font-mono-ui text-mono-ui text-on-surface placeholder-on-surface-variant focus:ring-2 focus:ring-primary focus:border-primary resize-none transition-all" placeholder="Type here to send keystrokes to remote PC..." spellcheck="false"></textarea>
+<!-- Quick Action overlay -->
+<div class="absolute bottom-4 right-4 flex gap-2">
+<button class="h-touch-target-min px-4 bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-lg text-label-lg rounded-lg border border-outline-variant flex items-center justify-center transition-colors active:scale-95">
+                    Clear
+                </button>
+<button class="h-touch-target-min px-6 bg-primary text-on-primary font-label-lg text-label-lg rounded-lg flex items-center justify-center gap-2 transition-colors active:scale-95 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[20px]">send</span> Send
+                </button>
+</div>
+</div>
+<!-- PC Specific Keys Grid -->
+<div class="grid grid-cols-4 gap-gutter mb-2">
+<button class="h-touch-target-min bg-surface-container hover:bg-surface-container-highest border border-outline-variant rounded-lg font-mono-ui text-mono-ui text-on-surface active:bg-primary-container active:text-on-primary-container active:border-primary transition-all">Esc</button>
+<button class="h-touch-target-min bg-surface-container hover:bg-surface-container-highest border border-outline-variant rounded-lg font-mono-ui text-mono-ui text-on-surface active:bg-primary-container active:text-on-primary-container active:border-primary transition-all">Tab</button>
+<button class="h-touch-target-min bg-surface-container hover:bg-surface-container-highest border border-outline-variant rounded-lg font-mono-ui text-mono-ui text-on-surface active:bg-primary-container active:text-on-primary-container active:border-primary transition-all flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">grid_view</span>
+</button>
+<button class="h-touch-target-min bg-error-container/20 hover:bg-error-container/40 border border-error-container/50 rounded-lg font-mono-ui text-mono-ui text-error active:bg-error-container active:text-on-error-container transition-all">Del</button>
+<button class="h-touch-target-min bg-surface-container hover:bg-surface-container-highest border border-outline-variant rounded-lg font-mono-ui text-mono-ui text-on-surface active:bg-primary-container active:text-on-primary-container active:border-primary transition-all">Ctrl</button>
+<button class="h-touch-target-min bg-surface-container hover:bg-surface-container-highest border border-outline-variant rounded-lg font-mono-ui text-mono-ui text-on-surface active:bg-primary-container active:text-on-primary-container active:border-primary transition-all">Alt</button>
+<button class="h-touch-target-min bg-surface-container hover:bg-surface-container-highest border border-outline-variant rounded-lg font-mono-ui text-mono-ui text-on-surface active:bg-primary-container active:text-on-primary-container active:border-primary transition-all">Shift</button>
+<!-- Arrow Keys Mini-grid -->
+<div class="col-span-1 grid grid-cols-2 grid-rows-2 gap-1 h-touch-target-min">
+<button class="col-start-2 row-start-1 bg-surface-container border border-outline-variant rounded active:bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">keyboard_arrow_up</span>
+</button>
+<button class="col-start-1 row-start-2 bg-surface-container border border-outline-variant rounded active:bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">keyboard_arrow_left</span>
+</button>
+<button class="col-start-2 row-start-2 bg-surface-container border border-outline-variant rounded active:bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
+</button>
+<button class="col-start-3 row-start-2 bg-surface-container border border-outline-variant rounded active:bg-primary-container flex items-center justify-center absolute -right-8 w-7 h-5 mt-[25px]">
+<span class="material-symbols-outlined text-[16px]">keyboard_arrow_right</span>
+</button>
+</div>
+<!-- Adding the right arrow as a sibling due to grid constraints on 1 col span -->
+<script>
+                // A bit hacky layout for arrows in a tight space
+             </script>
+</div>
+<div class="grid grid-cols-4 gap-gutter mt-[-32px]">
+<div class="col-span-3"></div>
+<div class="col-span-1 grid grid-cols-3 gap-1">
+<div></div>
+<div></div>
+<button class="h-6 w-full bg-surface-container border border-outline-variant rounded active:bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">keyboard_arrow_right</span>
+</button>
+</div>
+</div>
+<div class="w-full flex justify-end gap-1 mt-[-24px] pr-2">
+<button class="w-8 h-8 bg-surface-container border border-outline-variant rounded active:bg-primary-container flex items-center justify-center z-10">
+<span class="material-symbols-outlined text-[16px]">keyboard_arrow_right</span>
+</button>
+</div>
+</main>
+<!-- BottomNavBar from JSON -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter py-2 pb-[max(env(safe-area-inset-bottom),8px)] bg-surface/90 dark:bg-surface/90 backdrop-blur-xl border-t border-outline-variant dark:border-outline-variant flat no shadows md:hidden">
+<!-- Dashboard (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary active:scale-90 transition-transform duration-150 h-touch-target-min" href="#">
+<span class="material-symbols-outlined mb-1">dashboard</span>
+<span class="font-label-sm text-label-sm">Dashboard</span>
+</a>
+<!-- Controls (Active) -->
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary-container text-on-primary-container dark:text-on-primary-container rounded-xl px-4 py-1 hover:text-primary dark:hover:text-primary active:scale-90 transition-transform duration-150 h-touch-target-min" href="#">
+<span class="material-symbols-outlined mb-1" data-weight="fill">videogame_asset</span>
+<span class="font-label-sm text-label-sm">Controls</span>
+</a>
+<!-- Files (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary active:scale-90 transition-transform duration-150 h-touch-target-min" href="#">
+<span class="material-symbols-outlined mb-1">folder_open</span>
+<span class="font-label-sm text-label-sm">Files</span>
+</a>
+<!-- Settings (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary active:scale-90 transition-transform duration-150 h-touch-target-min" href="#">
+<span class="material-symbols-outlined mb-1">settings</span>
+<span class="font-label-sm text-label-sm">Settings</span>
+</a>
+</nav>
+</body></html>

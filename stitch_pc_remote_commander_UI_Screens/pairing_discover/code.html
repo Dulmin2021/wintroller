@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Proton Remote - Pairing</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#2d3449",
+                        "error-container": "#93000a",
+                        "on-tertiary-container": "#00311f",
+                        "surface-container": "#171f33",
+                        "inverse-primary": "#005ac2",
+                        "primary": "#adc6ff",
+                        "inverse-on-surface": "#283044",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "on-primary-fixed": "#001a42",
+                        "surface-tint": "#adc6ff",
+                        "primary-container": "#4d8eff",
+                        "surface-container-lowest": "#060e20",
+                        "surface-bright": "#31394d",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "surface-container-low": "#131b2e",
+                        "secondary-fixed": "#d3e4fe",
+                        "on-surface": "#dae2fd",
+                        "on-secondary-container": "#a9bad3",
+                        "outline-variant": "#424754",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "tertiary-container": "#00a572",
+                        "inverse-surface": "#dae2fd",
+                        "on-surface-variant": "#c2c6d6",
+                        "on-error-container": "#ffdad6",
+                        "background": "#0b1326",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed": "#0b1c30",
+                        "surface": "#0b1326",
+                        "on-tertiary-fixed": "#002113",
+                        "on-background": "#dae2fd",
+                        "on-tertiary": "#003824",
+                        "surface-variant": "#2d3449",
+                        "surface-dim": "#0b1326",
+                        "surface-container-high": "#222a3d",
+                        "on-secondary": "#213145",
+                        "tertiary-fixed": "#6ffbbe",
+                        "primary-fixed": "#d8e2ff",
+                        "on-error": "#690005",
+                        "on-primary-fixed-variant": "#004395",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-primary-container": "#00285d",
+                        "secondary-container": "#3a4a5f",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "tertiary": "#4edea3",
+                        "outline": "#8c909f",
+                        "on-primary": "#002e6a",
+                        "secondary": "#b7c8e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-lg": "24px",
+                        "margin-mobile": "20px",
+                        "gutter": "16px",
+                        "stack-md": "16px",
+                        "stack-sm": "8px",
+                        "touch-target-min": "48px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "mono-ui": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "mono-ui": ["14px", { "lineHeight": "20px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .pulse-ring {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(77, 142, 255, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(77, 142, 255, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(77, 142, 255, 0); }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-touch-target-min bg-surface border-b border-outline-variant">
+<div class="flex items-center">
+<button class="h-touch-target-min w-touch-target-min flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 active:scale-95 rounded-full mr-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+</button>
+<span class="text-headline-sm font-headline-sm font-bold text-primary">Proton Remote</span>
+</div>
+<button class="h-touch-target-min w-touch-target-min flex items-center justify-center text-primary hover:bg-surface-container-highest transition-colors duration-200 active:scale-95 rounded-full">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">qr_code_scanner</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-[calc(var(--spacing-touch-target-min)+var(--spacing-margin-mobile))] pb-stack-lg px-margin-mobile flex flex-col items-center justify-center">
+<!-- Scanning Animation Area -->
+<div class="flex flex-col items-center justify-center mb-12 relative w-full max-w-sm">
+<div class="w-32 h-32 rounded-full bg-surface-container-highest flex items-center justify-center pulse-ring mb-stack-md z-10 border border-outline-variant">
+<span class="material-symbols-outlined text-primary text-5xl" style="font-variation-settings: 'FILL' 0;">wifi_tethering</span>
+</div>
+<h2 class="text-headline-md font-headline-md text-on-background text-center mb-2">Looking for PCs...</h2>
+<p class="text-body-md font-body-md text-on-surface-variant text-center">Ensure your PC is on the same Wi-Fi network and Proton Host is running.</p>
+</div>
+<!-- Discovered PCs List -->
+<div class="w-full max-w-md flex flex-col gap-stack-sm mb-auto">
+<div class="text-label-lg font-label-lg text-on-surface-variant mb-2">AVAILABLE DEVICES</div>
+<!-- PC Item 1 -->
+<button class="w-full bg-surface-container text-left p-4 rounded-xl border border-outline-variant hover:border-primary hover:bg-surface-container-highest transition-colors duration-200 flex items-center group">
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center mr-4 group-hover:bg-primary-container transition-colors duration-200">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-on-primary-container" style="font-variation-settings: 'FILL' 0;">desktop_windows</span>
+</div>
+<div class="flex-grow">
+<div class="text-body-lg font-body-lg text-on-surface mb-1 group-hover:text-primary">Gaming-PC</div>
+<div class="text-label-sm font-label-sm text-on-surface-variant flex items-center">
+<span class="w-2 h-2 rounded-full bg-tertiary mr-2"></span>
+                        192.168.1.105
+                    </div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary" style="font-variation-settings: 'FILL' 0;">chevron_right</span>
+</button>
+<!-- PC Item 2 -->
+<button class="w-full bg-surface-container text-left p-4 rounded-xl border border-outline-variant hover:border-primary hover:bg-surface-container-highest transition-colors duration-200 flex items-center group">
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center mr-4 group-hover:bg-primary-container transition-colors duration-200">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-on-primary-container" style="font-variation-settings: 'FILL' 0;">laptop_mac</span>
+</div>
+<div class="flex-grow">
+<div class="text-body-lg font-body-lg text-on-surface mb-1 group-hover:text-primary">Home-Office-Laptop</div>
+<div class="text-label-sm font-label-sm text-on-surface-variant flex items-center">
+<span class="w-2 h-2 rounded-full bg-tertiary mr-2"></span>
+                        192.168.1.142
+                    </div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary" style="font-variation-settings: 'FILL' 0;">chevron_right</span>
+</button>
+</div>
+<!-- Bottom Action -->
+<div class="w-full max-w-md mt-12">
+<button class="w-full h-[56px] bg-transparent border border-outline-variant text-on-surface rounded-xl flex items-center justify-center hover:bg-surface-container-highest transition-colors duration-200 active:scale-[0.98]">
+<span class="material-symbols-outlined mr-2" style="font-variation-settings: 'FILL' 0;">keyboard</span>
+<span class="text-label-lg font-label-lg uppercase tracking-wider">Enter PIN Manually</span>
+</button>
+</div>
+</main>
+<!-- BottomNavBar Suppressed: Transactional/Setup flow -->
+</body></html>

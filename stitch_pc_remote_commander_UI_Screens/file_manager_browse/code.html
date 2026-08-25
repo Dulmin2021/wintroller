@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Proton Remote - Files</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#2d3449",
+                        "error-container": "#93000a",
+                        "on-tertiary-container": "#00311f",
+                        "surface-container": "#171f33",
+                        "inverse-primary": "#005ac2",
+                        "primary": "#adc6ff",
+                        "inverse-on-surface": "#283044",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "on-primary-fixed": "#001a42",
+                        "surface-tint": "#adc6ff",
+                        "primary-container": "#4d8eff",
+                        "surface-container-lowest": "#060e20",
+                        "surface-bright": "#31394d",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "surface-container-low": "#131b2e",
+                        "secondary-fixed": "#d3e4fe",
+                        "on-surface": "#dae2fd",
+                        "on-secondary-container": "#a9bad3",
+                        "outline-variant": "#424754",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "tertiary-container": "#00a572",
+                        "inverse-surface": "#dae2fd",
+                        "on-surface-variant": "#c2c6d6",
+                        "on-error-container": "#ffdad6",
+                        "background": "#0b1326",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed": "#0b1c30",
+                        "surface": "#0b1326",
+                        "on-tertiary-fixed": "#002113",
+                        "on-background": "#dae2fd",
+                        "on-tertiary": "#003824",
+                        "surface-variant": "#2d3449",
+                        "surface-dim": "#0b1326",
+                        "surface-container-high": "#222a3d",
+                        "on-secondary": "#213145",
+                        "tertiary-fixed": "#6ffbbe",
+                        "primary-fixed": "#d8e2ff",
+                        "on-error": "#690005",
+                        "on-primary-fixed-variant": "#004395",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-primary-container": "#00285d",
+                        "secondary-container": "#3a4a5f",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "tertiary": "#4edea3",
+                        "outline": "#8c909f",
+                        "on-primary": "#002e6a",
+                        "secondary": "#b7c8e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-lg": "24px",
+                        "margin-mobile": "20px",
+                        "gutter": "16px",
+                        "stack-md": "16px",
+                        "stack-sm": "8px",
+                        "touch-target-min": "48px",
+                        "safe": "env(safe-area-inset-bottom)"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "mono-ui": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "mono-ui": ["14px", { "lineHeight": "20px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+        }
+        /* Hide scrollbar for clean UI but allow scrolling */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md antialiased min-h-screen flex flex-col pb-[80px] pt-[64px]">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-touch-target-min bg-surface border-b border-outline-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="settings_remote">settings_remote</span>
+<span class="font-headline-sm text-headline-sm font-bold text-primary">Proton Remote</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative w-full max-w-xs md:flex hidden mr-4">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]" data-icon="search">search</span>
+<input class="w-full bg-surface-container-high border border-outline-variant rounded-full pl-10 pr-4 py-1.5 font-label-lg text-label-lg text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="Search files..." type="text"/>
+</div>
+<button class="md:hidden w-touch-target-min h-touch-target-min flex items-center justify-center hover:bg-surface-container-highest rounded-full transition-colors duration-200 active:scale-95 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+<button class="w-touch-target-min h-touch-target-min flex items-center justify-center hover:bg-surface-container-highest rounded-full transition-colors duration-200 active:scale-95 text-primary">
+<span class="material-symbols-outlined" data-icon="sensors">sensors</span>
+</button>
+</div>
+</header>
+<main class="flex-1 px-margin-mobile py-stack-md flex flex-col gap-stack-lg max-w-5xl mx-auto w-full">
+<!-- Breadcrumb & Actions -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2 overflow-x-auto no-scrollbar font-mono-ui text-mono-ui text-on-surface-variant">
+<button class="hover:text-primary transition-colors flex items-center gap-1"><span class="material-symbols-outlined text-[16px]" data-icon="hard_drive">hard_drive</span> C:</button>
+<span class="material-symbols-outlined text-[16px]" data-icon="chevron_right">chevron_right</span>
+<button class="hover:text-primary transition-colors">Users</button>
+<span class="material-symbols-outlined text-[16px]" data-icon="chevron_right">chevron_right</span>
+<button class="hover:text-primary transition-colors">Admin</button>
+<span class="material-symbols-outlined text-[16px]" data-icon="chevron_right">chevron_right</span>
+<span class="text-on-surface">Documents</span>
+</div>
+<div class="hidden md:flex gap-2">
+<button class="h-touch-target-min px-4 rounded-lg bg-surface-container hover:bg-surface-container-high border border-outline-variant flex items-center gap-2 text-on-surface font-label-lg text-label-lg transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="grid_view">grid_view</span> View
+                </button>
+<button class="h-touch-target-min px-4 rounded-lg bg-surface-container hover:bg-surface-container-high border border-outline-variant flex items-center gap-2 text-on-surface font-label-lg text-label-lg transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="sort">sort</span> Sort
+                </button>
+</div>
+</div>
+<!-- File List Container -->
+<div class="bg-surface-container-low border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+<!-- List Header (Desktop) -->
+<div class="hidden md:grid grid-cols-[auto_1fr_120px_150px_auto] gap-4 items-center px-4 py-3 bg-surface-container-high border-b border-outline-variant font-label-sm text-label-sm text-on-surface-variant">
+<div class="w-8"></div>
+<div>Name</div>
+<div class="text-right">Size</div>
+<div class="text-right">Modified</div>
+<div class="w-8"></div>
+</div>
+<!-- List Items -->
+<div class="flex flex-col">
+<!-- Folder Item -->
+<button class="grid grid-cols-[auto_1fr_auto] md:grid-cols-[auto_1fr_120px_150px_auto] gap-4 items-center px-4 py-3 border-b border-outline-variant/50 hover:bg-surface-container-highest transition-colors group text-left w-full h-[64px] md:h-auto">
+<span class="material-symbols-outlined text-primary text-[28px]" data-icon="folder" data-weight="fill">folder</span>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors truncate">Project Titan</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant md:hidden">Folder • 10/24/2023</span>
+</div>
+<span class="font-mono-ui text-mono-ui text-on-surface-variant text-right hidden md:block">--</span>
+<span class="font-mono-ui text-mono-ui text-on-surface-variant text-right hidden md:block">10/24/2023</span>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-on-surface hidden md:block" data-icon="more_vert">more_vert</span>
+</button>
+<!-- Folder Item -->
+<button class="grid grid-cols-[auto_1fr_auto] md:grid-cols-[auto_1fr_120px_150px_auto] gap-4 items-center px-4 py-3 border-b border-outline-variant/50 hover:bg-surface-container-highest transition-colors group text-left w-full h-[64px] md:h-auto">
+<span class="material-symbols-outlined text-primary text-[28px]" data-icon="folder" data-weight="fill">folder</span>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors truncate">Q4 Reports</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant md:hidden">Folder • 10/12/2023</span>
+</div>
+<span class="font-mono-ui text-mono-ui text-on-surface-variant text-right hidden md:block">--</span>
+<span class="font-mono-ui text-mono-ui text-on-surface-variant text-right hidden md:block">10/12/2023</span>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-on-surface hidden md:block" data-icon="more_vert">more_vert</span>
+</button>
+<!-- PDF Item -->
+<button class="grid grid-cols-[auto_1fr_auto] md:grid-cols-[auto_1fr_120px_150px_auto] gap-4 items-center px-4 py-3 border-b border-outline-variant/50 hover:bg-surface-container-highest transition-colors group text-left w-full h-[64px] md:h-auto focus:bg-surface-container-highest focus:outline-none">
+<span class="material-symbols-outlined text-error text-[28px]" data-icon="picture_as_pdf">picture_as_pdf</span>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors truncate">Financial_Summary_2023.pdf</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant md:hidden">2.4 MB • 11/02/2023</span>
+</div>
+<span class="font-mono-ui text-mono-ui text-on-surface-variant text-right hidden md:block">2.4 MB</span>
+<span class="font-mono-ui text-mono-ui text-on-surface-variant text-right hidden md:block">11/02/2023</span>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-on-surface hidden md:block" data-icon="more_vert">more_vert</span>
+</button>
+<!-- Image Item -->
+<button class="grid grid-cols-[auto_1fr_auto] md:grid-cols-[auto_1fr_120px_150px_auto] gap-4 items-center px-4 py-3 border-b border-outline-variant/50 hover:bg-surface-container-highest transition-colors group text-left w-full h-[64px] md:h-auto">
+<div class="w-[28px] h-[28px] rounded overflow-hidden border border-outline-variant shrink-0 flex items-center justify-center bg-surface-container">
+<span class="material-symbols-outlined text-tertiary text-[20px]" data-icon="image">image</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors truncate">Server_Architecture_Diagram.png</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant md:hidden">4.1 MB • 10/28/2023</span>
+</div>
+<span class="font-mono-ui text-mono-ui text-on-surface-variant text-right hidden md:block">4.1 MB</span>
+<span class="font-mono-ui text-mono-ui text-on-surface-variant text-right hidden md:block">10/28/2023</span>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-on-surface hidden md:block" data-icon="more_vert">more_vert</span>
+</button>
+<!-- Code Item -->
+<button class="grid grid-cols-[auto_1fr_auto] md:grid-cols-[auto_1fr_120px_150px_auto] gap-4 items-center px-4 py-3 hover:bg-surface-container-highest transition-colors group text-left w-full h-[64px] md:h-auto">
+<span class="material-symbols-outlined text-secondary text-[28px]" data-icon="code">code</span>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors truncate">deploy_script_v2.sh</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant md:hidden">14 KB • 11/05/2023</span>
+</div>
+<span class="font-mono-ui text-mono-ui text-on-surface-variant text-right hidden md:block">14 KB</span>
+<span class="font-mono-ui text-mono-ui text-on-surface-variant text-right hidden md:block">11/05/2023</span>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-on-surface hidden md:block" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+</main>
+<!-- FAB for Upload -->
+<button class="fixed bottom-[96px] right-margin-mobile w-[56px] h-[56px] bg-primary text-on-primary rounded-xl flex items-center justify-center shadow-lg hover:bg-primary-container hover:text-on-primary-container transition-all duration-200 active:scale-95 z-40 md:hidden">
+<span class="material-symbols-outlined text-[28px]" data-icon="add">add</span>
+</button>
+<button class="fixed bottom-[40px] right-margin-mobile w-[56px] h-[56px] bg-primary text-on-primary rounded-xl hidden md:flex items-center justify-center shadow-lg hover:bg-primary-container hover:text-on-primary-container transition-all duration-200 active:scale-95 z-40">
+<span class="material-symbols-outlined text-[28px]" data-icon="upload">upload</span>
+</button>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter py-2 pb-safe bg-surface/80 backdrop-blur-xl border-t border-outline-variant font-label-sm text-label-sm">
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary transition-transform duration-150 active:scale-90" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary transition-transform duration-150 active:scale-90" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="videogame_asset">videogame_asset</span>
+<span>Controls</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-4 py-1 transition-transform duration-150 active:scale-90" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="folder_open" data-weight="fill">folder_open</span>
+<span>Files</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary transition-transform duration-150 active:scale-90" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+</body></html>
