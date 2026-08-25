@@ -236,10 +236,35 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         color: colors.primary,
                         child: Icon(Icons.radar_rounded, color: colors.primary, size: 14),
                       ),
+                      tooltip: 'Paired Devices',
                       onPressed: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => const DeviceManagementScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ] else ...[
+                    const SizedBox(width: 4),
+                    IconButton(
+                      icon: Icon(Icons.devices_rounded, color: colors.onSurface, size: 20),
+                      tooltip: 'Paired Devices',
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const DeviceManagementScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.settings_outlined, color: colors.onSurface, size: 20),
+                      tooltip: 'Settings',
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const SettingsScreen(),
                           ),
                         );
                       },
@@ -687,7 +712,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               ),
             ),
 
-            // Bottom Sci-Fi Cybernetic HUD Navigation Dock
+            // Bottom Navigation Dock
             if (isAlienHud)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -705,6 +730,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           color: colors.primary,
                           child: Icon(Icons.gps_fixed_rounded, color: colors.primary, size: 12),
                         ),
+                        tooltip: 'Devices',
                         onPressed: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(builder: (_) => const DeviceManagementScreen()),
@@ -732,6 +758,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       ),
                       IconButton(
                         icon: Icon(Icons.settings_outlined, color: colors.primary, size: 24),
+                        tooltip: 'Settings',
                         onPressed: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(builder: (_) => const SettingsScreen()),
@@ -740,6 +767,64 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       ),
                     ],
                   ),
+                ),
+              )
+            else
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: colors.surfaceContainer,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: colors.outlineVariant.withOpacity(0.8), width: 0.8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.devices_rounded, color: colors.onSurfaceVariant),
+                      tooltip: 'Devices',
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const DeviceManagementScreen()),
+                        );
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.mouse_rounded, color: colors.primary),
+                      tooltip: 'Trackpad',
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const MouseTrackpadScreen()),
+                        );
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.play_circle_fill_rounded, color: colors.primary, size: 36),
+                      tooltip: 'Play/Pause',
+                      onPressed: () {
+                        ref.read(pcRemoteRepositoryProvider).mediaPlayPause();
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.keyboard_rounded, color: colors.primary),
+                      tooltip: 'Keyboard',
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const KeyboardControlScreen()),
+                        );
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.settings_rounded, color: colors.onSurfaceVariant),
+                      tooltip: 'Settings',
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ),
           ],
