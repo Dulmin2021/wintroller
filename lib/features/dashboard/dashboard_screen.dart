@@ -96,31 +96,37 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'WINTROLLER',
-                          style: isAlienHud
-                              ? GoogleFonts.orbitron(
-                                  fontSize: 19,
-                                  fontWeight: FontWeight.w900,
-                                  color: colors.primary,
-                                  letterSpacing: 2.2,
-                                )
-                              : TextStyle(
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -0.5,
-                                  fontSize: 20,
-                                  color: colors.onSurface,
-                                ),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'WINTROLLER',
+                            style: isAlienHud
+                                ? GoogleFonts.orbitron(
+                                    fontSize: 16.5,
+                                    fontWeight: FontWeight.w900,
+                                    color: colors.primary,
+                                    letterSpacing: 1.2,
+                                  )
+                                : TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.5,
+                                    fontSize: 18,
+                                    color: colors.onSurface,
+                                  ),
+                            maxLines: 1,
+                          ),
                         ),
                         if (isAlienHud)
                           Text(
                             'ALIEN REMOTE INTERFACE',
                             style: GoogleFonts.orbitron(
-                              fontSize: 8.5,
+                              fontSize: 8.0,
                               fontWeight: FontWeight.w700,
                               color: colors.primary.withOpacity(0.75),
-                              letterSpacing: 1.8,
+                              letterSpacing: 1.2,
                             ),
+                            maxLines: 1,
                           ),
                       ],
                     ),
@@ -603,9 +609,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       crossAxisCount: 2,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      childAspectRatio: isAlienHud ? 0.95 : 1.15,
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 10,
+                      childAspectRatio: isAlienHud ? 1.45 : 1.15,
                       children: [
                         ModuleCard(
                           title: isAlienHud ? 'MOUSE & TRACKPAD' : 'Trackpad',

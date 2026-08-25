@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../providers/app_providers.dart';
 import '../theme/app_colors.dart';
 import 'alien_icons.dart';
@@ -34,78 +33,23 @@ class ModuleCard extends ConsumerWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
-          splashColor: colors.primary.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(14),
+          splashColor: colors.primary.withOpacity(0.25),
           child: HudFrame(
-            chamferSize: 16,
+            chamferSize: 12,
             borderColor: colors.primary,
             backgroundColor: colors.surfaceContainer,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-            child: Stack(
-              children: [
-                if (badgeText != null)
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: colors.primary.withOpacity(0.6), width: 0.8),
-                        borderRadius: BorderRadius.circular(4),
-                        color: colors.primary.withOpacity(0.12),
-                      ),
-                      child: Text(
-                        badgeText!,
-                        style: GoogleFonts.orbitron(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: colors.primary,
-                        ),
-                      ),
-                    ),
-                  ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    HudRadarCircle(
-                      size: 58,
-                      color: colors.primary,
-                      child: Icon(
-                        icon,
-                        color: colors.primary,
-                        size: 28,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      title.toUpperCase(),
-                      style: GoogleFonts.orbitron(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                        color: colors.primary,
-                        letterSpacing: 0.6,
-                      ),
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: GoogleFonts.rajdhani(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: colors.onSurfaceVariant,
-                        letterSpacing: 0.2,
-                      ),
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+            padding: const EdgeInsets.all(8),
+            child: Center(
+              child: HudRadarCircle(
+                size: 52,
+                color: colors.primary,
+                child: Icon(
+                  icon,
+                  color: colors.primary,
+                  size: 26,
                 ),
-              ],
+              ),
             ),
           ),
         ),
@@ -129,7 +73,7 @@ class ModuleCard extends ConsumerWidget {
             ),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(18),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -138,15 +82,15 @@ class ModuleCard extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: accentColor.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         icon,
                         color: accentColor,
-                        size: 26,
+                        size: 24,
                       ),
                     ),
                     if (badgeText != null)
@@ -175,13 +119,17 @@ class ModuleCard extends ConsumerWidget {
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w700,
                             color: colors.onSurface,
+                            fontSize: 14,
                           ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       subtitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: colors.onSurfaceVariant,
+                            fontSize: 11,
                           ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
