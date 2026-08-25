@@ -120,6 +120,16 @@ class PCRemoteRepository {
   Future<ResponseMessage> brightnessLow() async =>
       await _wsService.sendCommand(ProtocolActions.brightnessLow);
 
+  // Hardware Quick Toggles (Wi-Fi, Bluetooth, Display Power)
+  Future<ResponseMessage> setWifi(bool enable) async =>
+      await _wsService.sendCommand(enable ? ProtocolActions.systemWifiOn : ProtocolActions.systemWifiOff);
+
+  Future<ResponseMessage> setBluetooth(bool enable) async =>
+      await _wsService.sendCommand(enable ? ProtocolActions.systemBluetoothOn : ProtocolActions.systemBluetoothOff);
+
+  Future<ResponseMessage> setDisplay(bool enable) async =>
+      await _wsService.sendCommand(enable ? ProtocolActions.systemDisplayOn : ProtocolActions.systemDisplayOff);
+
   // Mouse Gestures (Low-latency streaming)
   void sendMouseMove(double dx, double dy) {
     _wsService.sendStreamMessage(ProtocolActions.mouseMove, {'dx': dx, 'dy': dy});

@@ -18,11 +18,20 @@ import '../mouse/mouse_trackpad_screen.dart';
 import '../power/power_control_screen.dart';
 import '../settings/settings_screen.dart';
 
-class DashboardScreen extends ConsumerWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  bool _wifiEnabled = true;
+  bool _bluetoothEnabled = true;
+  bool _displayOn = true;
+
+  @override
+  Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final themeStyle = ref.watch(themeStyleProvider);
     final activeDevice = ref.watch(activeDeviceProvider);
@@ -99,109 +108,116 @@ class DashboardScreen extends ConsumerWidget {
                   // Connection Status Pill
                   GestureDetector(
                     onTap: () {
-                      if (connectionStatus == ConnectionStatus.offline) {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const ConnectionErrorScreen()),
-                        );
-                      } else {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const DeviceManagementScreen()),
-                        );
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: isAlienHud
-                            ? colors.surfaceContainer
-                            : (connectionStatus == ConnectionStatus.connected
-                                ? colors.tertiary.withOpacity(0.15)
-                                : colors.error.withOpacity(0.15)),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: connectionStatus == ConnectionStatus.connected
-                              ? colors.primary
-                              : colors.error,
-                          width: 1,
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const DeviceManagementScreen(),
                         ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 7,
-                            height: 7,
+                      );
+                    },
+                    child: isAlienHud
+                        ? Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: connectionStatus == ConnectionStatus.connected
-                                  ? colors.primary
-                                  : colors.error,
-                              boxShadow: isAlienHud
-                                  ? [
-                                      BoxShadow(
-                                        color: colors.primary.withOpacity(0.8),
-                                        blurRadius: 6,
-                                      )
-                                    ]
-                                  : null,
+                              color: colors.surfaceContainer,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: connectionStatus == ConnectionStatus.connected
+                                    ? colors.primary
+                                    : colors.error,
+                                width: 1.0,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: (connectionStatus == ConnectionStatus.connected
+                                          ? colors.primary
+                                          : colors.error)
+                                      .withOpacity(0.2),
+                                  blurRadius: 8,
+                                ),
+                              ],
                             ),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            connectionStatus == ConnectionStatus.connected
-                                ? 'CONNECTED'
-                                : 'OFFLINE',
-                            style: isAlienHud
-                                ? GoogleFonts.orbitron(
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 7,
+                                  height: 7,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: connectionStatus == ConnectionStatus.connected
+                                        ? colors.primary
+                                        : colors.error,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: connectionStatus == ConnectionStatus.connected
+                                            ? colors.primary.withOpacity(0.8)
+                                            : colors.error.withOpacity(0.8),
+                                        blurRadius: 6,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  connectionStatus == ConnectionStatus.connected
+                                      ? 'CONNECTED'
+                                      : 'OFFLINE',
+                                  style: GoogleFonts.orbitron(
                                     fontSize: 10,
                                     fontWeight: FontWeight.w800,
                                     color: connectionStatus == ConnectionStatus.connected
                                         ? colors.primary
                                         : colors.error,
-                                    letterSpacing: 1.0,
-                                  )
-                                : TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    color: connectionStatus == ConnectionStatus.connected
-                                        ? colors.primary
-                                        : colors.error,
+                                    letterSpacing: 1.2,
                                   ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: connectionStatus == ConnectionStatus.connected
+                                  ? colors.tertiaryContainer.withOpacity(0.2)
+                                  : colors.errorContainer.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: connectionStatus == ConnectionStatus.connected
+                                    ? colors.tertiary
+                                    : colors.error,
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Text(
+                              connectionStatus == ConnectionStatus.connected ? 'Online' : 'Offline',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: connectionStatus == ConnectionStatus.connected
+                                    ? colors.tertiary
+                                    : colors.error,
+                              ),
+                            ),
                           ),
-                        ],
-                      ),
-                    ),
                   ),
 
-                  const SizedBox(width: 8),
-
-                  // Radar Reticle / Settings Button
-                  if (isAlienHud)
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const DeviceManagementScreen()),
-                        );
-                      },
-                      child: HudRadarCircle(
-                        size: 36,
-                        color: colors.primary,
-                        child: Icon(
-                          Icons.radar_rounded,
-                          color: colors.primary,
-                          size: 18,
-                        ),
-                      ),
-                    )
-                  else
+                  if (isAlienHud) ...[
+                    const SizedBox(width: 8),
                     IconButton(
-                      icon: Icon(Icons.settings_outlined, color: colors.onSurface),
+                      icon: HudRadarCircle(
+                        size: 26,
+                        color: colors.primary,
+                        child: Icon(Icons.radar_rounded, color: colors.primary, size: 14),
+                      ),
                       onPressed: () {
                         Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const DeviceManagementScreen(),
+                          ),
                         );
                       },
                     ),
+                  ],
                 ],
               ),
             ),
@@ -211,66 +227,8 @@ class DashboardScreen extends ConsumerWidget {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Offline Alert Banner if disconnected
-                    if (connectionStatus == ConnectionStatus.offline ||
-                        connectionStatus == ConnectionStatus.error) ...[
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 14),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: colors.errorContainer.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: colors.error.withOpacity(0.5)),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.cloud_off_rounded, color: colors.error, size: 22),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'PC Connection Offline',
-                                    style: TextStyle(
-                                      color: colors.onSurface,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                  Text(
-                                    activeDevice != null
-                                        ? 'Cannot reach ${activeDevice.name} (${activeDevice.ip})'
-                                        : 'No active PC paired yet',
-                                    style: TextStyle(
-                                      color: colors.onSurfaceVariant,
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => const ConnectionErrorScreen(),
-                                  ),
-                                );
-                              },
-                              child: Text(
-                                'Reconnect',
-                                style: TextStyle(color: colors.error, fontWeight: FontWeight.w700),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-
-                    // Host Status HUD Card
+                    // Host PC Card
                     if (isAlienHud)
                       HudFrame(
                         chamferSize: 18,
@@ -279,23 +237,15 @@ class DashboardScreen extends ConsumerWidget {
                         padding: const EdgeInsets.all(16),
                         child: Column(
                           children: [
-                            // Top Row: PC Radar Monitor + Host info
                             Row(
                               children: [
                                 HudRadarCircle(
                                   size: 68,
                                   color: colors.primary,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      color: colors.primary.withOpacity(0.12),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      Icons.desktop_windows_rounded,
-                                      color: colors.primary,
-                                      size: 32,
-                                    ),
+                                  child: Icon(
+                                    Icons.desktop_windows_rounded,
+                                    color: colors.primary,
+                                    size: 34,
                                   ),
                                 ),
                                 const SizedBox(width: 14),
@@ -304,9 +254,11 @@ class DashboardScreen extends ConsumerWidget {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        (activeDevice?.name ?? systemInfo.hostname).toUpperCase(),
+                                        activeDevice != null
+                                            ? activeDevice.name.toUpperCase()
+                                            : systemInfo.hostname.toUpperCase(),
                                         style: GoogleFonts.orbitron(
-                                          fontSize: 16,
+                                          fontSize: 15,
                                           fontWeight: FontWeight.w900,
                                           color: colors.primary,
                                           letterSpacing: 0.8,
@@ -316,9 +268,7 @@ class DashboardScreen extends ConsumerWidget {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        activeDevice != null
-                                            ? activeDevice.ip
-                                            : '192.168.1.X',
+                                        activeDevice != null ? activeDevice.ip : '192.168.1.X',
                                         style: GoogleFonts.shareTechMono(
                                           fontSize: 13,
                                           color: colors.onSurfaceVariant,
@@ -356,7 +306,7 @@ class DashboardScreen extends ConsumerWidget {
                             Divider(color: colors.outlineVariant, height: 1),
                             const SizedBox(height: 14),
 
-                            // Bottom Row: 4 Glowing Telemetry Pods
+                            // Bottom Row: 4 Glowing Telemetry Pods (Icons + Percentage only)
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
@@ -365,19 +315,16 @@ class DashboardScreen extends ConsumerWidget {
                                       ? Icons.battery_charging_full_rounded
                                       : Icons.battery_std_rounded,
                                   value: '${systemInfo.batteryPercent}%',
-                                  label: 'BATTERY',
                                   color: colors.primary,
                                 ),
                                 _HudTelemetryPod(
                                   icon: Icons.memory_rounded,
                                   value: '${systemInfo.cpuUsage.toStringAsFixed(0)}%',
-                                  label: 'CPU LOAD',
                                   color: colors.primary,
                                 ),
                                 _HudTelemetryPod(
                                   icon: Icons.developer_board_rounded,
                                   value: '${systemInfo.ramUsage.toStringAsFixed(0)}%',
-                                  label: 'RAM USAGE',
                                   color: colors.primary,
                                 ),
                                 _HudTelemetryPod(
@@ -385,7 +332,6 @@ class DashboardScreen extends ConsumerWidget {
                                       ? Icons.volume_off_rounded
                                       : Icons.volume_up_rounded,
                                   value: systemInfo.isMuted ? 'MUTE' : '${systemInfo.volume}%',
-                                  label: 'VOLUME',
                                   color: systemInfo.volume > 80
                                       ? const Color(0xFFFFD600)
                                       : colors.primary,
@@ -424,25 +370,27 @@ class DashboardScreen extends ConsumerWidget {
                                       Container(
                                         padding: const EdgeInsets.all(10),
                                         decoration: BoxDecoration(
-                                          color: colors.primary.withOpacity(0.15),
+                                          color: colors.primaryContainer.withOpacity(0.15),
                                           borderRadius: BorderRadius.circular(14),
                                         ),
                                         child: Icon(
                                           Icons.desktop_windows_rounded,
                                           color: colors.primary,
-                                          size: 26,
+                                          size: 28,
                                         ),
                                       ),
-                                      const SizedBox(width: 12),
+                                      const SizedBox(width: 14),
                                       Expanded(
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              activeDevice?.name ?? systemInfo.hostname,
+                                              activeDevice != null
+                                                  ? activeDevice.name
+                                                  : systemInfo.hostname,
                                               style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w800,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w700,
                                                 color: colors.onSurface,
                                               ),
                                               maxLines: 1,
@@ -520,7 +468,71 @@ class DashboardScreen extends ConsumerWidget {
                         ),
                       ),
 
-                    const SizedBox(height: 22),
+                    const SizedBox(height: 16),
+
+                    // Quick Hardware Toggles (Wi-Fi, Bluetooth, Display Power)
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _HardwareToggleTile(
+                            title: 'WI-FI',
+                            isOn: _wifiEnabled,
+                            icon: Icons.wifi_rounded,
+                            onTap: () {
+                              final newState = !_wifiEnabled;
+                              setState(() => _wifiEnabled = newState);
+                              ref.read(pcRemoteRepositoryProvider).setWifi(newState);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(newState ? 'Enabling PC Wi-Fi...' : 'Disabling PC Wi-Fi...'),
+                                  duration: const Duration(seconds: 1),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _HardwareToggleTile(
+                            title: 'BLUETOOTH',
+                            isOn: _bluetoothEnabled,
+                            icon: Icons.bluetooth_rounded,
+                            onTap: () {
+                              final newState = !_bluetoothEnabled;
+                              setState(() => _bluetoothEnabled = newState);
+                              ref.read(pcRemoteRepositoryProvider).setBluetooth(newState);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(newState ? 'Enabling PC Bluetooth...' : 'Disabling PC Bluetooth...'),
+                                  duration: const Duration(seconds: 1),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _HardwareToggleTile(
+                            title: 'DISPLAY',
+                            isOn: _displayOn,
+                            icon: Icons.monitor_rounded,
+                            onTap: () {
+                              final newState = !_displayOn;
+                              setState(() => _displayOn = newState);
+                              ref.read(pcRemoteRepositoryProvider).setDisplay(newState);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(newState ? 'Waking PC Display...' : 'Turning PC Display OFF...'),
+                                  duration: const Duration(seconds: 1),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 18),
 
                     // Section Title: CONTROL MODULES
                     Row(
@@ -572,11 +584,11 @@ class DashboardScreen extends ConsumerWidget {
                       crossAxisCount: 2,
                       mainAxisSpacing: 12,
                       crossAxisSpacing: 12,
-                      childAspectRatio: isAlienHud ? 1.02 : 1.05,
+                      childAspectRatio: isAlienHud ? 0.95 : 1.15,
                       children: [
                         ModuleCard(
-                          title: 'Mouse & Trackpad',
-                          subtitle: 'Gestures, clicks & scroll',
+                          title: isAlienHud ? 'MOUSE & TRACKPAD' : 'Trackpad',
+                          subtitle: isAlienHud ? 'Gestures, clicks & scroll' : 'Multi-touch gesture control',
                           icon: Icons.mouse_rounded,
                           accentColor: colors.mouseAccent,
                           onTap: () {
@@ -586,8 +598,8 @@ class DashboardScreen extends ConsumerWidget {
                           },
                         ),
                         ModuleCard(
-                          title: 'Keyboard',
-                          subtitle: 'Typing & shortcuts',
+                          title: isAlienHud ? 'KEYBOARD' : 'Keyboard',
+                          subtitle: isAlienHud ? 'Typing & shortcuts' : 'Full input & special keys',
                           icon: Icons.keyboard_rounded,
                           accentColor: colors.keyboardAccent,
                           onTap: () {
@@ -597,11 +609,10 @@ class DashboardScreen extends ConsumerWidget {
                           },
                         ),
                         ModuleCard(
-                          title: 'Media Controls',
-                          subtitle: 'Playback, volume & mic',
+                          title: isAlienHud ? 'MEDIA CONTROLS' : 'Media',
+                          subtitle: isAlienHud ? 'Playback, volume & mic' : 'Playback, volume & stream',
                           icon: Icons.play_arrow_rounded,
                           accentColor: colors.mediaAccent,
-                          badgeText: systemInfo.isPlaying ? 'Playing' : null,
                           onTap: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(builder: (_) => const MediaControlScreen()),
@@ -609,8 +620,8 @@ class DashboardScreen extends ConsumerWidget {
                           },
                         ),
                         ModuleCard(
-                          title: 'Power Options',
-                          subtitle: 'Shutdown, restart, lock',
+                          title: isAlienHud ? 'POWER OPTIONS' : 'Power',
+                          subtitle: isAlienHud ? 'Shutdown, restart, lock' : 'Sleep, restart & shutdown',
                           icon: Icons.power_settings_new_rounded,
                           accentColor: colors.powerAccent,
                           onTap: () {
@@ -620,9 +631,9 @@ class DashboardScreen extends ConsumerWidget {
                           },
                         ),
                         ModuleCard(
-                          title: 'File Manager',
-                          subtitle: 'Browse, download, upload',
-                          icon: Icons.folder_open_rounded,
+                          title: isAlienHud ? 'FILE MANAGER' : 'Files',
+                          subtitle: isAlienHud ? 'Explore & transfer files' : 'Browse PC drives & transfer',
+                          icon: Icons.folder_rounded,
                           accentColor: colors.filesAccent,
                           onTap: () {
                             Navigator.of(context).push(
@@ -631,11 +642,10 @@ class DashboardScreen extends ConsumerWidget {
                           },
                         ),
                         ModuleCard(
-                          title: 'Display Brightness',
-                          subtitle: 'Adjust screen light level',
-                          icon: Icons.wb_sunny_outlined,
+                          title: isAlienHud ? 'DISPLAY BRIGHTNESS' : 'Brightness',
+                          subtitle: isAlienHud ? 'Display lumen control' : 'Display lumen output',
+                          icon: Icons.wb_sunny_rounded,
                           accentColor: colors.brightnessAccent,
-                          badgeText: '${systemInfo.brightness}%',
                           onTap: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(builder: (_) => const BrightnessControlScreen()),
@@ -650,7 +660,7 @@ class DashboardScreen extends ConsumerWidget {
               ),
             ),
 
-            // Bottom Sci-Fi Cybernetic Dock Navigation
+            // Bottom Sci-Fi Cybernetic HUD Navigation Dock
             if (isAlienHud)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -662,12 +672,11 @@ class DashboardScreen extends ConsumerWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      // Target Reticle
                       IconButton(
                         icon: HudRadarCircle(
-                          size: 26,
+                          size: 24,
                           color: colors.primary,
-                          child: Icon(Icons.gps_fixed_rounded, color: colors.primary, size: 14),
+                          child: Icon(Icons.gps_fixed_rounded, color: colors.primary, size: 12),
                         ),
                         onPressed: () {
                           Navigator.of(context).push(
@@ -675,46 +684,25 @@ class DashboardScreen extends ConsumerWidget {
                           );
                         },
                       ),
-
-                      // Mini Alien Emblem
                       IconButton(
                         icon: const AlienEmblem(size: 22, hasGlow: false),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Wintroller Alien Interface v1.0.0')),
-                          );
-                        },
+                        onPressed: () {},
                       ),
-
-                      // Center Floating Giant Glowing Alien Core
+                      // Floating Giant Alien Core
                       GestureDetector(
                         onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const DeviceManagementScreen()),
-                          );
+                          ref.read(pcRemoteRepositoryProvider).mediaPlayPause();
                         },
                         child: HudRadarCircle(
-                          size: 48,
+                          size: 46,
                           color: colors.primary,
-                          child: const AlienEmblem(size: 30, hasGlow: true),
+                          child: const AlienEmblem(size: 28, hasGlow: true),
                         ),
                       ),
-
-                      // Telemetry Stats
                       IconButton(
                         icon: Icon(Icons.bar_chart_rounded, color: colors.primary, size: 24),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'CPU: ${systemInfo.cpuUsage.toInt()}% | RAM: ${systemInfo.ramUsage.toInt()}% | Bat: ${systemInfo.batteryPercent}%',
-                              ),
-                            ),
-                          );
-                        },
+                        onPressed: () {},
                       ),
-
-                      // Settings Gear
                       IconButton(
                         icon: Icon(Icons.settings_outlined, color: colors.primary, size: 24),
                         onPressed: () {
@@ -734,44 +722,99 @@ class DashboardScreen extends ConsumerWidget {
   }
 }
 
-class _HudTelemetryPod extends StatelessWidget {
+class _HardwareToggleTile extends StatelessWidget {
+  final String title;
+  final bool isOn;
   final IconData icon;
-  final String value;
-  final String label;
-  final Color color;
+  final VoidCallback onTap;
 
-  const _HudTelemetryPod({
+  const _HardwareToggleTile({
+    required this.title,
+    required this.isOn,
     required this.icon,
-    required this.value,
-    required this.label,
-    required this.color,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
+    final themeStyle = colors.primary == const Color(0xFF00FF66);
 
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+          decoration: BoxDecoration(
+            color: isOn ? colors.primary.withOpacity(0.14) : colors.surfaceContainer,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isOn ? colors.primary : colors.outlineVariant.withOpacity(0.6),
+              width: isOn ? 1.4 : 0.8,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                color: isOn ? colors.primary : colors.onSurfaceVariant.withOpacity(0.6),
+                size: 20,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                title,
+                style: GoogleFonts.orbitron(
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w800,
+                  color: isOn ? colors.primary : colors.onSurfaceVariant,
+                  letterSpacing: 0.6,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                isOn ? '[ON]' : '[OFF]',
+                style: GoogleFonts.shareTechMono(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w700,
+                  color: isOn ? colors.primary : colors.onSurfaceVariant.withOpacity(0.7),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HudTelemetryPod extends StatelessWidget {
+  final IconData icon;
+  final String value;
+  final Color color;
+
+  const _HudTelemetryPod({
+    required this.icon,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, color: color, size: 20),
+        Icon(icon, color: color, size: 22),
         const SizedBox(height: 6),
         Text(
           value,
           style: GoogleFonts.orbitron(
-            fontSize: 14,
+            fontSize: 13.5,
             fontWeight: FontWeight.w900,
             color: color,
             letterSpacing: 0.5,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: GoogleFonts.orbitron(
-            fontSize: 8.5,
-            fontWeight: FontWeight.w700,
-            color: colors.onSurfaceVariant,
-            letterSpacing: 0.8,
           ),
         ),
       ],
@@ -803,8 +846,8 @@ class _TelemetryItem extends StatelessWidget {
         Text(
           value,
           style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
             color: colors.onSurface,
           ),
         ),
@@ -814,6 +857,7 @@ class _TelemetryItem extends StatelessWidget {
           style: TextStyle(
             fontSize: 11,
             color: colors.onSurfaceVariant,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ],

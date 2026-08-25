@@ -311,6 +311,44 @@ class _PowerControlScreenState extends ConsumerState<PowerControlScreen> {
                       ],
                     ),
 
+                    const SizedBox(height: 12),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _PowerActionTile(
+                            title: isAlienHud ? 'DISPLAY_OFF' : 'Turn Display Off',
+                            subtitle: 'Put monitor into power-saving off mode',
+                            icon: Icons.tv_off_rounded,
+                            color: colors.primary,
+                            onTap: () => _executePowerAction(
+                              title: 'Turn Display Off',
+                              message: 'Turn off monitor power?',
+                              confirmLabel: 'Display Off',
+                              requiresConfirm: false,
+                              action: () => repo.setDisplay(false),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _PowerActionTile(
+                            title: isAlienHud ? 'DISPLAY_WAKE' : 'Wake Display',
+                            subtitle: 'Wake up PC display monitor',
+                            icon: Icons.tv_rounded,
+                            color: colors.secondary,
+                            onTap: () => _executePowerAction(
+                              title: 'Wake Display',
+                              message: 'Wake monitor display?',
+                              confirmLabel: 'Wake',
+                              requiresConfirm: false,
+                              action: () => repo.setDisplay(true),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
                     const SizedBox(height: 24),
 
                     Text(

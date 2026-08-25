@@ -127,4 +127,12 @@ class ProtocolActions {
   static const String filesList = 'files.list';
   static const String filesDownload = 'files.download';
   static const String filesUpload = 'files.upload';
+
+  // Hardware Quick Toggles
+  static const String systemWifiOn = 'system.wifiOn';
+  static const String systemWifiOff = 'system.wifiOff';
+  static const String systemBluetoothOn = 'system.bluetoothOn';
+  static const String systemBluetoothOff = 'system.bluetoothOff';
+  static const String systemDisplayOff = 'system.displayOff';
+  static const String systemDisplayOn = 'system.displayOn';
 }

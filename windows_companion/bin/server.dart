@@ -80,6 +80,9 @@ typedef VkKeyScanDart = int Function(int ch);
 typedef WaveOutSetVolumeNative = Int32 Function(IntPtr uDeviceID, Uint32 dwVolume);
 typedef WaveOutSetVolumeDart = int Function(int uDeviceID, int dwVolume);
 
+typedef SendMessageNative = IntPtr Function(IntPtr hWnd, Uint32 Msg, IntPtr wParam, IntPtr lParam);
+typedef SendMessageDart = int Function(int hWnd, int Msg, int wParam, int lParam);
+
 class Win32Native {
   static final Win32Native instance = Win32Native._();
 
@@ -96,6 +99,7 @@ class Win32Native {
   late final GetSystemPowerStatusDart _getSystemPowerStatus;
   late final GlobalMemoryStatusExDart _globalMemoryStatusEx;
   late final VkKeyScanDart _vkKeyScan;
+  late final SendMessageDart _sendMessage;
   WaveOutSetVolumeDart? _waveOutSetVolume;
 
   bool _isAvailable = false;
@@ -123,6 +127,8 @@ class Win32Native {
           _user32.lookupFunction<ExitWindowsExNative, ExitWindowsExDart>('ExitWindowsEx');
       _vkKeyScan =
           _user32.lookupFunction<VkKeyScanNative, VkKeyScanDart>('VkKeyScanW');
+      _sendMessage =
+          _user32.lookupFunction<SendMessageNative, SendMessageDart>('SendMessageW');
 
       _getSystemPowerStatus = _kernel32.lookupFunction<
           GetSystemPowerStatusNative, GetSystemPowerStatusDart>('GetSystemPowerStatus');
@@ -174,14 +180,52 @@ class Win32Native {
     _keybdEvent(vkey, 0, 0x0002, 0); // Key Up (KEYEVENTF_KEYUP = 0x0002)
   }
 
-  void setMasterVolume(int percent) {
+  void setMasterVolume(int targetPercent) {
     if (!_isAvailable) return;
     try {
-      final clamped = percent.clamp(0, 100);
-      final v = (clamped * 65535 ~/ 100) & 0xFFFF;
-      final dword = (v << 16) | v;
-      _waveOutSetVolume?.call(0, dword);
+      final clamped = targetPercent.clamp(0, 100);
+      // 50 VK_VOLUME_DOWN keys reliably zero the Windows master volume
+      for (int i = 0; i < 50; i++) {
+        _keybdEvent(0xAE, 0, 0, 0);
+        _keybdEvent(0xAE, 0, 0x0002, 0);
+      }
+      // Each VK_VOLUME_UP increases volume by 2%
+      final stepsUp = (clamped / 2).round();
+      for (int i = 0; i < stepsUp; i++) {
+        _keybdEvent(0xAF, 0, 0, 0);
+        _keybdEvent(0xAF, 0, 0x0002, 0);
+      }
     } catch (_) {}
+  }
+
+  // Display Control
+  void displayOff() {
+    if (_isAvailable) {
+      // SendMessage HWND_BROADCAST (0xFFFF), WM_SYSCOMMAND (0x0112), SC_MONITORPOWER (0xF170), 2 (power off)
+      _sendMessage(0xFFFF, 0x0112, 0xF170, 2);
+    }
+  }
+
+  void displayOn() {
+    if (_isAvailable) {
+      _mouseEvent(0x0001, 1, 1, 0, 0);
+      _mouseEvent(0x0001, -1, -1, 0, 0);
+    }
+  }
+
+  // Wireless Hardware Toggles (Wi-Fi & Bluetooth)
+  void setWifi(bool enable) {
+    Process.run('powershell', [
+      '-Command',
+      'Get-NetAdapter -Name *Wi-Fi*,*Wireless*,*WLAN* -ErrorAction SilentlyContinue | ${enable ? "Enable-NetAdapter" : "Disable-NetAdapter"} -Confirm:\$false -ErrorAction SilentlyContinue'
+    ]);
+  }
+
+  void setBluetooth(bool enable) {
+    Process.run('powershell', [
+      '-Command',
+      'try { [Windows.Devices.Radios.Radio,Windows.System.Devices,ContentType=WindowsRuntime] | Out-Null; \$radios = [Windows.Devices.Radios.Radio]::GetRadiosAsync().GetAwaiter().GetResult(); \$bt = \$radios | Where-Object { \$_.Kind -eq "Bluetooth" }; if (\$bt) { \$bt.SetStateAsync("${enable ? "On" : "Off"}").GetAwaiter().GetResult() } } catch { Get-PnpDevice -Class Bluetooth -ErrorAction SilentlyContinue | ${enable ? "Enable-PnpDevice" : "Disable-PnpDevice"} -Confirm:\$false -ErrorAction SilentlyContinue }'
+    ]);
   }
 
   void typeString(String text) {
@@ -215,7 +259,7 @@ class Win32Native {
     if (_isAvailable) {
       _setSuspendState(0, 1, 0);
     } else {
-      Process.run('rundll32.exe', ['powrprof.dll,SetSuspendState', '0,1,0']);
+      Process.run('powrprof.dll,SetSuspendState', ['0,1,0']);
     }
   }
 
@@ -618,6 +662,43 @@ class PCRemoteServer {
         _currentBrightness = 25;
         _sendResponse(client, id, action, true);
         _setWindowsBrightnessAsync(25);
+        break;
+
+      // 5b. Hardware Quick Toggles (Wi-Fi, Bluetooth, Display Power)
+      case 'system.wifiOn':
+        stdout.writeln('[HARDWARE] Enabling Wi-Fi');
+        _native.setWifi(true);
+        _sendResponse(client, id, action, true);
+        break;
+
+      case 'system.wifiOff':
+        stdout.writeln('[HARDWARE] Disabling Wi-Fi');
+        _native.setWifi(false);
+        _sendResponse(client, id, action, true);
+        break;
+
+      case 'system.bluetoothOn':
+        stdout.writeln('[HARDWARE] Enabling Bluetooth');
+        _native.setBluetooth(true);
+        _sendResponse(client, id, action, true);
+        break;
+
+      case 'system.bluetoothOff':
+        stdout.writeln('[HARDWARE] Disabling Bluetooth');
+        _native.setBluetooth(false);
+        _sendResponse(client, id, action, true);
+        break;
+
+      case 'system.displayOff':
+        stdout.writeln('[HARDWARE] Turning Display Off');
+        _native.displayOff();
+        _sendResponse(client, id, action, true);
+        break;
+
+      case 'system.displayOn':
+        stdout.writeln('[HARDWARE] Turning Display On');
+        _native.displayOn();
+        _sendResponse(client, id, action, true);
         break;
 
       // 6. Mouse Gestures (Zero-latency Native FFI)
