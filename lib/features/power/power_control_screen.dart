@@ -21,13 +21,15 @@ class _PowerControlScreenState extends ConsumerState<PowerControlScreen> {
     required bool requiresConfirm,
     required Future<dynamic> Function() action,
   }) async {
+    final colors = AppColors.of(context);
+
     if (requiresConfirm) {
       final confirmed = await AppDialog.showConfirmAction(
         context: context,
         title: title,
         message: message,
         confirmLabel: confirmLabel,
-        confirmColor: AppColors.powerAccent,
+        confirmColor: colors.powerAccent,
         icon: Icons.power_settings_new_rounded,
       );
       if (!confirmed) return;
@@ -46,8 +48,8 @@ class _PowerControlScreenState extends ConsumerState<PowerControlScreen> {
                 : 'Failed: ${response.error ?? "Unknown error"}',
           ),
           backgroundColor: response.success
-              ? AppColors.tertiaryContainer
-              : AppColors.errorContainer,
+              ? colors.tertiaryContainer
+              : colors.errorContainer,
         ),
       );
     } catch (e) {
@@ -55,7 +57,7 @@ class _PowerControlScreenState extends ConsumerState<PowerControlScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: $e'),
-          backgroundColor: AppColors.errorContainer,
+          backgroundColor: colors.errorContainer,
         ),
       );
     } finally {
@@ -65,12 +67,17 @@ class _PowerControlScreenState extends ConsumerState<PowerControlScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     final repo = ref.watch(pcRemoteRepositoryProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        title: const Text('Power Controls'),
+        backgroundColor: colors.background,
+        title: Text(
+          'Power Controls',
+          style: TextStyle(color: colors.onSurface, fontWeight: FontWeight.w700),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -82,26 +89,26 @@ class _PowerControlScreenState extends ConsumerState<PowerControlScreen> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceContainer,
+                  color: colors.surfaceContainer,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.outlineVariant, width: 0.8),
+                  border: Border.all(color: colors.outlineVariant, width: 0.8),
                 ),
                 child: Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: AppColors.powerAccent.withOpacity(0.15),
+                        color: colors.powerAccent.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.power_settings_new_rounded,
-                        color: AppColors.powerAccent,
+                        color: colors.powerAccent,
                         size: 32,
                       ),
                     ),
                     const SizedBox(width: 16),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -110,15 +117,15 @@ class _PowerControlScreenState extends ConsumerState<PowerControlScreen> {
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.onSurface,
+                              color: colors.onSurface,
                             ),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
                             'Destructive actions like Shutdown and Restart will request confirmation.',
                             style: TextStyle(
                               fontSize: 13,
-                              color: AppColors.onSurfaceVariant,
+                              color: colors.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -129,12 +136,12 @@ class _PowerControlScreenState extends ConsumerState<PowerControlScreen> {
               ),
 
               const SizedBox(height: 24),
-              const Text(
+              Text(
                 'Instant Actions',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.onSurface,
+                  color: colors.onSurface,
                 ),
               ),
               const SizedBox(height: 12),
@@ -146,7 +153,7 @@ class _PowerControlScreenState extends ConsumerState<PowerControlScreen> {
                       title: 'Lock Screen',
                       subtitle: 'Lock Windows workspace',
                       icon: Icons.lock_outline_rounded,
-                      color: AppColors.primary,
+                      color: colors.primary,
                       onTap: () => _executePowerAction(
                         title: 'Lock Screen',
                         message: 'Lock the active Windows user session?',
@@ -162,7 +169,7 @@ class _PowerControlScreenState extends ConsumerState<PowerControlScreen> {
                       title: 'Sleep Mode',
                       subtitle: 'Enter low-power state',
                       icon: Icons.bedtime_outlined,
-                      color: AppColors.secondary,
+                      color: colors.secondary,
                       onTap: () => _executePowerAction(
                         title: 'Sleep Mode',
                         message: 'Put your computer into sleep state?',
@@ -184,7 +191,7 @@ class _PowerControlScreenState extends ConsumerState<PowerControlScreen> {
                       title: 'Hibernate',
                       subtitle: 'Save state & turn off',
                       icon: Icons.mode_night_rounded,
-                      color: AppColors.tertiary,
+                      color: colors.tertiary,
                       onTap: () => _executePowerAction(
                         title: 'Hibernate',
                         message: 'Save open documents and hibernate your PC?',
@@ -200,7 +207,7 @@ class _PowerControlScreenState extends ConsumerState<PowerControlScreen> {
                       title: 'Log Off',
                       subtitle: 'Sign out current user',
                       icon: Icons.logout_rounded,
-                      color: const Color(0xFFFFB74D),
+                      color: colors.mediaAccent,
                       onTap: () => _executePowerAction(
                         title: 'Log Off',
                         message: 'Are you sure you want to sign out? Any unsaved work may be lost.',
@@ -214,12 +221,12 @@ class _PowerControlScreenState extends ConsumerState<PowerControlScreen> {
               ),
 
               const SizedBox(height: 28),
-              const Text(
+              Text(
                 'Destructive Actions',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.powerAccent,
+                  color: colors.powerAccent,
                 ),
               ),
               const SizedBox(height: 12),
@@ -244,7 +251,7 @@ class _PowerControlScreenState extends ConsumerState<PowerControlScreen> {
                 title: 'Shut Down Computer',
                 subtitle: 'Turn off your PC completely',
                 icon: Icons.power_settings_new_rounded,
-                color: AppColors.powerAccent,
+                color: colors.powerAccent,
                 onTap: () => _executePowerAction(
                   title: 'Shut Down Computer',
                   message: 'Are you sure you want to shut down your PC? All running programs will be stopped.',
@@ -256,8 +263,8 @@ class _PowerControlScreenState extends ConsumerState<PowerControlScreen> {
 
               if (_isBusy) ...[
                 const SizedBox(height: 24),
-                const Center(
-                  child: CircularProgressIndicator(color: AppColors.powerAccent),
+                Center(
+                  child: CircularProgressIndicator(color: colors.powerAccent),
                 ),
               ],
             ],
@@ -285,6 +292,8 @@ class _PowerActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -293,9 +302,9 @@ class _PowerActionTile extends StatelessWidget {
         child: Ink(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppColors.surfaceContainer,
+            color: colors.surfaceContainer,
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: AppColors.outlineVariant, width: 0.8),
+            border: Border.all(color: colors.outlineVariant, width: 0.8),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -311,18 +320,18 @@ class _PowerActionTile extends StatelessWidget {
               const SizedBox(height: 14),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.onSurface,
+                  color: colors.onSurface,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 subtitle,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.onSurfaceVariant,
+                  color: colors.onSurfaceVariant,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -352,6 +361,8 @@ class _DestructiveActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -390,9 +401,9 @@ class _DestructiveActionTile extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       subtitle,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.onSurfaceVariant,
+                        color: colors.onSurfaceVariant,
                       ),
                     ),
                   ],

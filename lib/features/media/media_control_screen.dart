@@ -95,6 +95,7 @@ class _MediaControlScreenState extends ConsumerState<MediaControlScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     final repo = ref.watch(pcRemoteRepositoryProvider);
     final systemInfo = ref.watch(systemInfoProvider).value ?? const HostSystemInfo();
 
@@ -107,9 +108,13 @@ class _MediaControlScreenState extends ConsumerState<MediaControlScreen> {
     });
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        title: const Text('Media Controls'),
+        backgroundColor: colors.background,
+        title: Text(
+          'Media Controls',
+          style: TextStyle(color: colors.onSurface, fontWeight: FontWeight.w700),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -123,15 +128,15 @@ class _MediaControlScreenState extends ConsumerState<MediaControlScreen> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      AppColors.surfaceContainerHigh,
-                      AppColors.surfaceContainer,
+                      colors.surfaceContainerHigh,
+                      colors.surfaceContainer,
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(28),
                   border: Border.all(
-                    color: AppColors.outlineVariant.withOpacity(0.8),
+                    color: colors.outlineVariant.withOpacity(0.8),
                     width: 1,
                   ),
                 ),
@@ -143,21 +148,21 @@ class _MediaControlScreenState extends ConsumerState<MediaControlScreen> {
                       decoration: BoxDecoration(
                         gradient: RadialGradient(
                           colors: [
-                            AppColors.mediaAccent.withOpacity(0.3),
-                            AppColors.surfaceContainerLowest,
+                            colors.mediaAccent.withOpacity(0.3),
+                            colors.surfaceContainerLowest,
                           ],
                         ),
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
-                          color: AppColors.mediaAccent.withOpacity(0.6),
+                          color: colors.mediaAccent.withOpacity(0.6),
                           width: 1.5,
                         ),
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Icon(
                           Icons.music_note_rounded,
                           size: 64,
-                          color: AppColors.mediaAccent,
+                          color: colors.mediaAccent,
                         ),
                       ),
                     ),
@@ -166,10 +171,10 @@ class _MediaControlScreenState extends ConsumerState<MediaControlScreen> {
                       (systemInfo.activeMediaTitle != null && systemInfo.activeMediaTitle!.isNotEmpty)
                           ? systemInfo.activeMediaTitle!
                           : 'Desktop Audio',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.onSurface,
+                        color: colors.onSurface,
                       ),
                       textAlign: TextAlign.center,
                       maxLines: 1,
@@ -180,9 +185,9 @@ class _MediaControlScreenState extends ConsumerState<MediaControlScreen> {
                       (systemInfo.activeMediaArtist != null && systemInfo.activeMediaArtist!.isNotEmpty)
                           ? systemInfo.activeMediaArtist!
                           : 'Windows Media Session',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
-                        color: AppColors.onSurfaceVariant,
+                        color: colors.onSurfaceVariant,
                       ),
                       textAlign: TextAlign.center,
                       maxLines: 1,
@@ -239,9 +244,9 @@ class _MediaControlScreenState extends ConsumerState<MediaControlScreen> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceContainer,
+                  color: colors.surfaceContainer,
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: AppColors.outlineVariant, width: 0.8),
+                  border: Border.all(color: colors.outlineVariant, width: 0.8),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,26 +254,26 @@ class _MediaControlScreenState extends ConsumerState<MediaControlScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Row(
+                        Row(
                           children: [
-                            Icon(Icons.volume_up_rounded, color: AppColors.mediaAccent),
-                            SizedBox(width: 8),
+                            Icon(Icons.volume_up_rounded, color: colors.mediaAccent),
+                            const SizedBox(width: 8),
                             Text(
                               'Master Volume',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.onSurface,
+                                color: colors.onSurface,
                               ),
                             ),
                           ],
                         ),
                         Text(
                           '${_currentVolume.toInt()}%',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.mediaAccent,
+                            color: colors.mediaAccent,
                           ),
                         ),
                       ],
@@ -283,7 +288,7 @@ class _MediaControlScreenState extends ConsumerState<MediaControlScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: AppColors.surfaceContainerHigh,
+                              color: colors.surfaceContainerHigh,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Icon(Icons.volume_down_rounded, size: 20),
@@ -294,8 +299,8 @@ class _MediaControlScreenState extends ConsumerState<MediaControlScreen> {
                             value: _currentVolume,
                             min: 0,
                             max: 100,
-                            activeColor: AppColors.mediaAccent,
-                            inactiveColor: AppColors.surfaceContainerHighest,
+                            activeColor: colors.mediaAccent,
+                            inactiveColor: colors.surfaceContainerHighest,
                             onChanged: _onVolumeSliderChanged,
                             onChangeEnd: _onVolumeSliderChangeEnd,
                           ),
@@ -307,7 +312,7 @@ class _MediaControlScreenState extends ConsumerState<MediaControlScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: AppColors.surfaceContainerHigh,
+                              color: colors.surfaceContainerHigh,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Icon(Icons.volume_up_rounded, size: 20),
@@ -328,7 +333,7 @@ class _MediaControlScreenState extends ConsumerState<MediaControlScreen> {
                     child: _MediaToggleCard(
                       title: systemInfo.isMuted ? 'Unmute Audio' : 'Mute Audio',
                       isActive: systemInfo.isMuted,
-                      activeColor: AppColors.error,
+                      activeColor: colors.error,
                       icon: systemInfo.isMuted
                           ? Icons.volume_off_rounded
                           : Icons.volume_up_rounded,
@@ -347,7 +352,7 @@ class _MediaControlScreenState extends ConsumerState<MediaControlScreen> {
                     child: _MediaToggleCard(
                       title: systemInfo.isMicMuted ? 'Mic Muted' : 'Mic Live',
                       isActive: systemInfo.isMicMuted,
-                      activeColor: AppColors.error,
+                      activeColor: colors.error,
                       icon: systemInfo.isMicMuted
                           ? Icons.mic_off_rounded
                           : Icons.mic_rounded,
@@ -388,16 +393,18 @@ class _PlaybackCircleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: isPrimary ? AppColors.mediaAccent : AppColors.surfaceContainerHigh,
+        color: isPrimary ? colors.mediaAccent : colors.surfaceContainerHigh,
         boxShadow: isPrimary
             ? [
                 BoxShadow(
-                  color: AppColors.mediaAccent.withOpacity(0.4),
+                  color: colors.mediaAccent.withOpacity(0.4),
                   blurRadius: 18,
                   offset: const Offset(0, 4),
                 )
@@ -407,7 +414,7 @@ class _PlaybackCircleButton extends StatelessWidget {
       child: IconButton(
         icon: Icon(icon),
         iconSize: iconSize,
-        color: isPrimary ? Colors.black : AppColors.onSurface,
+        color: isPrimary ? Colors.black : colors.onSurface,
         onPressed: onPressed,
       ),
     );
@@ -431,6 +438,8 @@ class _MediaToggleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -439,10 +448,10 @@ class _MediaToggleCard extends StatelessWidget {
         child: Ink(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           decoration: BoxDecoration(
-            color: isActive ? activeColor.withOpacity(0.15) : AppColors.surfaceContainer,
+            color: isActive ? activeColor.withOpacity(0.15) : colors.surfaceContainer,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isActive ? activeColor : AppColors.outlineVariant,
+              color: isActive ? activeColor : colors.outlineVariant,
               width: 1,
             ),
           ),
@@ -451,7 +460,7 @@ class _MediaToggleCard extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                color: isActive ? activeColor : AppColors.onSurface,
+                color: isActive ? activeColor : colors.onSurface,
                 size: 22,
               ),
               const SizedBox(width: 10),
@@ -460,7 +469,7 @@ class _MediaToggleCard extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 14,
-                  color: isActive ? activeColor : AppColors.onSurface,
+                  color: isActive ? activeColor : colors.onSurface,
                 ),
               ),
             ],

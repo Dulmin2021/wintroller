@@ -7,68 +7,67 @@ class AppTheme {
 
   /// 1. Stitch Cyber (Proton Remote) Theme - Extracted from Stitch UI Design System
   static ThemeData get stitchCyberTheme {
+    final colors = AppThemeColors.stitchCyber;
     final baseTextTheme = ThemeData.dark(useMaterial3: true).textTheme;
-    final textTheme = GoogleFonts.interTextTheme(baseTextTheme).apply(
-      bodyColor: AppColors.onSurface,
-      displayColor: AppColors.onSurface,
-    );
+    final textTheme = GoogleFonts.interTextTheme(baseTextTheme);
 
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: AppColors.background,
-      colorScheme: const ColorScheme(
+      scaffoldBackgroundColor: colors.background,
+      colorScheme: ColorScheme(
         brightness: Brightness.dark,
-        primary: AppColors.primary,
-        onPrimary: AppColors.onPrimary,
-        primaryContainer: AppColors.primaryContainer,
-        onPrimaryContainer: AppColors.onPrimaryContainer,
-        secondary: AppColors.secondary,
-        onSecondary: AppColors.onSecondary,
-        secondaryContainer: AppColors.secondaryContainer,
-        onSecondaryContainer: AppColors.onSecondaryContainer,
-        tertiary: AppColors.tertiary,
-        onTertiary: AppColors.onTertiary,
-        tertiaryContainer: AppColors.tertiaryContainer,
-        onTertiaryContainer: AppColors.onTertiaryContainer,
-        error: AppColors.error,
-        onError: AppColors.onError,
-        errorContainer: AppColors.errorContainer,
-        onErrorContainer: AppColors.onErrorContainer,
-        surface: AppColors.surface,
-        onSurface: AppColors.onSurface,
-        surfaceContainerLowest: AppColors.surfaceContainerLowest,
-        surfaceContainerLow: AppColors.surfaceContainerLow,
-        surfaceContainer: AppColors.surfaceContainer,
-        surfaceContainerHigh: AppColors.surfaceContainerHigh,
-        surfaceContainerHighest: AppColors.surfaceContainerHighest,
-        outline: AppColors.outline,
-        outlineVariant: AppColors.outlineVariant,
+        primary: colors.primary,
+        onPrimary: colors.onPrimary,
+        primaryContainer: colors.primaryContainer,
+        onPrimaryContainer: colors.onPrimaryContainer,
+        secondary: colors.secondary,
+        onSecondary: colors.onSecondary,
+        secondaryContainer: colors.secondaryContainer,
+        onSecondaryContainer: colors.onSecondaryContainer,
+        tertiary: colors.tertiary,
+        onTertiary: colors.onTertiary,
+        tertiaryContainer: colors.tertiaryContainer,
+        onTertiaryContainer: colors.onTertiaryContainer,
+        error: colors.error,
+        onError: colors.onError,
+        errorContainer: colors.errorContainer,
+        onErrorContainer: colors.onErrorContainer,
+        surface: colors.surface,
+        onSurface: colors.onSurface,
+        surfaceContainerLowest: colors.surfaceContainerLowest,
+        surfaceContainerLow: colors.surfaceContainerLow,
+        surfaceContainer: colors.surfaceContainer,
+        surfaceContainerHigh: colors.surfaceContainerHigh,
+        surfaceContainerHighest: colors.surfaceContainerHighest,
+        outline: colors.outline,
+        outlineVariant: colors.outlineVariant,
       ),
       textTheme: textTheme,
+      extensions: [colors],
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.background,
-        foregroundColor: AppColors.onSurface,
+        backgroundColor: colors.background,
+        foregroundColor: colors.onSurface,
         elevation: 0,
         centerTitle: false,
         titleTextStyle: GoogleFonts.inter(
           fontSize: 20,
           fontWeight: FontWeight.w700,
-          color: AppColors.onSurface,
+          color: colors.onSurface,
           letterSpacing: -0.4,
         ),
       ),
       cardTheme: CardThemeData(
-        color: AppColors.surfaceContainer,
+        color: colors.surfaceContainer,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: AppColors.outlineVariant, width: 0.8),
+          side: BorderSide(color: colors.outlineVariant, width: 0.8),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryContainer,
+          backgroundColor: colors.primaryContainer,
           foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
@@ -83,8 +82,8 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primary,
-          side: const BorderSide(color: AppColors.outlineVariant),
+          foregroundColor: colors.primary,
+          side: BorderSide(color: colors.outlineVariant),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
@@ -95,71 +94,134 @@ class AppTheme {
           ),
         ),
       ),
-      sliderTheme: const SliderThemeData(
-        activeTrackColor: AppColors.primaryContainer,
-        inactiveTrackColor: AppColors.surfaceContainerHighest,
-        thumbColor: AppColors.primary,
+      sliderTheme: SliderThemeData(
+        activeTrackColor: colors.primaryContainer,
+        inactiveTrackColor: colors.surfaceContainerHighest,
+        thumbColor: colors.primary,
         trackHeight: 6,
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: AppColors.surfaceContainerHigh,
+        backgroundColor: colors.surfaceContainerHigh,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: AppColors.outlineVariant, width: 0.8),
+          side: BorderSide(color: colors.outlineVariant, width: 0.8),
         ),
       ),
-      bottomSheetTheme: const BottomSheetThemeData(
-        backgroundColor: AppColors.surfaceContainer,
-        shape: RoundedRectangleBorder(
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: colors.surfaceContainer,
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
       ),
     );
   }
 
-  /// 2. Midnight Slate Theme (Deep Charcoal / Neon Cyan)
+  /// 2. Midnight Slate (Charcoal & Sky Cyan) Theme
   static ThemeData get midnightTheme {
-    const bg = Color(0xFF0F172A);
-    const cardBg = Color(0xFF1E293B);
-    const cardHigh = Color(0xFF334155);
-    const primary = Color(0xFF38BDF8);
-    const primaryCont = Color(0xFF0284C7);
-
+    final colors = AppThemeColors.midnight;
     final baseTextTheme = ThemeData.dark(useMaterial3: true).textTheme;
     final textTheme = GoogleFonts.interTextTheme(baseTextTheme);
 
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: bg,
-      colorScheme: ColorScheme.dark(
-        primary: primary,
-        primaryContainer: primaryCont,
-        surface: bg,
-        surfaceContainer: cardBg,
-        surfaceContainerHigh: cardHigh,
-        onSurface: const Color(0xFFF1F5F9),
-        onSurfaceVariant: const Color(0xFF94A3B8),
-        outline: const Color(0xFF64748B),
-        outlineVariant: const Color(0xFF334155),
+      scaffoldBackgroundColor: colors.background,
+      colorScheme: ColorScheme(
+        brightness: Brightness.dark,
+        primary: colors.primary,
+        onPrimary: colors.onPrimary,
+        primaryContainer: colors.primaryContainer,
+        onPrimaryContainer: colors.onPrimaryContainer,
+        secondary: colors.secondary,
+        onSecondary: colors.onSecondary,
+        secondaryContainer: colors.secondaryContainer,
+        onSecondaryContainer: colors.onSecondaryContainer,
+        tertiary: colors.tertiary,
+        onTertiary: colors.onTertiary,
+        tertiaryContainer: colors.tertiaryContainer,
+        onTertiaryContainer: colors.onTertiaryContainer,
+        error: colors.error,
+        onError: colors.onError,
+        errorContainer: colors.errorContainer,
+        onErrorContainer: colors.onErrorContainer,
+        surface: colors.surface,
+        onSurface: colors.onSurface,
+        surfaceContainerLowest: colors.surfaceContainerLowest,
+        surfaceContainerLow: colors.surfaceContainerLow,
+        surfaceContainer: colors.surfaceContainer,
+        surfaceContainerHigh: colors.surfaceContainerHigh,
+        surfaceContainerHighest: colors.surfaceContainerHighest,
+        outline: colors.outline,
+        outlineVariant: colors.outlineVariant,
       ),
       textTheme: textTheme,
+      extensions: [colors],
       appBarTheme: AppBarTheme(
-        backgroundColor: bg,
-        foregroundColor: const Color(0xFFF1F5F9),
+        backgroundColor: colors.background,
+        foregroundColor: colors.onSurface,
         elevation: 0,
+        centerTitle: false,
         titleTextStyle: GoogleFonts.inter(
           fontSize: 20,
           fontWeight: FontWeight.w700,
-          color: const Color(0xFFF1F5F9),
+          color: colors.onSurface,
+          letterSpacing: -0.4,
         ),
       ),
       cardTheme: CardThemeData(
-        color: cardBg,
+        color: colors.surfaceContainer,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFF334155), width: 0.8),
+          side: BorderSide(color: colors.outlineVariant, width: 0.8),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: colors.primaryContainer,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          textStyle: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: colors.primary,
+          side: BorderSide(color: colors.outlineVariant),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          textStyle: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      sliderTheme: SliderThemeData(
+        activeTrackColor: colors.primaryContainer,
+        inactiveTrackColor: colors.surfaceContainerHighest,
+        thumbColor: colors.primary,
+        trackHeight: 6,
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: colors.surfaceContainerHigh,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: colors.outlineVariant, width: 0.8),
+        ),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: colors.surfaceContainer,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
       ),
     );
@@ -167,17 +229,56 @@ class AppTheme {
 
   /// 3. Clean Light Theme
   static ThemeData get lightTheme {
+    final colors = AppThemeColors.light;
     final baseTextTheme = ThemeData.light(useMaterial3: true).textTheme;
     final textTheme = GoogleFonts.interTextTheme(baseTextTheme);
 
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFF005AC2),
+      scaffoldBackgroundColor: colors.background,
+      colorScheme: ColorScheme(
         brightness: Brightness.light,
+        primary: colors.primary,
+        onPrimary: colors.onPrimary,
+        primaryContainer: colors.primaryContainer,
+        onPrimaryContainer: colors.onPrimaryContainer,
+        secondary: colors.secondary,
+        onSecondary: colors.onSecondary,
+        secondaryContainer: colors.secondaryContainer,
+        onSecondaryContainer: colors.onSecondaryContainer,
+        tertiary: colors.tertiary,
+        onTertiary: colors.onTertiary,
+        tertiaryContainer: colors.tertiaryContainer,
+        onTertiaryContainer: colors.onTertiaryContainer,
+        error: colors.error,
+        onError: colors.onError,
+        errorContainer: colors.errorContainer,
+        onErrorContainer: colors.onErrorContainer,
+        surface: colors.surface,
+        onSurface: colors.onSurface,
+        surfaceContainerLowest: colors.surfaceContainerLowest,
+        surfaceContainerLow: colors.surfaceContainerLow,
+        surfaceContainer: colors.surfaceContainer,
+        surfaceContainerHigh: colors.surfaceContainerHigh,
+        surfaceContainerHighest: colors.surfaceContainerHighest,
+        outline: colors.outline,
+        outlineVariant: colors.outlineVariant,
       ),
       textTheme: textTheme,
+      extensions: [colors],
+      appBarTheme: AppBarTheme(
+        backgroundColor: colors.background,
+        foregroundColor: colors.onSurface,
+        elevation: 0,
+        centerTitle: false,
+        titleTextStyle: GoogleFonts.inter(
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          color: colors.onSurface,
+          letterSpacing: -0.4,
+        ),
+      ),
     );
   }
 

@@ -21,6 +21,8 @@ class ModuleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -30,10 +32,10 @@ class ModuleCard extends StatelessWidget {
         highlightColor: accentColor.withOpacity(0.08),
         child: Ink(
           decoration: BoxDecoration(
-            color: AppColors.surfaceContainer,
+            color: colors.surfaceContainer,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: AppColors.outlineVariant.withOpacity(0.7),
+              color: colors.outlineVariant.withOpacity(0.7),
               width: 1,
             ),
           ),
@@ -62,7 +64,7 @@ class ModuleCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AppColors.surfaceContainerHighest,
+                          color: colors.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -70,7 +72,7 @@ class ModuleCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.onSurfaceVariant,
+                            color: colors.onSurfaceVariant,
                           ),
                         ),
                       ),
@@ -83,14 +85,14 @@ class ModuleCard extends StatelessWidget {
                       title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w700,
-                            color: AppColors.onSurface,
+                            color: colors.onSurface,
                           ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       subtitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.onSurfaceVariant,
+                            color: colors.onSurfaceVariant,
                           ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

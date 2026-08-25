@@ -9,6 +9,7 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = AppColors.of(context);
     final themeMode = ref.watch(themeModeProvider);
     final themeStyle = ref.watch(themeStyleProvider);
     final haptics = ref.watch(hapticsProvider);
@@ -17,21 +18,25 @@ class SettingsScreen extends ConsumerWidget {
     final ws = ref.watch(webSocketServiceProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        title: const Text('Settings'),
+        backgroundColor: colors.background,
+        title: Text(
+          'Settings',
+          style: TextStyle(color: colors.onSurface, fontWeight: FontWeight.w700),
+        ),
       ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           children: [
             // Preference Section: Appearance
-            const Text(
+            Text(
               'Appearance & Theme',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: AppColors.primary,
+                color: colors.primary,
                 letterSpacing: 0.5,
               ),
             ),
@@ -39,20 +44,24 @@ class SettingsScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.surfaceContainer,
+                color: colors.surfaceContainer,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: AppColors.outlineVariant, width: 0.8),
+                border: Border.all(color: colors.outlineVariant, width: 0.8),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.palette_rounded, color: AppColors.primary, size: 20),
-                      SizedBox(width: 8),
+                      Icon(Icons.palette_rounded, color: colors.primary, size: 20),
+                      const SizedBox(width: 8),
                       Text(
                         'Theme Style',
-                        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                          color: colors.onSurface,
+                        ),
                       ),
                     ],
                   ),
@@ -64,7 +73,7 @@ class SettingsScreen extends ConsumerWidget {
                           title: 'Stitch Cyber',
                           subtitle: 'Proton Remote',
                           bgColor: const Color(0xFF0B1326),
-                          accentColor: AppColors.primaryContainer,
+                          accentColor: const Color(0xFF4D8EFF),
                           isSelected: themeStyle == AppThemeStyle.stitchCyber,
                           onTap: () {
                             ref
@@ -91,15 +100,19 @@ class SettingsScreen extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  const Divider(color: AppColors.outlineVariant, height: 1),
+                  Divider(color: colors.outlineVariant, height: 1),
                   const SizedBox(height: 16),
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.brightness_6_rounded, color: AppColors.primary, size: 20),
-                      SizedBox(width: 8),
+                      Icon(Icons.brightness_6_rounded, color: colors.primary, size: 20),
+                      const SizedBox(width: 8),
                       Text(
                         'Mode',
-                        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                          color: colors.onSurface,
+                        ),
                       ),
                     ],
                   ),
@@ -111,13 +124,13 @@ class SettingsScreen extends ConsumerWidget {
                         backgroundColor: MaterialStateProperty.resolveWith<Color?>(
                           (Set<MaterialState> states) {
                             if (states.contains(MaterialState.selected)) {
-                              return AppColors.primaryContainer.withOpacity(0.3);
+                              return colors.primaryContainer.withOpacity(0.25);
                             }
-                            return AppColors.surfaceContainerHigh;
+                            return colors.surfaceContainerHigh;
                           },
                         ),
                         side: MaterialStateProperty.all(
-                          const BorderSide(color: AppColors.outlineVariant, width: 0.8),
+                          BorderSide(color: colors.outlineVariant, width: 0.8),
                         ),
                       ),
                       segments: const [
@@ -150,39 +163,51 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: 24),
 
             // Preference Section: Controls & Connection
-            const Text(
+            Text(
               'Controls & Connection',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: AppColors.primary,
+                color: colors.primary,
                 letterSpacing: 0.5,
               ),
             ),
             const SizedBox(height: 10),
             Container(
               decoration: BoxDecoration(
-                color: AppColors.surfaceContainer,
+                color: colors.surfaceContainer,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.outlineVariant, width: 0.8),
+                border: Border.all(color: colors.outlineVariant, width: 0.8),
               ),
               child: Column(
                 children: [
                   SwitchListTile(
-                    secondary: const Icon(Icons.vibration_rounded, color: AppColors.tertiary),
-                    title: const Text('Haptic Feedback', style: TextStyle(fontWeight: FontWeight.w600)),
-                    subtitle: const Text('Vibrate on trackpad tap and button presses'),
+                    secondary: Icon(Icons.vibration_rounded, color: colors.tertiary),
+                    title: Text(
+                      'Haptic Feedback',
+                      style: TextStyle(fontWeight: FontWeight.w600, color: colors.onSurface),
+                    ),
+                    subtitle: Text(
+                      'Vibrate on trackpad tap and button presses',
+                      style: TextStyle(color: colors.onSurfaceVariant),
+                    ),
                     value: haptics,
-                    activeColor: AppColors.tertiary,
+                    activeColor: colors.tertiary,
                     onChanged: (_) => ref.read(hapticsProvider.notifier).toggle(),
                   ),
-                  const Divider(color: AppColors.outlineVariant, height: 1),
+                  Divider(color: colors.outlineVariant, height: 1),
                   SwitchListTile(
-                    secondary: const Icon(Icons.sync_rounded, color: AppColors.primaryContainer),
-                    title: const Text('Auto-Reconnect', style: TextStyle(fontWeight: FontWeight.w600)),
-                    subtitle: const Text('Automatically reconnect when PC is detected on Wi-Fi'),
+                    secondary: Icon(Icons.sync_rounded, color: colors.primaryContainer),
+                    title: Text(
+                      'Auto-Reconnect',
+                      style: TextStyle(fontWeight: FontWeight.w600, color: colors.onSurface),
+                    ),
+                    subtitle: Text(
+                      'Automatically reconnect when PC is detected on Wi-Fi',
+                      style: TextStyle(color: colors.onSurfaceVariant),
+                    ),
                     value: autoReconnect,
-                    activeColor: AppColors.primaryContainer,
+                    activeColor: colors.primaryContainer,
                     onChanged: (_) => ref.read(autoReconnectProvider.notifier).toggle(),
                   ),
                 ],
@@ -193,12 +218,12 @@ class SettingsScreen extends ConsumerWidget {
 
             // Active Device & Disconnect
             if (activeDevice != null) ...[
-              const Text(
+              Text(
                 'Active Connection',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.primary,
+                  color: colors.primary,
                   letterSpacing: 0.5,
                 ),
               ),
@@ -206,15 +231,15 @@ class SettingsScreen extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceContainer,
+                  color: colors.surfaceContainer,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.outlineVariant, width: 0.8),
+                  border: Border.all(color: colors.outlineVariant, width: 0.8),
                 ),
                 child: Column(
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.desktop_windows_rounded, color: AppColors.primary),
+                        Icon(Icons.desktop_windows_rounded, color: colors.primary),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
@@ -222,11 +247,14 @@ class SettingsScreen extends ConsumerWidget {
                             children: [
                               Text(
                                 activeDevice.name,
-                                style: const TextStyle(fontWeight: FontWeight.w700),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  color: colors.onSurface,
+                                ),
                               ),
                               Text(
                                 '${activeDevice.ip}:${activeDevice.port}',
-                                style: const TextStyle(color: AppColors.onSurfaceVariant, fontSize: 12),
+                                style: TextStyle(color: colors.onSurfaceVariant, fontSize: 12),
                               ),
                             ],
                           ),
@@ -238,8 +266,8 @@ class SettingsScreen extends ConsumerWidget {
                       width: double.infinity,
                       child: OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.error,
-                          side: const BorderSide(color: AppColors.error),
+                          foregroundColor: colors.error,
+                          side: BorderSide(color: colors.error),
                         ),
                         icon: const Icon(Icons.link_off_rounded),
                         label: const Text('Disconnect PC'),
@@ -259,34 +287,43 @@ class SettingsScreen extends ConsumerWidget {
             ],
 
             // Help & About
-            const Text(
+            Text(
               'About Wintroller',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: AppColors.primary,
+                color: colors.primary,
                 letterSpacing: 0.5,
               ),
             ),
             const SizedBox(height: 10),
             Container(
               decoration: BoxDecoration(
-                color: AppColors.surfaceContainer,
+                color: colors.surfaceContainer,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.outlineVariant, width: 0.8),
+                border: Border.all(color: colors.outlineVariant, width: 0.8),
               ),
               child: Column(
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.info_outline_rounded, color: AppColors.secondary),
-                    title: const Text('Version', style: TextStyle(fontWeight: FontWeight.w600)),
-                    trailing: const Text('1.0.0 (Build 1)', style: TextStyle(color: AppColors.onSurfaceVariant)),
+                    leading: Icon(Icons.info_outline_rounded, color: colors.secondary),
+                    title: Text(
+                      'Version',
+                      style: TextStyle(fontWeight: FontWeight.w600, color: colors.onSurface),
+                    ),
+                    trailing: Text(
+                      '1.0.0 (Build 1)',
+                      style: TextStyle(color: colors.onSurfaceVariant),
+                    ),
                   ),
-                  const Divider(color: AppColors.outlineVariant, height: 1),
+                  Divider(color: colors.outlineVariant, height: 1),
                   ListTile(
-                    leading: const Icon(Icons.help_outline_rounded, color: AppColors.secondary),
-                    title: const Text('Replay Onboarding Guide', style: TextStyle(fontWeight: FontWeight.w600)),
-                    trailing: const Icon(Icons.chevron_right_rounded),
+                    leading: Icon(Icons.help_outline_rounded, color: colors.secondary),
+                    title: Text(
+                      'Replay Onboarding Guide',
+                      style: TextStyle(fontWeight: FontWeight.w600, color: colors.onSurface),
+                    ),
+                    trailing: Icon(Icons.chevron_right_rounded, color: colors.onSurfaceVariant),
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(builder: (_) => const OnboardingScreen()),
@@ -323,6 +360,8 @@ class _ThemeStyleOptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -334,7 +373,7 @@ class _ThemeStyleOptionCard extends StatelessWidget {
             color: bgColor,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isSelected ? accentColor : AppColors.outlineVariant.withOpacity(0.6),
+              color: isSelected ? accentColor : colors.outlineVariant.withOpacity(0.6),
               width: isSelected ? 2 : 1,
             ),
           ),

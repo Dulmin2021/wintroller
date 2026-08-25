@@ -21,31 +21,37 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = AppColors.of(context);
     final activeDevice = ref.watch(activeDeviceProvider);
     final connectionStatus = ref.watch(connectionStatusProvider).value ?? ConnectionStatus.offline;
     final systemInfo = ref.watch(systemInfoProvider).value ?? const HostSystemInfo();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: colors.background,
       appBar: AppBar(
+        backgroundColor: colors.background,
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: AppColors.primaryContainer.withOpacity(0.2),
+                color: colors.primaryContainer.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.computer_rounded,
-                color: AppColors.primary,
+                color: colors.primary,
                 size: 22,
               ),
             ),
             const SizedBox(width: 10),
-            const Text(
+            Text(
               'Wintroller',
-              style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: -0.5),
+              style: TextStyle(
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+                color: colors.onSurface,
+              ),
             ),
           ],
         ),
@@ -67,7 +73,7 @@ class DashboardScreen extends ConsumerWidget {
           ),
           const SizedBox(width: 6),
           IconButton(
-            icon: const Icon(Icons.settings_outlined),
+            icon: Icon(Icons.settings_outlined, color: colors.onSurface),
             tooltip: 'Settings',
             onPressed: () {
               Navigator.of(context).push(
@@ -91,22 +97,22 @@ class DashboardScreen extends ConsumerWidget {
                   margin: const EdgeInsets.only(bottom: 16),
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: AppColors.errorContainer.withOpacity(0.3),
+                    color: colors.errorContainer.withOpacity(0.3),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.error.withOpacity(0.5)),
+                    border: Border.all(color: colors.error.withOpacity(0.5)),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.cloud_off_rounded, color: AppColors.error, size: 24),
+                      Icon(Icons.cloud_off_rounded, color: colors.error, size: 24),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'PC is Offline',
                               style: TextStyle(
-                                color: AppColors.onSurface,
+                                color: colors.onSurface,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 14,
                               ),
@@ -115,8 +121,8 @@ class DashboardScreen extends ConsumerWidget {
                               activeDevice != null
                                   ? 'Cannot reach ${activeDevice.name} (${activeDevice.ip})'
                                   : 'No active PC paired yet',
-                              style: const TextStyle(
-                                color: AppColors.onSurfaceVariant,
+                              style: TextStyle(
+                                color: colors.onSurfaceVariant,
                                 fontSize: 12,
                               ),
                             ),
@@ -131,7 +137,7 @@ class DashboardScreen extends ConsumerWidget {
                             ),
                           );
                         },
-                        child: const Text('Troubleshoot', style: TextStyle(color: AppColors.error)),
+                        child: Text('Troubleshoot', style: TextStyle(color: colors.error)),
                       ),
                     ],
                   ),
@@ -144,15 +150,15 @@ class DashboardScreen extends ConsumerWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      AppColors.surfaceContainerHigh,
-                      AppColors.surfaceContainer,
+                      colors.surfaceContainerHigh,
+                      colors.surfaceContainer,
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: AppColors.outlineVariant.withOpacity(0.8),
+                    color: colors.outlineVariant.withOpacity(0.8),
                     width: 1,
                   ),
                 ),
@@ -167,12 +173,12 @@ class DashboardScreen extends ConsumerWidget {
                               Container(
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primary.withOpacity(0.15),
+                                  color: colors.primary.withOpacity(0.15),
                                   borderRadius: BorderRadius.circular(14),
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.desktop_windows_rounded,
-                                  color: AppColors.primary,
+                                  color: colors.primary,
                                   size: 26,
                                 ),
                               ),
@@ -183,10 +189,10 @@ class DashboardScreen extends ConsumerWidget {
                                   children: [
                                     Text(
                                       activeDevice?.name ?? systemInfo.hostname,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.w800,
-                                        color: AppColors.onSurface,
+                                        color: colors.onSurface,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -196,9 +202,9 @@ class DashboardScreen extends ConsumerWidget {
                                       activeDevice != null
                                           ? '${activeDevice.ip} • ${systemInfo.osVersion}'
                                           : systemInfo.osVersion,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 12,
-                                        color: AppColors.onSurfaceVariant,
+                                        color: colors.onSurfaceVariant,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -210,7 +216,7 @@ class DashboardScreen extends ConsumerWidget {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.devices_rounded, color: AppColors.primary),
+                          icon: Icon(Icons.devices_rounded, color: colors.primary),
                           tooltip: 'Manage Devices',
                           onPressed: () {
                             Navigator.of(context).push(
@@ -223,7 +229,7 @@ class DashboardScreen extends ConsumerWidget {
                       ],
                     ),
                     const SizedBox(height: 18),
-                    const Divider(color: AppColors.outlineVariant, height: 1),
+                    Divider(color: colors.outlineVariant, height: 1),
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -235,20 +241,20 @@ class DashboardScreen extends ConsumerWidget {
                           label: 'Battery',
                           value: '${systemInfo.batteryPercent}%',
                           color: systemInfo.batteryPercent > 20
-                              ? AppColors.tertiary
-                              : AppColors.error,
+                              ? colors.tertiary
+                              : colors.error,
                         ),
                         _TelemetryItem(
                           icon: Icons.memory_rounded,
                           label: 'CPU Load',
                           value: '${systemInfo.cpuUsage.toStringAsFixed(0)}%',
-                          color: AppColors.primary,
+                          color: colors.primary,
                         ),
                         _TelemetryItem(
                           icon: Icons.storage_rounded,
                           label: 'RAM Usage',
                           value: '${systemInfo.ramUsage.toStringAsFixed(0)}%',
-                          color: AppColors.secondary,
+                          color: colors.secondary,
                         ),
                         _TelemetryItem(
                           icon: systemInfo.isMuted
@@ -256,7 +262,7 @@ class DashboardScreen extends ConsumerWidget {
                               : Icons.volume_up_rounded,
                           label: 'Volume',
                           value: systemInfo.isMuted ? 'Muted' : '${systemInfo.volume}%',
-                          color: AppColors.mediaAccent,
+                          color: colors.mediaAccent,
                         ),
                       ],
                     ),
@@ -266,12 +272,12 @@ class DashboardScreen extends ConsumerWidget {
 
               const SizedBox(height: 28),
 
-              const Text(
+              Text(
                 'Control Modules',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.onSurface,
+                  color: colors.onSurface,
                   letterSpacing: -0.3,
                 ),
               ),
@@ -290,7 +296,7 @@ class DashboardScreen extends ConsumerWidget {
                     title: 'Mouse & Trackpad',
                     subtitle: 'Gestures, clicks & scroll',
                     icon: Icons.touch_app_rounded,
-                    accentColor: AppColors.mouseAccent,
+                    accentColor: colors.mouseAccent,
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(builder: (_) => const MouseTrackpadScreen()),
@@ -301,7 +307,7 @@ class DashboardScreen extends ConsumerWidget {
                     title: 'Keyboard',
                     subtitle: 'Typing & system shortcuts',
                     icon: Icons.keyboard_rounded,
-                    accentColor: AppColors.keyboardAccent,
+                    accentColor: colors.keyboardAccent,
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(builder: (_) => const KeyboardControlScreen()),
@@ -312,7 +318,7 @@ class DashboardScreen extends ConsumerWidget {
                     title: 'Media Controls',
                     subtitle: 'Playback, volume & mic',
                     icon: Icons.play_circle_filled_rounded,
-                    accentColor: AppColors.mediaAccent,
+                    accentColor: colors.mediaAccent,
                     badgeText: systemInfo.isPlaying ? 'Playing' : null,
                     onTap: () {
                       Navigator.of(context).push(
@@ -324,7 +330,7 @@ class DashboardScreen extends ConsumerWidget {
                     title: 'Power Options',
                     subtitle: 'Shutdown, restart, lock',
                     icon: Icons.power_settings_new_rounded,
-                    accentColor: AppColors.powerAccent,
+                    accentColor: colors.powerAccent,
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(builder: (_) => const PowerControlScreen()),
@@ -335,7 +341,7 @@ class DashboardScreen extends ConsumerWidget {
                     title: 'File Manager',
                     subtitle: 'Browse, download, upload',
                     icon: Icons.folder_shared_rounded,
-                    accentColor: AppColors.filesAccent,
+                    accentColor: colors.filesAccent,
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(builder: (_) => const FileManagerScreen()),
@@ -346,7 +352,7 @@ class DashboardScreen extends ConsumerWidget {
                     title: 'Display Brightness',
                     subtitle: 'Adjust screen light level',
                     icon: Icons.brightness_6_rounded,
-                    accentColor: AppColors.brightnessAccent,
+                    accentColor: colors.brightnessAccent,
                     badgeText: '${systemInfo.brightness}%',
                     onTap: () {
                       Navigator.of(context).push(
@@ -380,24 +386,26 @@ class _TelemetryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
     return Column(
       children: [
         Icon(icon, color: color, size: 20),
         const SizedBox(height: 6),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w700,
-            color: AppColors.onSurface,
+            color: colors.onSurface,
           ),
         ),
         const SizedBox(height: 2),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 11,
-            color: AppColors.onSurfaceVariant,
+            color: colors.onSurfaceVariant,
           ),
         ),
       ],
