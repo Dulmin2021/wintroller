@@ -81,9 +81,18 @@ class _WintrollerAppState extends ConsumerState<WintrollerApp> {
     final themeMode = ref.watch(themeModeProvider);
     final themeStyle = ref.watch(themeStyleProvider);
 
-    final activeDarkTheme = themeStyle == AppThemeStyle.midnight
-        ? AppTheme.midnightTheme
-        : AppTheme.stitchCyberTheme;
+    final ThemeData activeDarkTheme;
+    switch (themeStyle) {
+      case AppThemeStyle.alienHud:
+        activeDarkTheme = AppTheme.alienHudTheme;
+        break;
+      case AppThemeStyle.stitchCyber:
+        activeDarkTheme = AppTheme.stitchCyberTheme;
+        break;
+      case AppThemeStyle.midnight:
+        activeDarkTheme = AppTheme.midnightTheme;
+        break;
+    }
 
     return MaterialApp(
       title: 'Wintroller',

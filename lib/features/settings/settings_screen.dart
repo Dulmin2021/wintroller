@@ -32,7 +32,7 @@ class SettingsScreen extends ConsumerWidget {
           children: [
             // Preference Section: Appearance
             Text(
-              'Appearance & Theme',
+              'Appearance & Theme Style',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
@@ -56,7 +56,7 @@ class SettingsScreen extends ConsumerWidget {
                       Icon(Icons.palette_rounded, color: colors.primary, size: 20),
                       const SizedBox(width: 8),
                       Text(
-                        'Theme Style',
+                        'Select Visual Interface',
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 15,
@@ -66,6 +66,23 @@ class SettingsScreen extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 12),
+
+                  // 1. Alienware Sci-Fi Cyberpunk HUD (Flagship)
+                  _ThemeStyleOptionCard(
+                    title: 'Alienware Sci-Fi HUD',
+                    subtitle: 'Alien Remote Interface (Neon Green & Matrix HUD)',
+                    bgColor: const Color(0xFF040D06),
+                    accentColor: const Color(0xFF00FF66),
+                    isSelected: themeStyle == AppThemeStyle.alienHud,
+                    onTap: () {
+                      ref
+                          .read(themeStyleProvider.notifier)
+                          .setThemeStyle(AppThemeStyle.alienHud);
+                    },
+                  ),
+                  const SizedBox(height: 10),
+
+                  // 2. Stitch Cyber & 3. Midnight Slate in 2 columns
                   Row(
                     children: [
                       Expanded(
@@ -82,7 +99,7 @@ class SettingsScreen extends ConsumerWidget {
                           },
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: _ThemeStyleOptionCard(
                           title: 'Midnight Slate',
@@ -389,13 +406,21 @@ class _ThemeStyleOptionCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: accentColor,
                       shape: BoxShape.circle,
+                      boxShadow: isSelected
+                          ? [
+                              BoxShadow(
+                                color: accentColor.withOpacity(0.6),
+                                blurRadius: 6,
+                              )
+                            ]
+                          : null,
                     ),
                   ),
                   if (isSelected)
                     Icon(Icons.check_circle_rounded, color: accentColor, size: 18),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               Text(
                 title,
                 style: const TextStyle(

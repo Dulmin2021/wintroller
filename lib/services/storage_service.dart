@@ -78,7 +78,7 @@ class StorageService {
   String getThemeMode() => _prefs.getString(_keyThemeMode) ?? 'dark';
   Future<void> setThemeMode(String mode) async => _prefs.setString(_keyThemeMode, mode);
 
-  String getThemeStyle() => _prefs.getString(_keyThemeStyle) ?? 'stitch_cyber';
+  String getThemeStyle() => _prefs.getString(_keyThemeStyle) ?? 'alien_hud';
   Future<void> setThemeStyle(String style) async => _prefs.setString(_keyThemeStyle, style);
 
   bool getHapticsEnabled() => _prefs.getBool(_keyHaptics) ?? true;

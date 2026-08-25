@@ -88,7 +88,47 @@ class AppThemeColors extends ThemeExtension<AppThemeColors> {
     required this.brightnessAccent,
   });
 
-  /// 1. Stitch Cyber (Proton Remote) Theme Colors
+  /// 1. Alienware Sci-Fi Cyberpunk HUD (Alien Remote Interface) Theme Colors
+  static const AppThemeColors alienHud = AppThemeColors(
+    background: Color(0xFF030704),
+    surface: Color(0xFF050E07),
+    surfaceContainerLowest: Color(0xFF020503),
+    surfaceContainerLow: Color(0xFF061208),
+    surfaceContainer: Color(0xFF08180B),
+    surfaceContainerHigh: Color(0xFF0D2411),
+    surfaceContainerHighest: Color(0xFF143319),
+    primary: Color(0xFF00FF66),
+    onPrimary: Color(0xFF003813),
+    primaryContainer: Color(0xFF00E65C),
+    onPrimaryContainer: Color(0xFF00240B),
+    secondary: Color(0xFF4EDEA3),
+    onSecondary: Color(0xFF003824),
+    secondaryContainer: Color(0xFF0A2B14),
+    onSecondaryContainer: Color(0xFFA6F5D0),
+    tertiary: Color(0xFF39FF14),
+    onTertiary: Color(0xFF043800),
+    tertiaryContainer: Color(0xFF00B341),
+    onTertiaryContainer: Color(0xFFE8FFE6),
+    error: Color(0xFFFF4D4D),
+    onError: Colors.black,
+    errorContainer: Color(0xFF5C0000),
+    onErrorContainer: Color(0xFFFFD6D6),
+    onSurface: Color(0xFFE6FFF0),
+    onSurfaceVariant: Color(0xFF75A882),
+    outline: Color(0xFF00FF66),
+    outlineVariant: Color(0xFF0E3817),
+    statusOnline: Color(0xFF00FF66),
+    statusConnecting: Color(0xFFFFD600),
+    statusOffline: Color(0xFFFF4D4D),
+    powerAccent: Color(0xFF00FF66),
+    mouseAccent: Color(0xFF00FF66),
+    keyboardAccent: Color(0xFF00FF66),
+    mediaAccent: Color(0xFF00FF66),
+    filesAccent: Color(0xFF00FF66),
+    brightnessAccent: Color(0xFF00FF66),
+  );
+
+  /// 2. Stitch Cyber (Proton Remote) Theme Colors
   static const AppThemeColors stitchCyber = AppThemeColors(
     background: Color(0xFF0B1326),
     surface: Color(0xFF0B1326),
@@ -339,7 +379,7 @@ class AppColors {
   AppColors._();
 
   static AppThemeColors of(BuildContext context) {
-    return Theme.of(context).extension<AppThemeColors>() ?? AppThemeColors.stitchCyber;
+    return Theme.of(context).extension<AppThemeColors>() ?? AppThemeColors.alienHud;
   }
 
   static const Color background = Color(0xFF0B1326);

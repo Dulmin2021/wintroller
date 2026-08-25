@@ -126,6 +126,7 @@ class ThemeModeNotifier extends StateNotifier<ThemeMode> {
 }
 
 enum AppThemeStyle {
+  alienHud,
   stitchCyber,
   midnight,
 }
@@ -140,14 +141,29 @@ class ThemeStyleNotifier extends StateNotifier<AppThemeStyle> {
       case 'midnight':
         return AppThemeStyle.midnight;
       case 'stitch_cyber':
-      default:
         return AppThemeStyle.stitchCyber;
+      case 'alien_hud':
+      default:
+        return AppThemeStyle.alienHud;
     }
   }
 
   Future<void> setThemeStyle(AppThemeStyle style) async {
     state = style;
-    await _storage.setThemeStyle(style == AppThemeStyle.midnight ? 'midnight' : 'stitch_cyber');
+    String styleStr;
+    switch (style) {
+      case AppThemeStyle.midnight:
+        styleStr = 'midnight';
+        break;
+      case AppThemeStyle.stitchCyber:
+        styleStr = 'stitch_cyber';
+        break;
+      case AppThemeStyle.alienHud:
+      default:
+        styleStr = 'alien_hud';
+        break;
+    }
+    await _storage.setThemeStyle(styleStr);
   }
 }
 
