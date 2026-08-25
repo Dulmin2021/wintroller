@@ -5,7 +5,8 @@ import 'app_colors.dart';
 class AppTheme {
   AppTheme._();
 
-  static ThemeData get darkTheme {
+  /// 1. Stitch Cyber (Proton Remote) Theme - Extracted from Stitch UI Design System
+  static ThemeData get stitchCyberTheme {
     final baseTextTheme = ThemeData.dark(useMaterial3: true).textTheme;
     final textTheme = GoogleFonts.interTextTheme(baseTextTheme).apply(
       bodyColor: AppColors.onSurface,
@@ -52,8 +53,9 @@ class AppTheme {
         centerTitle: false,
         titleTextStyle: GoogleFonts.inter(
           fontSize: 20,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           color: AppColors.onSurface,
+          letterSpacing: -0.4,
         ),
       ),
       cardTheme: CardThemeData(
@@ -71,7 +73,7 @@ class AppTheme {
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
           textStyle: GoogleFonts.inter(
             fontSize: 16,
@@ -85,7 +87,7 @@ class AppTheme {
           side: const BorderSide(color: AppColors.outlineVariant),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
           textStyle: GoogleFonts.inter(
             fontSize: 16,
@@ -115,8 +117,56 @@ class AppTheme {
     );
   }
 
+  /// 2. Midnight Slate Theme (Deep Charcoal / Neon Cyan)
+  static ThemeData get midnightTheme {
+    const bg = Color(0xFF0F172A);
+    const cardBg = Color(0xFF1E293B);
+    const cardHigh = Color(0xFF334155);
+    const primary = Color(0xFF38BDF8);
+    const primaryCont = Color(0xFF0284C7);
+
+    final baseTextTheme = ThemeData.dark(useMaterial3: true).textTheme;
+    final textTheme = GoogleFonts.interTextTheme(baseTextTheme);
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      scaffoldBackgroundColor: bg,
+      colorScheme: ColorScheme.dark(
+        primary: primary,
+        primaryContainer: primaryCont,
+        surface: bg,
+        surfaceContainer: cardBg,
+        surfaceContainerHigh: cardHigh,
+        onSurface: const Color(0xFFF1F5F9),
+        onSurfaceVariant: const Color(0xFF94A3B8),
+        outline: const Color(0xFF64748B),
+        outlineVariant: const Color(0xFF334155),
+      ),
+      textTheme: textTheme,
+      appBarTheme: AppBarTheme(
+        backgroundColor: bg,
+        foregroundColor: const Color(0xFFF1F5F9),
+        elevation: 0,
+        titleTextStyle: GoogleFonts.inter(
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          color: const Color(0xFFF1F5F9),
+        ),
+      ),
+      cardTheme: CardThemeData(
+        color: cardBg,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFF334155), width: 0.8),
+        ),
+      ),
+    );
+  }
+
+  /// 3. Clean Light Theme
   static ThemeData get lightTheme {
-    // We provide a light theme alternative if user toggles theme in settings
     final baseTextTheme = ThemeData.light(useMaterial3: true).textTheme;
     final textTheme = GoogleFonts.interTextTheme(baseTextTheme);
 
@@ -130,4 +180,6 @@ class AppTheme {
       textTheme: textTheme,
     );
   }
+
+  static ThemeData get darkTheme => stitchCyberTheme;
 }

@@ -72,9 +72,14 @@ class StorageService {
     return await _secureStorage.read(key: 'token_$deviceId');
   }
 
+  static const String _keyThemeStyle = 'theme_style';
+
   // Preferences
   String getThemeMode() => _prefs.getString(_keyThemeMode) ?? 'dark';
   Future<void> setThemeMode(String mode) async => _prefs.setString(_keyThemeMode, mode);
+
+  String getThemeStyle() => _prefs.getString(_keyThemeStyle) ?? 'stitch_cyber';
+  Future<void> setThemeStyle(String style) async => _prefs.setString(_keyThemeStyle, style);
 
   bool getHapticsEnabled() => _prefs.getBool(_keyHaptics) ?? true;
   Future<void> setHapticsEnabled(bool enabled) async => _prefs.setBool(_keyHaptics, enabled);

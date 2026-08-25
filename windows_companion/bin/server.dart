@@ -77,12 +77,16 @@ typedef GlobalMemoryStatusExDart = int Function(Pointer<MEMORYSTATUSEX> lpBuffer
 typedef VkKeyScanNative = Int16 Function(Int16 ch);
 typedef VkKeyScanDart = int Function(int ch);
 
+typedef WaveOutSetVolumeNative = Int32 Function(IntPtr uDeviceID, Uint32 dwVolume);
+typedef WaveOutSetVolumeDart = int Function(int uDeviceID, int dwVolume);
+
 class Win32Native {
   static final Win32Native instance = Win32Native._();
 
   late final DynamicLibrary _user32;
   late final DynamicLibrary _kernel32;
   late final DynamicLibrary _powrprof;
+  DynamicLibrary? _winmm;
 
   late final MouseEventDart _mouseEvent;
   late final KeybdEventDart _keybdEvent;
@@ -92,6 +96,7 @@ class Win32Native {
   late final GetSystemPowerStatusDart _getSystemPowerStatus;
   late final GlobalMemoryStatusExDart _globalMemoryStatusEx;
   late final VkKeyScanDart _vkKeyScan;
+  WaveOutSetVolumeDart? _waveOutSetVolume;
 
   bool _isAvailable = false;
   bool get isAvailable => _isAvailable;
@@ -103,6 +108,10 @@ class Win32Native {
       _user32 = DynamicLibrary.open('user32.dll');
       _kernel32 = DynamicLibrary.open('kernel32.dll');
       _powrprof = DynamicLibrary.open('powrprof.dll');
+      try {
+        _winmm = DynamicLibrary.open('winmm.dll');
+        _waveOutSetVolume = _winmm?.lookupFunction<WaveOutSetVolumeNative, WaveOutSetVolumeDart>('waveOutSetVolume');
+      } catch (_) {}
 
       _mouseEvent =
           _user32.lookupFunction<MouseEventNative, MouseEventDart>('mouse_event');
@@ -163,6 +172,16 @@ class Win32Native {
     if (!_isAvailable) return;
     _keybdEvent(vkey, 0, 0, 0); // Key Down
     _keybdEvent(vkey, 0, 0x0002, 0); // Key Up (KEYEVENTF_KEYUP = 0x0002)
+  }
+
+  void setMasterVolume(int percent) {
+    if (!_isAvailable) return;
+    try {
+      final clamped = percent.clamp(0, 100);
+      final v = (clamped * 65535 ~/ 100) & 0xFFFF;
+      final dword = (v << 16) | v;
+      _waveOutSetVolume?.call(0, dword);
+    } catch (_) {}
   }
 
   void typeString(String text) {
@@ -549,6 +568,13 @@ class PCRemoteServer {
       case 'media.volumeDown':
         _currentVolume = (_currentVolume - 2).clamp(0, 100);
         _native.sendVirtualKey(0xAE); // VK_VOLUME_DOWN
+        _sendResponse(client, id, action, true);
+        break;
+
+      case 'media.setVolume':
+        final val = (params['value'] as num?)?.toInt() ?? 40;
+        _currentVolume = val.clamp(0, 100);
+        _native.setMasterVolume(_currentVolume);
         _sendResponse(client, id, action, true);
         break;
 

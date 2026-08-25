@@ -44,7 +44,7 @@ class DashboardScreen extends ConsumerWidget {
             ),
             const SizedBox(width: 10),
             const Text(
-              'PCRemote',
+              'Wintroller',
               style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: -0.5),
             ),
           ],

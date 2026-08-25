@@ -18,19 +18,19 @@ void main() async {
       overrides: [
         storageServiceProvider.overrideWithValue(storageService),
       ],
-      child: const PCRemoteApp(),
+      child: const WintrollerApp(),
     ),
   );
 }
 
-class PCRemoteApp extends ConsumerStatefulWidget {
-  const PCRemoteApp({super.key});
+class WintrollerApp extends ConsumerStatefulWidget {
+  const WintrollerApp({super.key});
 
   @override
-  ConsumerState<PCRemoteApp> createState() => _PCRemoteAppState();
+  ConsumerState<WintrollerApp> createState() => _WintrollerAppState();
 }
 
-class _PCRemoteAppState extends ConsumerState<PCRemoteApp> {
+class _WintrollerAppState extends ConsumerState<WintrollerApp> {
   @override
   void initState() {
     super.initState();
@@ -74,12 +74,17 @@ class _PCRemoteAppState extends ConsumerState<PCRemoteApp> {
   @override
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeModeProvider);
+    final themeStyle = ref.watch(themeStyleProvider);
+
+    final activeDarkTheme = themeStyle == AppThemeStyle.midnight
+        ? AppTheme.midnightTheme
+        : AppTheme.stitchCyberTheme;
 
     return MaterialApp(
-      title: 'PCRemote',
+      title: 'Wintroller',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
+      darkTheme: activeDarkTheme,
       themeMode: themeMode,
       home: _getInitialHome(),
     );

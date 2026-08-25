@@ -10,6 +10,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
+    final themeStyle = ref.watch(themeStyleProvider);
     final haptics = ref.watch(hapticsProvider);
     final autoReconnect = ref.watch(autoReconnectProvider);
     final activeDevice = ref.watch(activeDeviceProvider);
@@ -26,7 +27,7 @@ class SettingsScreen extends ConsumerWidget {
           children: [
             // Preference Section: Appearance
             const Text(
-              'Appearance',
+              'Appearance & Theme',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
@@ -43,6 +44,36 @@ class SettingsScreen extends ConsumerWidget {
               ),
               child: Column(
                 children: [
+                  ListTile(
+                    leading: const Icon(Icons.style_rounded, color: AppColors.primary),
+                    title: const Text('Theme Style', style: TextStyle(fontWeight: FontWeight.w600)),
+                    subtitle: Text(
+                      themeStyle == AppThemeStyle.stitchCyber
+                          ? 'Stitch Cyber (Proton Remote)'
+                          : 'Midnight Slate',
+                    ),
+                    trailing: DropdownButton<AppThemeStyle>(
+                      value: themeStyle,
+                      dropdownColor: AppColors.surfaceContainerHigh,
+                      underline: const SizedBox(),
+                      items: const [
+                        DropdownMenuItem(
+                          value: AppThemeStyle.stitchCyber,
+                          child: Text('Stitch Cyber (Proton)'),
+                        ),
+                        DropdownMenuItem(
+                          value: AppThemeStyle.midnight,
+                          child: Text('Midnight Slate'),
+                        ),
+                      ],
+                      onChanged: (style) {
+                        if (style != null) {
+                          ref.read(themeStyleProvider.notifier).setThemeStyle(style);
+                        }
+                      },
+                    ),
+                  ),
+                  const Divider(color: AppColors.outlineVariant, height: 1),
                   ListTile(
                     leading: const Icon(Icons.dark_mode_rounded, color: AppColors.primary),
                     title: const Text('Theme Mode', style: TextStyle(fontWeight: FontWeight.w600)),
@@ -180,7 +211,7 @@ class SettingsScreen extends ConsumerWidget {
 
             // Help & About
             const Text(
-              'About PCRemote',
+              'About Wintroller',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,

@@ -95,6 +95,9 @@ class PCRemoteRepository {
   Future<ResponseMessage> mediaVolumeDown() async =>
       await _wsService.sendCommand(ProtocolActions.mediaVolumeDown);
 
+  Future<ResponseMessage> setVolume(int value) async =>
+      await _wsService.sendCommand(ProtocolActions.mediaSetVolume, params: {'value': value});
+
   Future<ResponseMessage> mediaMute() async =>
       await _wsService.sendCommand(ProtocolActions.mediaMute);
 

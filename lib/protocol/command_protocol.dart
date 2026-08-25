@@ -103,6 +103,7 @@ class ProtocolActions {
   static const String mediaPrevious = 'media.previous';
   static const String mediaVolumeUp = 'media.volumeUp';
   static const String mediaVolumeDown = 'media.volumeDown';
+  static const String mediaSetVolume = 'media.setVolume';
   static const String mediaMute = 'media.mute';
   static const String mediaUnmute = 'media.unmute';
   static const String mediaMicOn = 'media.micOn';

@@ -19,7 +19,7 @@ void main() {
         overrides: [
           storageServiceProvider.overrideWithValue(storageService),
         ],
-        child: const PCRemoteApp(),
+        child: const WintrollerApp(),
       ),
     );
 

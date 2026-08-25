@@ -125,6 +125,38 @@ class ThemeModeNotifier extends StateNotifier<ThemeMode> {
   }
 }
 
+enum AppThemeStyle {
+  stitchCyber,
+  midnight,
+}
+
+class ThemeStyleNotifier extends StateNotifier<AppThemeStyle> {
+  final StorageService _storage;
+
+  ThemeStyleNotifier(this._storage) : super(_loadStyle(_storage.getThemeStyle()));
+
+  static AppThemeStyle _loadStyle(String style) {
+    switch (style) {
+      case 'midnight':
+        return AppThemeStyle.midnight;
+      case 'stitch_cyber':
+      default:
+        return AppThemeStyle.stitchCyber;
+    }
+  }
+
+  Future<void> setThemeStyle(AppThemeStyle style) async {
+    state = style;
+    await _storage.setThemeStyle(style == AppThemeStyle.midnight ? 'midnight' : 'stitch_cyber');
+  }
+}
+
+final themeStyleProvider =
+    StateNotifierProvider<ThemeStyleNotifier, AppThemeStyle>((ref) {
+  final storage = ref.watch(storageServiceProvider);
+  return ThemeStyleNotifier(storage);
+});
+
 final themeModeProvider =
     StateNotifierProvider<ThemeModeNotifier, ThemeMode>((ref) {
   final storage = ref.watch(storageServiceProvider);

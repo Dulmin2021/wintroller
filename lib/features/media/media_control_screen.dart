@@ -15,6 +15,7 @@ class MediaControlScreen extends ConsumerStatefulWidget {
 
 class _MediaControlScreenState extends ConsumerState<MediaControlScreen> {
   double _currentVolume = 40;
+  bool _isUserDraggingVolume = false;
   Timer? _volumeDebounceTimer;
   Timer? _holdTimer;
 
@@ -23,7 +24,7 @@ class _MediaControlScreenState extends ConsumerState<MediaControlScreen> {
     super.initState();
     final systemInfo = ref.read(systemInfoProvider).value;
     if (systemInfo != null) {
-      _currentVolume = systemInfo.volume.toDouble();
+      _currentVolume = systemInfo.volume.toDouble().clamp(0, 100);
     }
   }
 
@@ -35,12 +36,24 @@ class _MediaControlScreenState extends ConsumerState<MediaControlScreen> {
   }
 
   void _onVolumeSliderChanged(double val) {
-    setState(() => _currentVolume = val);
+    setState(() {
+      _isUserDraggingVolume = true;
+      _currentVolume = val;
+    });
+    _triggerHaptic();
     _volumeDebounceTimer?.cancel();
-    _volumeDebounceTimer = Timer(const Duration(milliseconds: 80), () {
+    _volumeDebounceTimer = Timer(const Duration(milliseconds: 30), () {
       final repo = ref.read(pcRemoteRepositoryProvider);
-      // Send volume change (or custom volume level)
-      // If server supports volume level, or repeated steps
+      repo.setVolume(val.toInt());
+    });
+  }
+
+  void _onVolumeSliderChangeEnd(double val) {
+    _volumeDebounceTimer?.cancel();
+    final repo = ref.read(pcRemoteRepositoryProvider);
+    repo.setVolume(val.toInt());
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) setState(() => _isUserDraggingVolume = false);
     });
   }
 
@@ -85,6 +98,14 @@ class _MediaControlScreenState extends ConsumerState<MediaControlScreen> {
     final repo = ref.watch(pcRemoteRepositoryProvider);
     final systemInfo = ref.watch(systemInfoProvider).value ?? const HostSystemInfo();
 
+    ref.listen(systemInfoProvider, (prev, next) {
+      if (!_isUserDraggingVolume && next.value != null) {
+        setState(() {
+          _currentVolume = next.value!.volume.toDouble().clamp(0, 100);
+        });
+      }
+    });
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -98,57 +119,72 @@ class _MediaControlScreenState extends ConsumerState<MediaControlScreen> {
               // Now Playing Artwork / Card
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
+                  gradient: LinearGradient(
                     colors: [
                       AppColors.surfaceContainerHigh,
                       AppColors.surfaceContainer,
                     ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(28),
-                  border: Border.all(color: AppColors.outlineVariant, width: 0.8),
+                  border: Border.all(
+                    color: AppColors.outlineVariant.withOpacity(0.8),
+                    width: 1,
+                  ),
                 ),
                 child: Column(
                   children: [
                     Container(
-                      width: 130,
-                      height: 130,
+                      width: 140,
+                      height: 140,
                       decoration: BoxDecoration(
-                        color: AppColors.mediaAccent.withOpacity(0.15),
+                        gradient: RadialGradient(
+                          colors: [
+                            AppColors.mediaAccent.withOpacity(0.3),
+                            AppColors.surfaceContainerLowest,
+                          ],
+                        ),
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
-                          color: AppColors.mediaAccent.withOpacity(0.4),
+                          color: AppColors.mediaAccent.withOpacity(0.6),
                           width: 1.5,
                         ),
                       ),
-                      child: const Icon(
-                        Icons.music_note_rounded,
-                        size: 64,
-                        color: AppColors.mediaAccent,
+                      child: const Center(
+                        child: Icon(
+                          Icons.music_note_rounded,
+                          size: 64,
+                          color: AppColors.mediaAccent,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
                     Text(
-                      systemInfo.activeMediaTitle ?? 'Now Playing on PC',
-                      textAlign: TextAlign.center,
+                      (systemInfo.activeMediaTitle != null && systemInfo.activeMediaTitle!.isNotEmpty)
+                          ? systemInfo.activeMediaTitle!
+                          : 'Desktop Audio',
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
                         color: AppColors.onSurface,
                       ),
+                      textAlign: TextAlign.center,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      systemInfo.activeMediaArtist ?? 'System Media Session',
+                      (systemInfo.activeMediaArtist != null && systemInfo.activeMediaArtist!.isNotEmpty)
+                          ? systemInfo.activeMediaArtist!
+                          : 'Windows Media Session',
                       style: const TextStyle(
                         fontSize: 14,
                         color: AppColors.onSurfaceVariant,
                       ),
+                      textAlign: TextAlign.center,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -156,68 +192,39 @@ class _MediaControlScreenState extends ConsumerState<MediaControlScreen> {
                 ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 28),
 
-              // Playback Controls Row (Previous, Play/Pause, Next)
+              // Playback Transport Controls (Prev / Play-Pause / Next)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Previous Track
-                  IconButton.filledTonal(
-                    iconSize: 32,
-                    padding: const EdgeInsets.all(16),
-                    style: IconButton.styleFrom(
-                      backgroundColor: AppColors.surfaceContainerHigh,
-                      foregroundColor: AppColors.onSurface,
-                    ),
-                    icon: const Icon(Icons.skip_previous_rounded),
+                  _PlaybackCircleButton(
+                    icon: Icons.skip_previous_rounded,
+                    size: 56,
+                    iconSize: 30,
                     onPressed: () {
                       _triggerHaptic();
                       repo.mediaPrevious();
                     },
                   ),
                   const SizedBox(width: 24),
-
-                  // Large Play / Pause button
-                  Container(
-                    width: 76,
-                    height: 76,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.mediaAccent,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.mediaAccent.withOpacity(0.35),
-                          blurRadius: 16,
-                          spreadRadius: 2,
-                        ),
-                      ],
-                    ),
-                    child: IconButton(
-                      iconSize: 40,
-                      color: Colors.black,
-                      icon: Icon(
-                        systemInfo.isPlaying
-                            ? Icons.pause_rounded
-                            : Icons.play_arrow_rounded,
-                      ),
-                      onPressed: () {
-                        _triggerHaptic();
-                        repo.mediaPlayPause();
-                      },
-                    ),
+                  _PlaybackCircleButton(
+                    icon: systemInfo.isPlaying
+                        ? Icons.pause_rounded
+                        : Icons.play_arrow_rounded,
+                    size: 76,
+                    iconSize: 42,
+                    isPrimary: true,
+                    onPressed: () {
+                      _triggerHaptic();
+                      repo.mediaPlayPause();
+                    },
                   ),
                   const SizedBox(width: 24),
-
-                  // Next Track
-                  IconButton.filledTonal(
-                    iconSize: 32,
-                    padding: const EdgeInsets.all(16),
-                    style: IconButton.styleFrom(
-                      backgroundColor: AppColors.surfaceContainerHigh,
-                      foregroundColor: AppColors.onSurface,
-                    ),
-                    icon: const Icon(Icons.skip_next_rounded),
+                  _PlaybackCircleButton(
+                    icon: Icons.skip_next_rounded,
+                    size: 56,
+                    iconSize: 30,
                     onPressed: () {
                       _triggerHaptic();
                       repo.mediaNext();
@@ -226,7 +233,7 @@ class _MediaControlScreenState extends ConsumerState<MediaControlScreen> {
                 ],
               ),
 
-              const SizedBox(height: 36),
+              const SizedBox(height: 32),
 
               // Volume Controls Card
               Container(
@@ -290,6 +297,7 @@ class _MediaControlScreenState extends ConsumerState<MediaControlScreen> {
                             activeColor: AppColors.mediaAccent,
                             inactiveColor: AppColors.surfaceContainerHighest,
                             onChanged: _onVolumeSliderChanged,
+                            onChangeEnd: _onVolumeSliderChangeEnd,
                           ),
                         ),
                         GestureDetector(
@@ -358,6 +366,49 @@ class _MediaControlScreenState extends ConsumerState<MediaControlScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _PlaybackCircleButton extends StatelessWidget {
+  final IconData icon;
+  final double size;
+  final double iconSize;
+  final bool isPrimary;
+  final VoidCallback onPressed;
+
+  const _PlaybackCircleButton({
+    required this.icon,
+    required this.size,
+    required this.iconSize,
+    this.isPrimary = false,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isPrimary ? AppColors.mediaAccent : AppColors.surfaceContainerHigh,
+        boxShadow: isPrimary
+            ? [
+                BoxShadow(
+                  color: AppColors.mediaAccent.withOpacity(0.4),
+                  blurRadius: 18,
+                  offset: const Offset(0, 4),
+                )
+              ]
+            : null,
+      ),
+      child: IconButton(
+        icon: Icon(icon),
+        iconSize: iconSize,
+        color: isPrimary ? Colors.black : AppColors.onSurface,
+        onPressed: onPressed,
       ),
     );
   }
