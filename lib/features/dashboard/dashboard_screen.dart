@@ -161,45 +161,53 @@ class DashboardScreen extends ConsumerWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              child: const Icon(
-                                Icons.desktop_windows_rounded,
-                                color: AppColors.primary,
-                                size: 26,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  activeDevice?.name ?? systemInfo.hostname,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w800,
-                                    color: AppColors.onSurface,
-                                  ),
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(14),
                                 ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  activeDevice != null
-                                      ? '${activeDevice.ip} • ${systemInfo.osVersion}'
-                                      : systemInfo.osVersion,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.onSurfaceVariant,
-                                  ),
+                                child: const Icon(
+                                  Icons.desktop_windows_rounded,
+                                  color: AppColors.primary,
+                                  size: 26,
                                 ),
-                              ],
-                            ),
-                          ],
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      activeDevice?.name ?? systemInfo.hostname,
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w800,
+                                        color: AppColors.onSurface,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      activeDevice != null
+                                          ? '${activeDevice.ip} • ${systemInfo.osVersion}'
+                                          : systemInfo.osVersion,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.onSurfaceVariant,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         IconButton(
                           icon: const Icon(Icons.devices_rounded, color: AppColors.primary),
