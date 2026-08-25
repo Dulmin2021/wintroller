@@ -12,6 +12,9 @@ class HostSystemInfo {
   final bool isPlaying;
   final double cpuUsage;
   final double ramUsage;
+  final bool isWifiOn;
+  final bool isBluetoothOn;
+  final bool isDisplayOn;
 
   const HostSystemInfo({
     this.hostname = 'Windows PC',
@@ -27,6 +30,9 @@ class HostSystemInfo {
     this.isPlaying = false,
     this.cpuUsage = 18.5,
     this.ramUsage = 42.0,
+    this.isWifiOn = true,
+    this.isBluetoothOn = false,
+    this.isDisplayOn = true,
   });
 
   HostSystemInfo copyWith({
@@ -43,6 +49,9 @@ class HostSystemInfo {
     bool? isPlaying,
     double? cpuUsage,
     double? ramUsage,
+    bool? isWifiOn,
+    bool? isBluetoothOn,
+    bool? isDisplayOn,
   }) {
     return HostSystemInfo(
       hostname: hostname ?? this.hostname,
@@ -58,6 +67,9 @@ class HostSystemInfo {
       isPlaying: isPlaying ?? this.isPlaying,
       cpuUsage: cpuUsage ?? this.cpuUsage,
       ramUsage: ramUsage ?? this.ramUsage,
+      isWifiOn: isWifiOn ?? this.isWifiOn,
+      isBluetoothOn: isBluetoothOn ?? this.isBluetoothOn,
+      isDisplayOn: isDisplayOn ?? this.isDisplayOn,
     );
   }
 
@@ -76,6 +88,9 @@ class HostSystemInfo {
       isPlaying: map['isPlaying'] as bool? ?? false,
       cpuUsage: (map['cpuUsage'] as num?)?.toDouble() ?? 15.0,
       ramUsage: (map['ramUsage'] as num?)?.toDouble() ?? 40.0,
+      isWifiOn: map['isWifiOn'] as bool? ?? true,
+      isBluetoothOn: map['isBluetoothOn'] as bool? ?? false,
+      isDisplayOn: map['isDisplayOn'] as bool? ?? true,
     );
   }
 
@@ -94,6 +109,9 @@ class HostSystemInfo {
       'isPlaying': isPlaying,
       'cpuUsage': cpuUsage,
       'ramUsage': ramUsage,
+      'isWifiOn': isWifiOn,
+      'isBluetoothOn': isBluetoothOn,
+      'isDisplayOn': isDisplayOn,
     };
   }
 }

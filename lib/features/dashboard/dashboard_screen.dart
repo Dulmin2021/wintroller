@@ -27,8 +27,19 @@ class DashboardScreen extends ConsumerStatefulWidget {
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   bool _wifiEnabled = true;
-  bool _bluetoothEnabled = true;
+  bool _bluetoothEnabled = false;
   bool _displayOn = true;
+
+  @override
+  void initState() {
+    super.initState();
+    final systemInfo = ref.read(systemInfoProvider).value;
+    if (systemInfo != null) {
+      _wifiEnabled = systemInfo.isWifiOn;
+      _bluetoothEnabled = systemInfo.isBluetoothOn;
+      _displayOn = systemInfo.isDisplayOn;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +48,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final activeDevice = ref.watch(activeDeviceProvider);
     final connectionStatus = ref.watch(connectionStatusProvider).value ?? ConnectionStatus.offline;
     final systemInfo = ref.watch(systemInfoProvider).value ?? const HostSystemInfo();
+
+    ref.listen(systemInfoProvider, (prev, next) {
+      if (next.value != null) {
+        setState(() {
+          _wifiEnabled = next.value!.isWifiOn;
+          _bluetoothEnabled = next.value!.isBluetoothOn;
+          _displayOn = next.value!.isDisplayOn;
+        });
+      }
+    });
 
     final isAlienHud = themeStyle == AppThemeStyle.alienHud;
 

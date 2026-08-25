@@ -367,6 +367,9 @@ class PCRemoteServer {
   bool _isMuted = false;
   bool _isMicMuted = false;
   bool _isPlaying = false;
+  bool _isWifiOn = true;
+  bool _isBluetoothOn = false;
+  bool _isDisplayOn = true;
 
   PCRemoteServer({
     this.port = 8765,
@@ -380,7 +383,38 @@ class PCRemoteServer {
     return base64Url.encode(values);
   }
 
+  Future<void> _queryRadios() async {
+    try {
+      final res = await Process.run('powershell', [
+        '-ExecutionPolicy',
+        'Bypass',
+        '-File',
+        'windows_companion/win_radios.ps1',
+        '-Action',
+        'status'
+      ]);
+      if (res.exitCode == 0) {
+        final out = res.stdout.toString().trim();
+        final match = RegExp(r'\{.*\}').firstMatch(out);
+        if (match != null) {
+          final jsonStr = match.group(0)!.replaceAll(r'\"', '"');
+          final map = json.decode(jsonStr) as Map<String, dynamic>;
+          _isWifiOn = map['wifi'] as bool? ?? _isWifiOn;
+          _isBluetoothOn = map['bluetooth'] as bool? ?? _isBluetoothOn;
+        }
+      }
+    } catch (_) {}
+  }
+
+  void _broadcastStatus() {
+    if (_clients.isEmpty) return;
+    for (final client in _clients) {
+      _sendSystemStatus(client, '');
+    }
+  }
+
   Future<void> start() async {
+    _queryRadios();
     // 1. Start HTTP & WebSocket Server using standard dart:io with auto port-recovery
     try {
       _httpServer = await HttpServer.bind(InternetAddress.anyIPv4, port, shared: true);
@@ -667,38 +701,52 @@ class PCRemoteServer {
       // 5b. Hardware Quick Toggles (Wi-Fi, Bluetooth, Display Power)
       case 'system.wifiOn':
         stdout.writeln('[HARDWARE] Enabling Wi-Fi');
-        _native.setWifi(true);
+        _isWifiOn = true;
+        Process.run('powershell', ['-ExecutionPolicy', 'Bypass', '-File', 'windows_companion/win_radios.ps1', '-Action', 'setwifi', '-Value', 'on']);
         _sendResponse(client, id, action, true);
+        _broadcastStatus();
         break;
 
       case 'system.wifiOff':
         stdout.writeln('[HARDWARE] Disabling Wi-Fi');
-        _native.setWifi(false);
+        _isWifiOn = false;
+        Process.run('powershell', ['-ExecutionPolicy', 'Bypass', '-File', 'windows_companion/win_radios.ps1', '-Action', 'setwifi', '-Value', 'off']);
         _sendResponse(client, id, action, true);
+        _broadcastStatus();
         break;
 
       case 'system.bluetoothOn':
         stdout.writeln('[HARDWARE] Enabling Bluetooth');
-        _native.setBluetooth(true);
+        _isBluetoothOn = true;
+        Process.run('powershell', ['-ExecutionPolicy', 'Bypass', '-File', 'windows_companion/win_radios.ps1', '-Action', 'setbluetooth', '-Value', 'on']);
         _sendResponse(client, id, action, true);
+        _broadcastStatus();
         break;
 
       case 'system.bluetoothOff':
         stdout.writeln('[HARDWARE] Disabling Bluetooth');
-        _native.setBluetooth(false);
+        _isBluetoothOn = false;
+        Process.run('powershell', ['-ExecutionPolicy', 'Bypass', '-File', 'windows_companion/win_radios.ps1', '-Action', 'setbluetooth', '-Value', 'off']);
         _sendResponse(client, id, action, true);
+        _broadcastStatus();
         break;
 
       case 'system.displayOff':
         stdout.writeln('[HARDWARE] Turning Display Off');
+        _isDisplayOn = false;
         _native.displayOff();
+        Process.run('powershell', ['-ExecutionPolicy', 'Bypass', '-File', 'windows_companion/win_radios.ps1', '-Action', 'displayoff']);
         _sendResponse(client, id, action, true);
+        _broadcastStatus();
         break;
 
       case 'system.displayOn':
         stdout.writeln('[HARDWARE] Turning Display On');
+        _isDisplayOn = true;
         _native.displayOn();
+        Process.run('powershell', ['-ExecutionPolicy', 'Bypass', '-File', 'windows_companion/win_radios.ps1', '-Action', 'displayon']);
         _sendResponse(client, id, action, true);
+        _broadcastStatus();
         break;
 
       // 6. Mouse Gestures (Zero-latency Native FFI)
@@ -788,6 +836,9 @@ class PCRemoteServer {
       'activeMediaArtist': 'Desktop Audio',
       'cpuUsage': (10 + Random().nextInt(15)).toDouble(),
       'ramUsage': (metrics['ramUsage'] as int).toDouble(),
+      'isWifiOn': _isWifiOn,
+      'isBluetoothOn': _isBluetoothOn,
+      'isDisplayOn': _isDisplayOn,
     });
   }
 
