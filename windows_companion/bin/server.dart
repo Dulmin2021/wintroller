@@ -318,8 +318,27 @@ class PCRemoteServer {
   }
 
   Future<void> start() async {
-    // 1. Start HTTP & WebSocket Server using standard dart:io
-    _httpServer = await HttpServer.bind(InternetAddress.anyIPv4, port, shared: true);
+    // 1. Start HTTP & WebSocket Server using standard dart:io with auto port-recovery
+    try {
+      _httpServer = await HttpServer.bind(InternetAddress.anyIPv4, port, shared: true);
+    } on SocketException catch (e) {
+      if (Platform.isWindows && (e.osError?.errorCode == 10048 || e.toString().contains('10048'))) {
+        stdout.writeln('-> Port $port is in use. Releasing port from old instance...');
+        try {
+          await Process.run('powershell', [
+            '-Command',
+            'Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id \$_.OwningProcess -Force -ErrorAction SilentlyContinue }'
+          ]);
+          await Future.delayed(const Duration(milliseconds: 600));
+          _httpServer = await HttpServer.bind(InternetAddress.anyIPv4, port, shared: true);
+          stdout.writeln('-> Successfully rebound port $port.');
+        } catch (_) {
+          rethrow;
+        }
+      } else {
+        rethrow;
+      }
+    }
     stdout.writeln('====================================================');
     stdout.writeln('   PCRemote Windows Companion Service (High-Speed)  ');
     stdout.writeln('====================================================');
