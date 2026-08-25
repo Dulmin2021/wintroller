@@ -4,12 +4,16 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../models/file_models.dart';
 import '../../providers/app_providers.dart';
+import '../../services/websocket_service.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/alien_icons.dart';
+import '../../widgets/hud_frame.dart';
+import '../settings/settings_screen.dart';
 import 'widgets/file_detail_sheet.dart';
-import 'widgets/file_transfer_sheet.dart';
 
 class FileManagerScreen extends ConsumerStatefulWidget {
   const FileManagerScreen({super.key});
@@ -79,12 +83,13 @@ class _FileManagerScreenState extends ConsumerState<FileManagerScreen> {
   }
 
   Future<void> _downloadFile(RemoteFileItem file) async {
+    final colors = AppColors.of(context);
     final repo = ref.read(pcRemoteRepositoryProvider);
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Downloading ${file.name}...'),
-        backgroundColor: AppColors.surfaceContainerHigh,
+        backgroundColor: colors.surfaceContainerHigh,
       ),
     );
 
@@ -103,7 +108,7 @@ class _FileManagerScreenState extends ConsumerState<FileManagerScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Saved to ${localFile.path}'),
-              backgroundColor: AppColors.tertiaryContainer,
+              backgroundColor: colors.tertiaryContainer,
             ),
           );
         }
@@ -112,7 +117,7 @@ class _FileManagerScreenState extends ConsumerState<FileManagerScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to save file: $e'),
-            backgroundColor: AppColors.errorContainer,
+            backgroundColor: colors.errorContainer,
           ),
         );
       }
@@ -121,13 +126,14 @@ class _FileManagerScreenState extends ConsumerState<FileManagerScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Download failed: ${response.error ?? "Unknown error"}'),
-          backgroundColor: AppColors.errorContainer,
+          backgroundColor: colors.errorContainer,
         ),
       );
     }
   }
 
   Future<void> _uploadFile() async {
+    final colors = AppColors.of(context);
     final result = await FilePicker.platform.pickFiles(withData: true);
     if (result == null || result.files.isEmpty) return;
 
@@ -145,7 +151,7 @@ class _FileManagerScreenState extends ConsumerState<FileManagerScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Uploading ${file.name}...'),
-        backgroundColor: AppColors.surfaceContainerHigh,
+        backgroundColor: colors.surfaceContainerHigh,
       ),
     );
 
@@ -156,7 +162,7 @@ class _FileManagerScreenState extends ConsumerState<FileManagerScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Uploaded ${file.name} successfully'),
-          backgroundColor: AppColors.tertiaryContainer,
+          backgroundColor: colors.tertiaryContainer,
         ),
       );
       _loadDirectory(_currentPath);
@@ -165,7 +171,7 @@ class _FileManagerScreenState extends ConsumerState<FileManagerScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Upload failed: ${response.error ?? "Unknown error"}'),
-          backgroundColor: AppColors.errorContainer,
+          backgroundColor: colors.errorContainer,
         ),
       );
     }
@@ -186,280 +192,409 @@ class _FileManagerScreenState extends ConsumerState<FileManagerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final themeStyle = ref.watch(themeStyleProvider);
+    final isAlienHud = themeStyle == AppThemeStyle.alienHud;
+    final connectionStatus = ref.watch(connectionStatusProvider).value ?? ConnectionStatus.offline;
+
     final filtered = _items.where((i) {
       if (_searchQuery.isEmpty) return true;
       return i.name.toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('File Manager'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded),
-            tooltip: 'Refresh Directory',
-            onPressed: () => _loadDirectory(_currentPath),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.filesAccent,
-        foregroundColor: Colors.black,
-        icon: const Icon(Icons.upload_file_rounded),
-        label: const Text(
-          'Upload File',
-          style: TextStyle(fontWeight: FontWeight.w700),
-        ),
-        onPressed: _uploadFile,
-      ),
+      backgroundColor: colors.background,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            // Search Bar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: TextField(
-                controller: _searchController,
-                style: const TextStyle(color: AppColors.onSurface),
-                decoration: InputDecoration(
-                  hintText: 'Search files and folders...',
-                  prefixIcon: const Icon(Icons.search_rounded, color: AppColors.filesAccent),
-                  suffixIcon: _searchQuery.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear_rounded),
-                          onPressed: () {
-                            _searchController.clear();
-                            setState(() => _searchQuery = '');
-                          },
-                        )
-                      : null,
-                  filled: true,
-                  fillColor: AppColors.surfaceContainer,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: AppColors.outlineVariant),
+            Column(
+              children: [
+                // Top App Bar
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.arrow_back_ios_new_rounded, color: colors.onSurface, size: 20),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                      const SizedBox(width: 6),
+                      if (isAlienHud) const AlienEmblem(size: 30),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'WINTROLLER',
+                              style: isAlienHud
+                                  ? GoogleFonts.orbitron(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w900,
+                                      color: colors.primary,
+                                      letterSpacing: 2.0,
+                                    )
+                                  : TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 18,
+                                      color: colors.onSurface,
+                                    ),
+                            ),
+                            Text(
+                              isAlienHud ? 'ALIEN REMOTE INTERFACE' : 'File Explorer',
+                              style: isAlienHud
+                                  ? GoogleFonts.orbitron(
+                                      fontSize: 8.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: colors.primary.withOpacity(0.7),
+                                      letterSpacing: 1.5,
+                                    )
+                                  : TextStyle(
+                                      fontSize: 12,
+                                      color: colors.onSurfaceVariant,
+                                    ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: colors.surfaceContainer,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: colors.primary, width: 0.8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: connectionStatus == ConnectionStatus.connected
+                                    ? colors.primary
+                                    : colors.error,
+                                boxShadow: [
+                                  BoxShadow(color: colors.primary.withOpacity(0.8), blurRadius: 4),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              connectionStatus == ConnectionStatus.connected ? 'CONNECTED' : 'OFFLINE',
+                              style: GoogleFonts.orbitron(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w800,
+                                color: connectionStatus == ConnectionStatus.connected
+                                    ? colors.primary
+                                    : colors.error,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                onChanged: (val) => setState(() => _searchQuery = val),
-              ),
-            ),
 
-            // Breadcrumb navigation header
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              color: AppColors.surfaceContainerLow,
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_upward_rounded, size: 20),
-                    tooltip: 'Parent Folder',
-                    onPressed: _currentPath == 'C:\\' ? null : _navigateUp,
+                // Breadcrumb Bar
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: colors.surfaceContainer,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: colors.primary.withOpacity(0.4), width: 0.8),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Text(
-                        _currentPath,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primary,
+                  child: Row(
+                    children: [
+                      Icon(Icons.storage_rounded, color: colors.primary, size: 18),
+                      const SizedBox(width: 8),
+                      if (_currentPath != 'C:\\')
+                        GestureDetector(
+                          onTap: _navigateUp,
+                          child: Icon(Icons.arrow_upward_rounded, color: colors.primary, size: 18),
                         ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Text(
+                            _currentPath.replaceAll('\\', ' / '),
+                            style: GoogleFonts.shareTechMono(
+                              fontSize: 13,
+                              color: colors.primary,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Search Bar
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: colors.surfaceContainer,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: colors.primary.withOpacity(0.4), width: 0.8),
+                    ),
+                    child: TextField(
+                      controller: _searchController,
+                      style: GoogleFonts.shareTechMono(color: colors.primary, fontSize: 13),
+                      decoration: InputDecoration(
+                        hintText: 'SEARCH_FILES_OR_FOLDERS...',
+                        hintStyle: GoogleFonts.shareTechMono(
+                          color: colors.primary.withOpacity(0.4),
+                          fontSize: 12,
+                          letterSpacing: 0.8,
+                        ),
+                        prefixIcon: Icon(Icons.search_rounded, color: colors.primary, size: 18),
+                        suffixIcon: _searchQuery.isNotEmpty
+                            ? IconButton(
+                                icon: Icon(Icons.clear_rounded, color: colors.primary, size: 18),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  setState(() => _searchQuery = '');
+                                },
+                              )
+                            : null,
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      ),
+                      onChanged: (val) => setState(() => _searchQuery = val),
+                    ),
+                  ),
+                ),
+
+                // File Table List with NAME / SIZE / ACT Header
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    child: HudFrame(
+                      chamferSize: 14,
+                      borderColor: colors.primary,
+                      backgroundColor: colors.surfaceContainer,
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        children: [
+                          // Table Header
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  flex: 6,
+                                  child: Text(
+                                    'NAME',
+                                    style: GoogleFonts.shareTechMono(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: colors.onSurfaceVariant,
+                                      letterSpacing: 1.2,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 3,
+                                  child: Text(
+                                    'SIZE',
+                                    style: GoogleFonts.shareTechMono(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: colors.onSurfaceVariant,
+                                      letterSpacing: 1.2,
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  'ACT',
+                                  style: GoogleFonts.shareTechMono(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: colors.onSurfaceVariant,
+                                    letterSpacing: 1.2,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Divider(color: colors.outlineVariant, height: 1),
+
+                          // File List
+                          Expanded(
+                            child: _isLoading
+                                ? Center(child: CircularProgressIndicator(color: colors.primary))
+                                : filtered.isEmpty
+                                    ? Center(
+                                        child: Text(
+                                          'NO_FILES_DETECTED',
+                                          style: GoogleFonts.shareTechMono(
+                                            color: colors.onSurfaceVariant,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      )
+                                    : ListView.separated(
+                                        padding: const EdgeInsets.symmetric(vertical: 4),
+                                        itemCount: filtered.length,
+                                        separatorBuilder: (_, __) => Divider(
+                                          color: colors.outlineVariant.withOpacity(0.4),
+                                          height: 1,
+                                        ),
+                                        itemBuilder: (context, index) {
+                                          final item = filtered[index];
+                                          final icon = _getFileIcon(item);
+
+                                          return InkWell(
+                                            onTap: () {
+                                              if (item.isDirectory) {
+                                                _loadDirectory(item.path);
+                                              } else {
+                                                _openFileDetail(item);
+                                              }
+                                            },
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    icon,
+                                                    color: colors.primary,
+                                                    size: 18,
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Expanded(
+                                                    flex: 6,
+                                                    child: Text(
+                                                      item.name,
+                                                      style: GoogleFonts.shareTechMono(
+                                                        fontSize: 12.5,
+                                                        fontWeight: FontWeight.w600,
+                                                        color: item.isDirectory
+                                                            ? colors.primary
+                                                            : colors.onSurface,
+                                                      ),
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                  ),
+                                                  Expanded(
+                                                    flex: 3,
+                                                    child: Text(
+                                                      item.isDirectory ? '--' : item.formattedSize,
+                                                      style: GoogleFonts.shareTechMono(
+                                                        fontSize: 11,
+                                                        color: colors.onSurfaceVariant,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  IconButton(
+                                                    icon: Icon(Icons.more_vert_rounded, color: colors.primary, size: 18),
+                                                    padding: EdgeInsets.zero,
+                                                    constraints: const BoxConstraints(),
+                                                    onPressed: () => _openFileDetail(item),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
+                ),
 
-            // Quick Folder Access Shortcuts
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Row(
-                children: [
-                  _QuickPathChip(
-                    label: 'C: Drive',
-                    icon: Icons.storage_rounded,
-                    onTap: () => _loadDirectory('C:\\'),
-                  ),
-                  const SizedBox(width: 8),
-                  _QuickPathChip(
-                    label: 'Downloads',
-                    icon: Icons.download_rounded,
-                    onTap: () => _loadDirectory('C:\\Users\\Default\\Downloads\\'),
-                  ),
-                  const SizedBox(width: 8),
-                  _QuickPathChip(
-                    label: 'Documents',
-                    icon: Icons.folder_shared_rounded,
-                    onTap: () => _loadDirectory('C:\\Users\\Default\\Documents\\'),
-                  ),
-                  const SizedBox(width: 8),
-                  _QuickPathChip(
-                    label: 'Desktop',
-                    icon: Icons.desktop_windows_rounded,
-                    onTap: () => _loadDirectory('C:\\Users\\Default\\Desktop\\'),
-                  ),
-                ],
-              ),
-            ),
-
-            // Files & Folders List
-            Expanded(
-              child: _isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(color: AppColors.filesAccent),
-                    )
-                  : filtered.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.folder_open_rounded,
-                                size: 54,
-                                color: AppColors.onSurfaceVariant.withOpacity(0.4),
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                _searchQuery.isNotEmpty
-                                    ? 'No matches found'
-                                    : 'Directory is empty',
-                                style: const TextStyle(
-                                  color: AppColors.onSurfaceVariant,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
+                // Bottom Sci-Fi Cybernetic Dock
+                if (isAlienHud)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    child: HudFrame(
+                      chamferSize: 14,
+                      borderColor: colors.primary,
+                      backgroundColor: colors.surfaceContainer,
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          IconButton(
+                            icon: HudRadarCircle(
+                              size: 24,
+                              color: colors.primary,
+                              child: Icon(Icons.gps_fixed_rounded, color: colors.primary, size: 12),
+                            ),
+                            onPressed: () => Navigator.of(context).pop(),
                           ),
-                        )
-                      : ListView.separated(
-                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
-                          itemCount: filtered.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 8),
-                          itemBuilder: (context, index) {
-                            final item = filtered[index];
-                            final icon = _getFileIcon(item);
+                          IconButton(
+                            icon: Icon(Icons.folder_open_rounded, color: colors.primary, size: 24),
+                            onPressed: () {},
+                          ),
+                          GestureDetector(
+                            onTap: _uploadFile,
+                            child: HudRadarCircle(
+                              size: 44,
+                              color: colors.primary,
+                              child: const AlienEmblem(size: 26, hasGlow: true),
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.bar_chart_rounded, color: colors.primary, size: 24),
+                            onPressed: () {},
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.settings_outlined, color: colors.primary, size: 24),
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
 
-                            return Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: () {
-                                  if (item.isDirectory) {
-                                    _loadDirectory(item.path);
-                                  } else {
-                                    _openFileDetail(item);
-                                  }
-                                },
-                                borderRadius: BorderRadius.circular(16),
-                                child: Ink(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.surfaceContainer,
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color: AppColors.outlineVariant.withOpacity(0.6),
-                                      width: 0.8,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(10),
-                                        decoration: BoxDecoration(
-                                          color: item.isDirectory
-                                              ? AppColors.primaryContainer.withOpacity(0.15)
-                                              : AppColors.filesAccent.withOpacity(0.15),
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: Icon(
-                                          icon,
-                                          color: item.isDirectory
-                                              ? AppColors.primaryContainer
-                                              : AppColors.filesAccent,
-                                          size: 24,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 14),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              item.name,
-                                              style: const TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w700,
-                                                color: AppColors.onSurface,
-                                              ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              item.formattedSize,
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                                color: AppColors.onSurfaceVariant,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      if (item.isDirectory)
-                                        const Icon(
-                                          Icons.chevron_right_rounded,
-                                          color: AppColors.onSurfaceVariant,
-                                        )
-                                      else
-                                        IconButton(
-                                          icon: const Icon(
-                                            Icons.download_rounded,
-                                            color: AppColors.filesAccent,
-                                          ),
-                                          onPressed: () => _downloadFile(item),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+            // Floating Glowing + Upload Button (matching bottom-right of screenshot)
+            Positioned(
+              right: 28,
+              bottom: 80,
+              child: GestureDetector(
+                onTap: _uploadFile,
+                child: Container(
+                  width: 54,
+                  height: 54,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: colors.primary,
+                    boxShadow: [
+                      BoxShadow(
+                        color: colors.primary.withOpacity(0.7),
+                        blurRadius: 16,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.add_rounded,
+                    color: Colors.black,
+                    size: 34,
+                  ),
+                ),
+              ),
             ),
           ],
         ),
       ),
-    );
-  }
-}
-
-class _QuickPathChip extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _QuickPathChip({
-    required this.label,
-    required this.icon,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ActionChip(
-      backgroundColor: AppColors.surfaceContainerHigh,
-      side: const BorderSide(color: AppColors.outlineVariant, width: 0.8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      avatar: Icon(icon, size: 16, color: AppColors.primary),
-      label: Text(
-        label,
-        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.onSurface),
-      ),
-      onPressed: onTap,
     );
   }
 }

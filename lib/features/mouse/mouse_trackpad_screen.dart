@@ -2,8 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../providers/app_providers.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/hud_frame.dart';
 
 class MouseTrackpadScreen extends ConsumerStatefulWidget {
   const MouseTrackpadScreen({super.key});
@@ -86,15 +88,17 @@ class _MouseTrackpadScreenState extends ConsumerState<MouseTrackpadScreen> {
   }
 
   void _showSensitivityDialog() {
+    final colors = AppColors.of(context);
+
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setDialogState) {
           return AlertDialog(
-            backgroundColor: AppColors.surfaceContainerHigh,
-            title: const Text(
+            backgroundColor: colors.surfaceContainerHigh,
+            title: Text(
               'Trackpad Sensitivity',
-              style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.onSurface),
+              style: TextStyle(fontWeight: FontWeight.w700, color: colors.onSurface),
             ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -102,12 +106,12 @@ class _MouseTrackpadScreenState extends ConsumerState<MouseTrackpadScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Speed Multiplier', style: TextStyle(color: AppColors.onSurfaceVariant)),
+                    Text('Speed Multiplier', style: TextStyle(color: colors.onSurfaceVariant)),
                     Text(
                       '${_sensitivity.toStringAsFixed(1)}x',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w700,
-                        color: AppColors.mouseAccent,
+                        color: colors.primary,
                       ),
                     ),
                   ],
@@ -116,8 +120,8 @@ class _MouseTrackpadScreenState extends ConsumerState<MouseTrackpadScreen> {
                   value: _sensitivity,
                   min: 0.5,
                   max: 3.5,
-                  activeColor: AppColors.mouseAccent,
-                  inactiveColor: AppColors.surfaceContainerHighest,
+                  activeColor: colors.primary,
+                  inactiveColor: colors.surfaceContainerHighest,
                   onChanged: (val) {
                     setDialogState(() => _sensitivity = val);
                     setState(() => _sensitivity = val);
@@ -128,7 +132,7 @@ class _MouseTrackpadScreenState extends ConsumerState<MouseTrackpadScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('Done', style: TextStyle(color: AppColors.mouseAccent)),
+                child: Text('Done', style: TextStyle(color: colors.primary)),
               ),
             ],
           );
@@ -145,40 +149,110 @@ class _MouseTrackpadScreenState extends ConsumerState<MouseTrackpadScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final themeStyle = ref.watch(themeStyleProvider);
+    final isAlienHud = themeStyle == AppThemeStyle.alienHud;
     final repo = ref.watch(pcRemoteRepositoryProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Trackpad'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.tune_rounded),
-            tooltip: 'Trackpad Sensitivity',
-            onPressed: _showSensitivityDialog,
-          ),
-        ],
-      ),
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Column(
           children: [
-            // Gesture hint header
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            // Top Bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
                 children: [
-                  _GestureHint(icon: Icons.touch_app_rounded, label: 'Tap: Left Click'),
-                  _GestureHint(icon: Icons.touch_app_rounded, label: '2-Finger: Right Click'),
-                  _GestureHint(icon: Icons.swap_vert_rounded, label: '2-Finger: Scroll'),
+                  IconButton(
+                    icon: Icon(Icons.arrow_back_ios_new_rounded, color: colors.onSurface, size: 20),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'WINTROLLER',
+                          style: isAlienHud
+                              ? GoogleFonts.orbitron(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                  color: colors.primary,
+                                  letterSpacing: 2.0,
+                                )
+                              : TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 18,
+                                  color: colors.onSurface,
+                                ),
+                        ),
+                        Text(
+                          isAlienHud ? 'MOUSE & TRACKPAD' : 'Wireless Touchpad',
+                          style: isAlienHud
+                              ? GoogleFonts.orbitron(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w700,
+                                  color: colors.primary.withOpacity(0.7),
+                                  letterSpacing: 1.5,
+                                )
+                              : TextStyle(
+                                  fontSize: 12,
+                                  color: colors.onSurfaceVariant,
+                                ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: colors.surfaceContainer,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: colors.primary, width: 0.8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: colors.primary,
+                            boxShadow: [
+                              BoxShadow(color: colors.primary.withOpacity(0.8), blurRadius: 4),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'ACTIVE',
+                          style: GoogleFonts.orbitron(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w800,
+                            color: colors.primary,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  IconButton(
+                    icon: Icon(Icons.tune_rounded, color: colors.onSurface, size: 20),
+                    tooltip: 'Sensitivity',
+                    onPressed: _showSensitivityDialog,
+                  ),
                 ],
               ),
             ),
 
-            // Fullscreen Touchpad Area
+            // Main Touchpad Area
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
                 child: Listener(
                   onPointerDown: _onPointerDown,
                   onPointerUp: _onPointerUp,
@@ -188,120 +262,166 @@ class _MouseTrackpadScreenState extends ConsumerState<MouseTrackpadScreen> {
                     onPanUpdate: _handlePanUpdate,
                     onTap: _handleTap,
                     onDoubleTap: _handleDoubleTap,
-                    child: Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceContainer,
-                        borderRadius: BorderRadius.circular(28),
-                        border: Border.all(
-                          color: _pointerCount > 0
-                              ? AppColors.mouseAccent
-                              : AppColors.outlineVariant,
-                          width: _pointerCount > 0 ? 1.5 : 1,
-                        ),
-                        boxShadow: _pointerCount > 0
-                            ? [
-                                BoxShadow(
-                                  color: AppColors.mouseAccent.withOpacity(0.12),
-                                  blurRadius: 16,
-                                  spreadRadius: 2,
-                                )
-                              ]
-                            : null,
-                      ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.gesture_rounded,
-                                size: 54,
-                                color: AppColors.onSurfaceVariant.withOpacity(0.3),
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                'Slide finger to move mouse pointer',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: AppColors.onSurfaceVariant.withOpacity(0.5),
-                                  fontWeight: FontWeight.w500,
+                    child: isAlienHud
+                        ? HudFrame(
+                            chamferSize: 18,
+                            borderColor: colors.primary,
+                            backgroundColor: colors.surfaceContainer,
+                            padding: const EdgeInsets.all(12),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                // Dotted Matrix Background Custom Painter
+                                CustomPaint(
+                                  size: Size.infinite,
+                                  painter: _DottedMatrixPainter(
+                                    dotColor: colors.primary.withOpacity(0.18),
+                                  ),
                                 ),
+
+                                // Top Pill Tag: GESTURE SURFACE
+                                Positioned(
+                                  top: 10,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: colors.surfaceContainerLowest.withOpacity(0.8),
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
+                                        color: colors.primary.withOpacity(0.35),
+                                        width: 0.8,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.touch_app_rounded, color: colors.primary, size: 14),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          'GESTURE SURFACE',
+                                          style: GoogleFonts.orbitron(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w700,
+                                            color: colors.primary.withOpacity(0.9),
+                                            letterSpacing: 1.4,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                // Center Delicate Crosshair
+                                Icon(
+                                  Icons.add_rounded,
+                                  size: 32,
+                                  color: colors.primary.withOpacity(0.35),
+                                ),
+                              ],
+                            ),
+                          )
+                        : Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: colors.surfaceContainer,
+                              borderRadius: BorderRadius.circular(28),
+                              border: Border.all(
+                                color: _pointerCount > 0
+                                    ? colors.primary
+                                    : colors.outlineVariant,
+                                width: _pointerCount > 0 ? 1.5 : 1,
                               ),
-                            ],
+                            ),
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.gesture_rounded,
+                                    size: 54,
+                                    color: colors.onSurfaceVariant.withOpacity(0.3),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    'Slide finger to move mouse pointer',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: colors.onSurfaceVariant.withOpacity(0.5),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                        ],
-                      ),
-                    ),
                   ),
                 ),
               ),
             ),
 
-            // Bottom Left & Right Click physical buttons
+            // Bottom L-CLICK and R-CLICK Pods
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: SizedBox(
-                height: 64,
+                height: 72,
                 child: Row(
                   children: [
+                    // L-CLICK
                     Expanded(
-                      flex: 6,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.surfaceContainerHigh,
-                          foregroundColor: AppColors.onSurface,
-                          elevation: 0,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.horizontal(
-                              left: Radius.circular(20),
+                      child: isAlienHud
+                          ? _AlienClickButton(
+                              label: 'L-CLICK',
+                              icon: Icons.mouse_rounded,
+                              onTap: () {
+                                _triggerHaptic();
+                                repo.sendMouseClick('left');
+                              },
+                            )
+                          : ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: colors.surfaceContainerHigh,
+                                foregroundColor: colors.onSurface,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  side: BorderSide(color: colors.outlineVariant),
+                                ),
+                              ),
+                              onPressed: () {
+                                _triggerHaptic();
+                                repo.sendMouseClick('left');
+                              },
+                              child: const Text('LEFT CLICK', style: TextStyle(fontWeight: FontWeight.w700)),
                             ),
-                            side: BorderSide(color: AppColors.outlineVariant),
-                          ),
-                        ),
-                        onPressed: () {
-                          _triggerHaptic();
-                          repo.sendMouseClick('left');
-                        },
-                        child: const Text(
-                          'LEFT CLICK',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 12),
+                    // R-CLICK
                     Expanded(
-                      flex: 4,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.surfaceContainerHigh,
-                          foregroundColor: AppColors.onSurface,
-                          elevation: 0,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.horizontal(
-                              right: Radius.circular(20),
+                      child: isAlienHud
+                          ? _AlienClickButton(
+                              label: 'R-CLICK',
+                              icon: Icons.cloud_outlined,
+                              onTap: () {
+                                _triggerHaptic();
+                                repo.sendMouseClick('right');
+                              },
+                            )
+                          : ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: colors.surfaceContainerHigh,
+                                foregroundColor: colors.onSurface,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  side: BorderSide(color: colors.outlineVariant),
+                                ),
+                              ),
+                              onPressed: () {
+                                _triggerHaptic();
+                                repo.sendMouseClick('right');
+                              },
+                              child: const Text('RIGHT CLICK', style: TextStyle(fontWeight: FontWeight.w700)),
                             ),
-                            side: BorderSide(color: AppColors.outlineVariant),
-                          ),
-                        ),
-                        onPressed: () {
-                          _triggerHaptic();
-                          repo.sendMouseClick('right');
-                        },
-                        child: const Text(
-                          'RIGHT CLICK',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
                     ),
                   ],
                 ),
@@ -314,28 +434,73 @@ class _MouseTrackpadScreenState extends ConsumerState<MouseTrackpadScreen> {
   }
 }
 
-class _GestureHint extends StatelessWidget {
-  final IconData icon;
+class _AlienClickButton extends StatelessWidget {
   final String label;
+  final IconData icon;
+  final VoidCallback onTap;
 
-  const _GestureHint({required this.icon, required this.label});
+  const _AlienClickButton({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 14, color: AppColors.mouseAccent),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 11,
-            color: AppColors.onSurfaceVariant,
-            fontWeight: FontWeight.w600,
+    final colors = AppColors.of(context);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        splashColor: colors.primary.withOpacity(0.2),
+        child: HudFrame(
+          chamferSize: 12,
+          borderColor: colors.primary.withOpacity(0.7),
+          backgroundColor: colors.surfaceContainer,
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: colors.primary, size: 22),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: GoogleFonts.orbitron(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: colors.primary,
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
+}
+
+class _DottedMatrixPainter extends CustomPainter {
+  final Color dotColor;
+
+  _DottedMatrixPainter({required this.dotColor});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = dotColor
+      ..style = PaintingStyle.fill;
+
+    const spacing = 18.0;
+    for (double x = 12; x < size.width - 12; x += spacing) {
+      for (double y = 12; y < size.height - 12; y += spacing) {
+        canvas.drawCircle(Offset(x, y), 0.9, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
