@@ -1,14 +1,12 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'features/dashboard/dashboard_screen.dart';
-import 'features/nova/nova_assistant_screen.dart';
 import 'features/onboarding/onboarding_screen.dart';
 import 'features/pairing/pairing_discover_screen.dart';
 import 'providers/app_providers.dart';
-import 'services/nova_voice_service.dart';
 import 'services/storage_service.dart';
 import 'theme/app_theme.dart';
+import 'widgets/floating_nova_button.dart';
 
 final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -37,7 +35,6 @@ class WintrollerApp extends ConsumerStatefulWidget {
 
 class _WintrollerAppState extends ConsumerState<WintrollerApp> {
   late final Widget _initialHome;
-  StreamSubscription? _globalWakeWordSub;
 
   @override
   void initState() {
@@ -47,35 +44,7 @@ class _WintrollerAppState extends ConsumerState<WintrollerApp> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _autoConnectIfAvailable();
-      _initGlobalWakeWordListener();
     });
-  }
-
-  void _initGlobalWakeWordListener() {
-    final voice = ref.read(novaVoiceServiceProvider);
-    final isWakeWordEnabled = ref.read(wakeWordEnabledProvider);
-
-    if (isWakeWordEnabled) {
-      voice.startGlobalWakeWordMonitoring();
-    }
-
-    _globalWakeWordSub = voice.wakeWordTriggerStream.listen((followUpCommand) {
-      final nav = appNavigatorKey.currentState;
-      if (nav == null) return;
-
-      // When "Hey Nova" is heard from ANY screen in the app, open Nova Assistant
-      nav.push(
-        MaterialPageRoute(
-          builder: (_) => NovaAssistantScreen(initialCommand: followUpCommand),
-        ),
-      );
-    });
-  }
-
-  @override
-  void dispose() {
-    _globalWakeWordSub?.cancel();
-    super.dispose();
   }
 
   void _autoConnectIfAvailable() {
@@ -135,6 +104,14 @@ class _WintrollerAppState extends ConsumerState<WintrollerApp> {
       darkTheme: activeDarkTheme,
       themeMode: themeMode,
       home: _initialHome,
+      builder: (context, child) {
+        return Stack(
+          children: [
+            if (child != null) child,
+            const GlobalFloatingNovaButton(),
+          ],
+        );
+      },
     );
   }
 }

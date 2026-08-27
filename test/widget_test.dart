@@ -23,7 +23,8 @@ void main() {
       ),
     );
 
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
 
     // Check that onboarding screen or pairing screen rendered
     expect(find.byType(MaterialApp), findsOneWidget);

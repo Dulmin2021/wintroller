@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../providers/app_providers.dart';
 import '../../services/nova_voice_service.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/floating_nova_button.dart';
 import '../nova/nova_assistant_screen.dart';
 import '../onboarding/onboarding_screen.dart';
 import '../pro/pro_plan_provider.dart';
@@ -136,19 +137,19 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                   Divider(color: colors.outlineVariant, height: 1),
                   SwitchListTile(
-                    secondary: Icon(Icons.record_voice_over_rounded, color: colors.primary),
+                    secondary: Icon(Icons.touch_app_rounded, color: colors.primary),
                     title: Text(
-                      '"Hey Nova" Voice Wake Word',
+                      'Floating Nova AI Button',
                       style: TextStyle(fontWeight: FontWeight.w600, color: colors.onSurface),
                     ),
                     subtitle: Text(
-                      'Wake up Nova hands-free by saying "Hey Nova"',
+                      'Floating draggable orb on all screens to wake Nova instantly',
                       style: TextStyle(color: colors.onSurfaceVariant, fontSize: 12),
                     ),
-                    value: ref.watch(wakeWordEnabledProvider),
+                    value: ref.watch(floatingNovaButtonEnabledProvider),
                     activeColor: colors.primary,
                     onChanged: (val) {
-                      ref.read(wakeWordEnabledProvider.notifier).state = val;
+                      ref.read(floatingNovaButtonEnabledProvider.notifier).state = val;
                     },
                   ),
                 ],
