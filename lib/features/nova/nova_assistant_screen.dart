@@ -2,11 +2,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../../services/gemini_service.dart';
 import '../../services/nova_voice_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/alien_icons.dart';
 import '../../widgets/hud_frame.dart';
+import '../../widgets/nova_voice_wave_visualizer.dart';
 import '../pro/pro_plan_provider.dart';
 import '../pro/pro_upgrade_screen.dart';
 
@@ -37,24 +39,25 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   late final AnimationController _pulseController;
-  late final AnimationController _waveController;
 
   final List<NovaMessage> _messages = [];
   bool _isProcessing = false;
   bool _isListening = false;
+  bool _isSpeaking = false;
   String _liveSpeechText = '';
   double _soundLevel = 0.0;
 
   StreamSubscription? _soundSub;
   StreamSubscription? _listeningSub;
+  StreamSubscription? _speakingSub;
 
   final List<String> _quickPrompts = [
-    'Night Mode: Display off & mute',
-    'Set master volume to 30%',
-    'Check PC battery and load',
-    'Turn OFF Wi-Fi and Bluetooth',
-    'Turn ON Display and unmute',
-    'Lock Windows Workspace',
+    'NIGHT MODE',
+    'CHECK TELEMETRY',
+    'SET VOLUME 30%',
+    'TURN OFF WI-FI & BT',
+    'DIM DISPLAY',
+    'LOCK WORKSPACE',
   ];
 
   @override
@@ -63,11 +66,6 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1800),
-    )..repeat(reverse: true);
-
-    _waveController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
     )..repeat(reverse: true);
 
     // Initial greeting
@@ -79,7 +77,6 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
       ),
     );
 
-    // Speak initial greeting if voice is enabled
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final voice = ref.read(novaVoiceServiceProvider);
       final isMuted = ref.read(voiceMutedProvider);
@@ -108,16 +105,24 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
         });
       }
     });
+
+    _speakingSub = voice.speakingStateStream.listen((isSpeaking) {
+      if (mounted) {
+        setState(() {
+          _isSpeaking = isSpeaking;
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
     _soundSub?.cancel();
     _listeningSub?.cancel();
+    _speakingSub?.cancel();
     _inputController.dispose();
     _scrollController.dispose();
     _pulseController.dispose();
-    _waveController.dispose();
     super.dispose();
   }
 
@@ -240,9 +245,9 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
     final isVoiceMuted = ref.watch(voiceMutedProvider);
 
     return Scaffold(
-      backgroundColor: colors.background,
+      backgroundColor: const Color(0xFF0C0F14),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0xFF0C0F14),
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: colors.primary, size: 20),
@@ -284,9 +289,9 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
                 Row(
                   children: [
                     Text(
-                      'NOVA VOICE AI',
+                      'WINTROLLER NOVA',
                       style: GoogleFonts.orbitron(
-                        fontSize: 15,
+                        fontSize: 14,
                         fontWeight: FontWeight.w900,
                         color: colors.primary,
                         letterSpacing: 1.5,
@@ -303,7 +308,7 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
                       child: Text(
                         'PRO',
                         style: GoogleFonts.orbitron(
-                          fontSize: 9,
+                          fontSize: 8.5,
                           fontWeight: FontWeight.w900,
                           color: colors.primary,
                         ),
@@ -313,9 +318,9 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
                 ),
                 Text(
                   _isListening
-                      ? 'LISTENING TO VOICE...'
+                      ? 'VOICE FREQUENCY SYNCED'
                       : (_isProcessing ? 'PROCESSING PROTOCOL...' : 'GEMINI NEURAL CO-PILOT'),
-                  style: GoogleFonts.rajdhani(
+                  style: GoogleFonts.shareTechMono(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
                     color: _isListening
@@ -329,7 +334,6 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
           ],
         ),
         actions: [
-          // Voice Response Audio Mute / Unmute Toggle
           IconButton(
             icon: Icon(
               isVoiceMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
@@ -358,7 +362,7 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
       body: SafeArea(
         child: Column(
           children: [
-            // Pro API Key Warning Banner if missing
+            // Pro API Key Notice Banner if missing
             if (!proState.isPro && (proState.geminiApiKey == null || proState.geminiApiKey!.isEmpty))
               GestureDetector(
                 onTap: () {
@@ -367,180 +371,164 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
                   );
                 },
                 child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFD600).withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: const Color(0xFFFFD600).withOpacity(0.5), width: 0.8),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.lock_clock_rounded, color: Color(0xFFFFD600), size: 16),
+                      const Icon(Icons.lock_clock_rounded, color: Color(0xFFFFD600), size: 14),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           'Configure Gemini API Key in Pro Settings for unmetered direct access.',
-                          style: GoogleFonts.rajdhani(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFFFFD600),
-                          ),
+                          style: GoogleFonts.shareTechMono(fontSize: 11, color: const Color(0xFFFFD600)),
                         ),
                       ),
-                      const Icon(Icons.chevron_right_rounded, color: Color(0xFFFFD600), size: 16),
                     ],
                   ),
                 ),
               ),
 
-            // Top Holographic AI Core (Tap to toggle Voice Listening)
+            // 1. Stitch Shader Voice Wave Visualizer Card (SYS_VIZ)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: HudFrame(
-                chamferSize: 10,
-                borderColor: _isListening
-                    ? const Color(0xFFFF3366)
-                    : colors.primary.withOpacity(0.6),
-                backgroundColor: colors.surfaceContainer.withOpacity(0.5),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: _toggleVoiceListening,
-                      child: AnimatedBuilder(
-                        animation: _pulseController,
-                        builder: (context, child) {
-                          final scale = _isListening
-                              ? 1.0 + (_soundLevel.clamp(0.0, 10.0) / 25.0)
-                              : (1.0 + 0.08 * _pulseController.value);
-                          return Transform.scale(
-                            scale: scale,
-                            child: Container(
-                              padding: const EdgeInsets.all(6),
+              child: GestureDetector(
+                onTap: _toggleVoiceListening,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF13171F),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: _isListening
+                          ? const Color(0xFFFF3366).withOpacity(0.8)
+                          : colors.primary.withOpacity(0.5),
+                      width: 1.2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: (_isListening ? const Color(0xFFFF3366) : colors.primary).withOpacity(0.15),
+                        blurRadius: 16,
+                      ),
+                    ],
+                  ),
+                  child: Stack(
+                    children: [
+                      // SYS_VIZ Top Left Label
+                      Positioned(
+                        top: 8,
+                        left: 12,
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: _isListening
-                                    ? const Color(0xFFFF3366).withOpacity(0.2)
-                                    : colors.primary.withOpacity(0.1),
-                                border: Border.all(
-                                  color: _isListening ? const Color(0xFFFF3366) : colors.primary,
-                                  width: 1.5,
-                                ),
-                              ),
-                              child: Icon(
-                                _isListening ? Icons.mic_rounded : Icons.psychology_rounded,
                                 color: _isListening ? const Color(0xFFFF3366) : colors.primary,
-                                size: 20,
                               ),
                             ),
-                          );
-                        },
+                            const SizedBox(width: 6),
+                            Text(
+                              'SYS_VIZ // VOICE WAVE HARMONICS',
+                              style: GoogleFonts.orbitron(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w900,
+                                color: _isListening ? const Color(0xFFFF3366) : colors.primary.withOpacity(0.8),
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _isListening ? 'VOICE FREQUENCY ENGAGED' : 'NOVA TACTICAL PROTOCOLS',
+                      // Top Right Frequency Status
+                      Positioned(
+                        top: 8,
+                        right: 12,
+                        child: Text(
+                          _isListening
+                              ? 'MIC: ACTIVE (${_soundLevel.toStringAsFixed(1)} dB)'
+                              : (_isSpeaking ? 'TTS: SPEAKING' : 'STANDBY'),
+                          style: GoogleFonts.shareTechMono(
+                            fontSize: 9.5,
+                            color: _isListening ? const Color(0xFFFF3366) : colors.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                      // The 5-Harmonic Voice Wave Visualizer Canvas
+                      Padding(
+                        padding: const EdgeInsets.only(top: 24, bottom: 8),
+                        child: NovaVoiceWaveVisualizer(
+                          soundLevel: _soundLevel,
+                          isListening: _isListening,
+                          isSpeaking: _isSpeaking,
+                          primaryColor: _isListening ? const Color(0xFFFF3366) : colors.primary,
+                          height: 120,
+                        ),
+                      ),
+                      // Bottom Centered Status Indicator
+                      Positioned(
+                        bottom: 6,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: Text(
+                            _isListening
+                                ? (_liveSpeechText.isNotEmpty ? '🎙️ "$_liveSpeechText"' : 'LISTENING TO VOICE FREQUENCY...')
+                                : 'TAP SCREEN OR MIC TO TRANSMIT VOICE PROTOCOL',
                             style: GoogleFonts.orbitron(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w900,
-                              color: _isListening ? const Color(0xFFFF3366) : colors.primary,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                              color: _isListening ? Colors.white : colors.primary.withOpacity(0.6),
                               letterSpacing: 1.0,
                             ),
                           ),
-                          Text(
-                            _isListening
-                                ? (_liveSpeechText.isNotEmpty ? '"$_liveSpeechText"' : 'Speak command now...')
-                                : 'Automated hardware, audio, brightness & power co-pilot',
-                            style: GoogleFonts.shareTechMono(
-                              fontSize: 11,
-                              color: _isListening ? colors.onSurface : colors.onSurfaceVariant,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        _isListening ? Icons.stop_circle_rounded : Icons.mic_rounded,
-                        color: _isListening ? const Color(0xFFFF3366) : colors.primary,
-                        size: 22,
-                      ),
-                      tooltip: _isListening ? 'Stop Voice' : 'Start Voice Input',
-                      onPressed: _toggleVoiceListening,
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
 
-            // Live Voice Waveform Bar (shown while listening)
-            if (_isListening)
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFF3366).withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFFF3366).withOpacity(0.6), width: 1.0),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.mic_none_rounded, color: Color(0xFFFF3366), size: 18),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        _liveSpeechText.isNotEmpty
-                            ? _liveSpeechText
-                            : 'Listening to your voice command...',
-                        style: GoogleFonts.shareTechMono(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
+            // 2. Terminal Log Section (TERMINAL LOG [ACTIVE])
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 6, 16, 2),
+              child: Row(
+                children: [
+                  Text(
+                    'TERMINAL LOG [ACTIVE]',
+                    style: GoogleFonts.orbitron(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      color: colors.primary.withOpacity(0.5),
+                      letterSpacing: 1.2,
                     ),
-                    const SizedBox(width: 8),
-                    // Sound Wave Bars Animation
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: List.generate(4, (i) {
-                        return AnimatedBuilder(
-                          animation: _waveController,
-                          builder: (context, child) {
-                            final h = 6.0 + ((i + 1) * 3.5) * (_waveController.value + (_soundLevel / 10.0)).clamp(0.2, 1.2);
-                            return Container(
-                              width: 3,
-                              height: h.clamp(4.0, 20.0),
-                              margin: const EdgeInsets.symmetric(horizontal: 1.5),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFF3366),
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                            );
-                          },
-                        );
-                      }),
+                  ),
+                  const Spacer(),
+                  Text(
+                    'AUTO_SYNC ON',
+                    style: GoogleFonts.shareTechMono(
+                      fontSize: 9.5,
+                      color: colors.primary.withOpacity(0.4),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+            ),
 
             // Chat Messages Stream
             Expanded(
               child: ListView.builder(
                 controller: _scrollController,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 itemCount: _messages.length,
                 itemBuilder: (context, index) {
                   final msg = _messages[index];
-                  return _NovaMessageBubble(
+                  return _NovaTerminalMessage(
                     message: msg,
                     onSpeak: () {
                       ref.read(novaVoiceServiceProvider).speak(msg.text);
@@ -550,9 +538,9 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
               ),
             ),
 
-            // Quick Prompt Chips
+            // 3. Quick Action Chips (Stitch HUD style)
             SizedBox(
-              height: 36,
+              height: 38,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -562,15 +550,16 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: ActionChip(
-                      backgroundColor: colors.surfaceContainer,
-                      side: BorderSide(color: colors.primary.withOpacity(0.4), width: 0.8),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      backgroundColor: const Color(0xFF13171F),
+                      side: BorderSide(color: colors.primary.withOpacity(0.4), width: 1.0),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       label: Text(
                         prompt,
-                        style: GoogleFonts.rajdhani(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w700,
+                        style: GoogleFonts.orbitron(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
                           color: colors.primary,
+                          letterSpacing: 0.8,
                         ),
                       ),
                       onPressed: _isProcessing ? null : () => _handleSend(prompt),
@@ -582,7 +571,7 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
 
             const SizedBox(height: 6),
 
-            // Bottom Input Bar with Mic & Send
+            // 4. Futuristic Bottom Input Bar with Mic & Send
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               child: Row(
@@ -595,58 +584,59 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
                         color: colors.onSurface,
                       ),
                       decoration: InputDecoration(
-                        hintText: 'Voice or text: "Volume 40%", "Night mode"...',
-                        hintStyle: GoogleFonts.rajdhani(
-                          fontSize: 13,
-                          color: colors.onSurfaceVariant.withOpacity(0.5),
+                        hintText: 'TYPE COMMAND OR TAP MIC...',
+                        hintStyle: GoogleFonts.orbitron(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: colors.primary.withOpacity(0.35),
+                          letterSpacing: 0.8,
                         ),
                         isDense: true,
                         filled: true,
-                        fillColor: colors.background,
+                        fillColor: const Color(0xFF13171F),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide(color: colors.outlineVariant),
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(color: colors.primary.withOpacity(0.4)),
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide(color: colors.outlineVariant),
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(color: colors.primary.withOpacity(0.3)),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide(color: colors.primary, width: 1.4),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                       ),
                       onSubmitted: (_) => _handleSend(),
                     ),
                   ),
                   const SizedBox(width: 8),
-                  // Mic Button (Voice Input Toggle)
+                  // Glowing Futuristic Mic Button
                   GestureDetector(
                     onTap: _toggleVoiceListening,
                     child: Container(
-                      padding: const EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(11),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: _isListening
                             ? const Color(0xFFFF3366)
-                            : colors.surfaceContainer,
+                            : const Color(0xFF13171F),
                         border: Border.all(
                           color: _isListening ? const Color(0xFFFF3366) : colors.primary,
-                          width: 1.2,
+                          width: 1.4,
                         ),
                         boxShadow: [
-                          if (_isListening)
-                            BoxShadow(
-                              color: const Color(0xFFFF3366).withOpacity(0.5),
-                              blurRadius: 10,
-                            ),
+                          BoxShadow(
+                            color: (_isListening ? const Color(0xFFFF3366) : colors.primary).withOpacity(0.4),
+                            blurRadius: 10,
+                          ),
                         ],
                       ),
                       child: Icon(
                         _isListening ? Icons.mic_rounded : Icons.mic_none_rounded,
                         color: _isListening ? Colors.white : colors.primary,
-                        size: 20,
+                        size: 22,
                       ),
                     ),
                   ),
@@ -684,11 +674,11 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
   }
 }
 
-class _NovaMessageBubble extends StatelessWidget {
+class _NovaTerminalMessage extends StatelessWidget {
   final NovaMessage message;
   final VoidCallback? onSpeak;
 
-  const _NovaMessageBubble({
+  const _NovaTerminalMessage({
     required this.message,
     this.onSpeak,
   });
@@ -697,42 +687,29 @@ class _NovaMessageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final isUser = message.isUser;
+    final timeStr = DateFormat('HH:mm:ss').format(message.timestamp);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Column(
         crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (!isUser) ...[
-                const AlienEmblem(size: 16, hasGlow: false),
-                const SizedBox(width: 6),
-                Text(
-                  'NOVA CO-PILOT',
-                  style: GoogleFonts.orbitron(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w800,
-                    color: colors.primary,
-                    letterSpacing: 1.0,
-                  ),
+              Text(
+                isUser ? 'USR_CMD // $timeStr' : 'SYS_RES // $timeStr',
+                style: GoogleFonts.shareTechMono(
+                  fontSize: 10,
+                  color: isUser ? colors.onSurfaceVariant.withOpacity(0.7) : colors.primary.withOpacity(0.8),
+                  letterSpacing: 0.8,
                 ),
+              ),
+              if (!isUser && onSpeak != null) ...[
                 const SizedBox(width: 6),
-                if (onSpeak != null)
-                  GestureDetector(
-                    onTap: onSpeak,
-                    child: Icon(Icons.volume_up_rounded, color: colors.primary.withOpacity(0.7), size: 14),
-                  ),
-              ] else ...[
-                Text(
-                  'YOU',
-                  style: GoogleFonts.orbitron(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w800,
-                    color: colors.onSurfaceVariant,
-                    letterSpacing: 1.0,
-                  ),
+                GestureDetector(
+                  onTap: onSpeak,
+                  child: Icon(Icons.volume_up_rounded, color: colors.primary.withOpacity(0.7), size: 14),
                 ),
               ],
             ],
@@ -740,18 +717,18 @@ class _NovaMessageBubble extends StatelessWidget {
           const SizedBox(height: 4),
           Container(
             constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.84,
+              maxWidth: MediaQuery.of(context).size.width * 0.86,
             ),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               color: isUser
-                  ? colors.primaryContainer.withOpacity(0.2)
-                  : colors.surfaceContainer,
-              borderRadius: BorderRadius.circular(14),
+                  ? const Color(0xFF161B22)
+                  : const Color(0xFF0F141C),
+              borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: isUser
-                    ? colors.primary.withOpacity(0.5)
-                    : (message.isError ? colors.error : colors.primary.withOpacity(0.4)),
+                    ? colors.primary.withOpacity(0.3)
+                    : (message.isError ? colors.error : colors.primary.withOpacity(0.6)),
                 width: 1,
               ),
             ),
@@ -759,17 +736,15 @@ class _NovaMessageBubble extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  message.text,
+                  isUser ? '> ${message.text}' : message.text,
                   style: isUser
                       ? GoogleFonts.shareTechMono(
                           fontSize: 13,
                           color: colors.onSurface,
                         )
-                      : GoogleFonts.rajdhani(
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w600,
-                          color: message.isError ? colors.error : colors.onSurface,
-                          letterSpacing: 0.2,
+                      : GoogleFonts.shareTechMono(
+                          fontSize: 13,
+                          color: message.isError ? colors.error : colors.primary,
                         ),
                 ),
                 if (message.executedActions.isNotEmpty) ...[
@@ -782,8 +757,8 @@ class _NovaMessageBubble extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
                           color: colors.primary.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: colors.primary.withOpacity(0.6), width: 0.6),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: colors.primary.withOpacity(0.7), width: 0.8),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -791,10 +766,10 @@ class _NovaMessageBubble extends StatelessWidget {
                             Icon(Icons.bolt_rounded, color: colors.primary, size: 12),
                             const SizedBox(width: 4),
                             Text(
-                              action.message,
-                              style: GoogleFonts.shareTechMono(
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w700,
+                              action.message.toUpperCase(),
+                              style: GoogleFonts.orbitron(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w800,
                                 color: colors.primary,
                               ),
                             ),
