@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Contact Support - Wintroller</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#003824",
+                        "surface-tint": "#adc6ff",
+                        "primary-fixed": "#d8e2ff",
+                        "surface-container-highest": "#2d3449",
+                        "on-primary-container": "#00285d",
+                        "surface-dim": "#0b1326",
+                        "surface-container-low": "#131b2e",
+                        "surface-variant": "#2d3449",
+                        "on-primary-fixed": "#001a42",
+                        "on-tertiary-fixed": "#002113",
+                        "on-secondary-fixed": "#0b1c30",
+                        "secondary-container": "#3a4a5f",
+                        "on-primary-fixed-variant": "#004395",
+                        "on-primary": "#002e6a",
+                        "tertiary-container": "#00a572",
+                        "on-secondary-container": "#a9bad3",
+                        "primary-container": "#4d8eff",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "on-tertiary-container": "#00311f",
+                        "primary-fixed-dim": "#adc6ff",
+                        "tertiary-fixed": "#6ffbbe",
+                        "surface-bright": "#31394d",
+                        "surface-container": "#171f33",
+                        "background": "#0b1326",
+                        "error": "#ffb4ab",
+                        "surface": "#0b1326",
+                        "surface-container-high": "#222a3d",
+                        "on-error-container": "#ffdad6",
+                        "outline": "#8c909f",
+                        "tertiary": "#4edea3",
+                        "secondary": "#b7c8e1",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-surface": "#dae2fd",
+                        "on-secondary": "#213145",
+                        "surface-container-lowest": "#060e20",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "secondary-fixed": "#d3e4fe",
+                        "inverse-on-surface": "#283044",
+                        "on-surface-variant": "#c2c6d6",
+                        "error-container": "#93000a",
+                        "primary": "#adc6ff",
+                        "inverse-surface": "#dae2fd",
+                        "inverse-primary": "#005ac2",
+                        "on-background": "#dae2fd",
+                        "on-error": "#690005",
+                        "outline-variant": "#424754",
+                        "secondary-fixed-dim": "#b7c8e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "margin-mobile": "20px",
+                        "stack-sm": "8px",
+                        "touch-target-min": "48px",
+                        "stack-md": "16px",
+                        "stack-lg": "24px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "mono-ui": ["JetBrains Mono"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-lg": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "mono-ui": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-touch-target-min bg-surface border-b border-outline-variant">
+<button class="text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200 active:scale-95 p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="text-headline-sm font-headline-sm font-bold text-primary">Contact Support</h1>
+<div class="w-10"></div> <!-- Spacer for center alignment -->
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-[calc(theme(spacing.touch-target-min)+theme(spacing.stack-md))] px-margin-mobile pb-safe flex flex-col gap-stack-lg max-w-2xl mx-auto w-full">
+<div class="bg-surface-container-low border border-outline-variant rounded-xl p-stack-md flex flex-col gap-stack-md shadow-sm">
+<div class="flex flex-col gap-stack-sm">
+<label class="font-label-lg text-label-lg text-on-surface-variant" for="subject">Subject</label>
+<div class="relative">
+<select class="w-full bg-surface-container-high border-outline-variant text-on-surface rounded-lg focus:ring-primary focus:border-primary block p-3 pr-10 min-h-touch-target-min appearance-none font-body-md" id="subject">
+<option value="bug">Bug Report</option>
+<option value="feature">Feature Request</option>
+<option value="general">General Feedback</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="arrow_drop_down">arrow_drop_down</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-stack-sm">
+<label class="font-label-lg text-label-lg text-on-surface-variant" for="message">Message</label>
+<textarea class="w-full bg-surface-container-high border border-outline-variant text-on-surface rounded-lg focus:ring-primary focus:border-primary block p-3 font-body-md resize-y" id="message" placeholder="Describe the issue or share your ideas..." rows="6"></textarea>
+</div>
+<button class="mt-2 w-full bg-primary text-on-primary font-label-lg text-label-lg rounded-lg min-h-touch-target-min flex items-center justify-center gap-2 hover:bg-primary-fixed-dim transition-colors active:scale-95 shadow-md" type="button">
+<span class="material-symbols-outlined" data-icon="send" data-weight="fill" style="font-variation-settings: 'FILL' 1;">send</span>
+                Send Feedback
+            </button>
+</div>
+<p class="text-center text-on-surface-variant font-label-sm text-label-sm mt-auto pb-stack-lg">
+            Your feedback helps us improve Wintroller.
+        </p>
+</main>
+<!-- Navigation suppressed as this is a transactional/task-focused screen -->
+</body></html>

@@ -10,6 +10,9 @@ class StorageService {
   static const String _keyHaptics = 'haptics_enabled';
   static const String _keyAutoReconnect = 'auto_reconnect';
   static const String _keyOnboardingDone = 'onboarding_completed';
+  static const String _keyLanguageCode = 'language_code';
+  static const String _keyLanguageSelected = 'language_selected';
+  static const String _keyPlanSelected = 'plan_selected';
 
   final SharedPreferences _prefs;
   final FlutterSecureStorage _secureStorage;
@@ -89,4 +92,14 @@ class StorageService {
 
   bool isOnboardingDone() => _prefs.getBool(_keyOnboardingDone) ?? false;
   Future<void> setOnboardingDone(bool done) async => _prefs.setBool(_keyOnboardingDone, done);
+
+  // Language & Plan Onboarding
+  String getLanguageCode() => _prefs.getString(_keyLanguageCode) ?? 'en';
+  Future<void> setLanguageCode(String code) async => _prefs.setString(_keyLanguageCode, code);
+
+  bool isLanguageSelected() => _prefs.getBool(_keyLanguageSelected) ?? false;
+  Future<void> setLanguageSelected(bool selected) async => _prefs.setBool(_keyLanguageSelected, selected);
+
+  bool isPlanSelected() => _prefs.getBool(_keyPlanSelected) ?? false;
+  Future<void> setPlanSelected(bool selected) async => _prefs.setBool(_keyPlanSelected, selected);
 }

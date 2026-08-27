@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/app_providers.dart';
-import '../../services/nova_voice_service.dart';
+import '../../services/language_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/floating_nova_button.dart';
+import '../feedback/contact_us_screen.dart';
+import '../language/language_selection_screen.dart';
 import '../nova/nova_assistant_screen.dart';
 import '../onboarding/onboarding_screen.dart';
+import '../pro/plan_selection_screen.dart';
 import '../pro/pro_plan_provider.dart';
 import '../pro/pro_upgrade_screen.dart';
 
@@ -23,13 +27,20 @@ class SettingsScreen extends ConsumerWidget {
     final activeDevice = ref.watch(activeDeviceProvider);
     final ws = ref.watch(webSocketServiceProvider);
     final proState = ref.watch(proPlanProvider);
+    final currentLocale = ref.watch(languageProvider);
+    final langCode = currentLocale.languageCode;
+
+    final currentLangObj = supportedLanguages.firstWhere(
+      (l) => l.code == langCode,
+      orElse: () => supportedLanguages.first,
+    );
 
     return Scaffold(
       backgroundColor: colors.background,
       appBar: AppBar(
         backgroundColor: colors.background,
         title: Text(
-          'Settings',
+          AppStrings.get('settings', langCode),
           style: TextStyle(color: colors.onSurface, fontWeight: FontWeight.w700),
         ),
       ),
@@ -101,9 +112,15 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                     trailing: Icon(Icons.chevron_right_rounded, color: colors.primary),
                     onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const NovaAssistantScreen()),
-                      );
+                      if (!proState.isPro && (proState.geminiApiKey == null || proState.geminiApiKey!.isEmpty)) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const PlanSelectionScreen()),
+                        );
+                      } else {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const NovaAssistantScreen()),
+                        );
+                      }
                     },
                   ),
                   Divider(color: colors.outlineVariant, height: 1),
@@ -113,11 +130,11 @@ class SettingsScreen extends ConsumerWidget {
                       color: proState.isPro ? colors.primary : const Color(0xFFFFD600),
                     ),
                     title: Text(
-                      'Wintroller Pro Status',
+                      'Wintroller Plan Tier',
                       style: TextStyle(fontWeight: FontWeight.w600, color: colors.onSurface),
                     ),
                     subtitle: Text(
-                      proState.isPro ? 'Pro Lifetime Active' : 'Free Tier (Tap to configure Gemini Key)',
+                      proState.isPro ? 'Pro Member (\$0.99/mo Active)' : 'Free Tier (Basic Controls Only)',
                       style: TextStyle(color: colors.onSurfaceVariant, fontSize: 12),
                     ),
                     trailing: TextButton(
@@ -130,7 +147,7 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                       onPressed: () {
                         Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const ProUpgradeScreen()),
+                          MaterialPageRoute(builder: (_) => const PlanSelectionScreen()),
                         );
                       },
                     ),
@@ -153,6 +170,63 @@ class SettingsScreen extends ConsumerWidget {
                     },
                   ),
                 ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Preference Section: Language & Localization
+            Text(
+              'LANGUAGE & REGION',
+              style: GoogleFonts.orbitron(
+                fontSize: 13,
+                fontWeight: FontWeight.w900,
+                color: colors.primary,
+                letterSpacing: 1.0,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              decoration: BoxDecoration(
+                color: colors.surfaceContainer,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: colors.outlineVariant, width: 0.8),
+              ),
+              child: ListTile(
+                leading: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: colors.surfaceContainerHighest,
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(currentLangObj.flagEmoji, style: const TextStyle(fontSize: 18)),
+                ),
+                title: Text(
+                  currentLangObj.nativeName,
+                  style: TextStyle(fontWeight: FontWeight.w700, color: colors.onSurface),
+                ),
+                subtitle: Text(
+                  '${currentLangObj.name} (${currentLangObj.country})',
+                  style: TextStyle(color: colors.onSurfaceVariant, fontSize: 12),
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Change',
+                      style: TextStyle(color: colors.primary, fontWeight: FontWeight.w600, fontSize: 13),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(Icons.chevron_right_rounded, color: colors.primary),
+                  ],
+                ),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const LanguageSelectionScreen()),
+                  );
+                },
               ),
             ),
 
@@ -195,17 +269,59 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 12),
 
-                  // 1. Alienware Sci-Fi Cyberpunk HUD (Flagship)
+                  // 1. Alienware Sci-Fi Cyberpunk HUD (Pro Locked for Free tier)
                   _ThemeStyleOptionCard(
                     title: 'Alienware Sci-Fi HUD',
                     subtitle: 'Alien Remote Interface (Neon Green & Matrix HUD)',
                     bgColor: const Color(0xFF040D06),
                     accentColor: const Color(0xFF00FF66),
                     isSelected: themeStyle == AppThemeStyle.alienHud,
+                    isProLocked: !proState.isPro,
                     onTap: () {
-                      ref
-                          .read(themeStyleProvider.notifier)
-                          .setThemeStyle(AppThemeStyle.alienHud);
+                      if (!proState.isPro) {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            backgroundColor: const Color(0xFF131B2E),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            title: Row(
+                              children: [
+                                const Icon(Icons.lock_rounded, color: Color(0xFFADC6FF)),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Pro Feature',
+                                  style: GoogleFonts.inter(fontWeight: FontWeight.w700, color: const Color(0xFFDAE2FD)),
+                                ),
+                              ],
+                            ),
+                            content: Text(
+                              AppStrings.get('pro_only_theme', langCode),
+                              style: GoogleFonts.inter(color: const Color(0xFFC2C6D6)),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: const Text('Cancel', style: TextStyle(color: Color(0xFF8C909F))),
+                              ),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFADC6FF),
+                                  foregroundColor: const Color(0xFF002E6A),
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(builder: (_) => const PlanSelectionScreen()),
+                                  );
+                                },
+                                child: const Text('View Pro Plans'),
+                              ),
+                            ],
+                          ),
+                        );
+                      } else {
+                        ref.read(themeStyleProvider.notifier).setThemeStyle(AppThemeStyle.alienHud);
+                      }
                     },
                   ),
                   const SizedBox(height: 10),
@@ -265,24 +381,11 @@ class SettingsScreen extends ConsumerWidget {
                   SizedBox(
                     width: double.infinity,
                     child: SegmentedButton<ThemeMode>(
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.resolveWith<Color?>(
-                          (Set<MaterialState> states) {
-                            if (states.contains(MaterialState.selected)) {
-                              return colors.primaryContainer.withOpacity(0.25);
-                            }
-                            return colors.surfaceContainerHigh;
-                          },
-                        ),
-                        side: MaterialStateProperty.all(
-                          BorderSide(color: colors.outlineVariant, width: 0.8),
-                        ),
-                      ),
                       segments: const [
                         ButtonSegment(
-                          value: ThemeMode.dark,
-                          label: Text('Dark'),
-                          icon: Icon(Icons.dark_mode_rounded, size: 18),
+                          value: ThemeMode.system,
+                          label: Text('System'),
+                          icon: Icon(Icons.brightness_auto_rounded, size: 18),
                         ),
                         ButtonSegment(
                           value: ThemeMode.light,
@@ -290,9 +393,9 @@ class SettingsScreen extends ConsumerWidget {
                           icon: Icon(Icons.light_mode_rounded, size: 18),
                         ),
                         ButtonSegment(
-                          value: ThemeMode.system,
-                          label: Text('System'),
-                          icon: Icon(Icons.settings_suggest_rounded, size: 18),
+                          value: ThemeMode.dark,
+                          label: Text('Dark'),
+                          icon: Icon(Icons.dark_mode_rounded, size: 18),
                         ),
                       ],
                       selected: {themeMode},
@@ -431,9 +534,9 @@ class SettingsScreen extends ConsumerWidget {
               const SizedBox(height: 24),
             ],
 
-            // Help & About
+            // Help, Support & Feedback
             Text(
-              'About Wintroller',
+              'Support & Feedback',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
@@ -451,15 +554,21 @@ class SettingsScreen extends ConsumerWidget {
               child: Column(
                 children: [
                   ListTile(
-                    leading: Icon(Icons.info_outline_rounded, color: colors.secondary),
+                    leading: Icon(Icons.feedback_outlined, color: colors.primary),
                     title: Text(
-                      'Version',
+                      AppStrings.get('contact_support', langCode),
                       style: TextStyle(fontWeight: FontWeight.w600, color: colors.onSurface),
                     ),
-                    trailing: Text(
-                      '1.0.0 (Build 1)',
-                      style: TextStyle(color: colors.onSurfaceVariant),
+                    subtitle: Text(
+                      'Report a bug or submit feature suggestions',
+                      style: TextStyle(color: colors.onSurfaceVariant, fontSize: 12),
                     ),
+                    trailing: Icon(Icons.chevron_right_rounded, color: colors.onSurfaceVariant),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const ContactUsScreen()),
+                      );
+                    },
                   ),
                   Divider(color: colors.outlineVariant, height: 1),
                   ListTile(
@@ -474,6 +583,18 @@ class SettingsScreen extends ConsumerWidget {
                         MaterialPageRoute(builder: (_) => const OnboardingScreen()),
                       );
                     },
+                  ),
+                  Divider(color: colors.outlineVariant, height: 1),
+                  ListTile(
+                    leading: Icon(Icons.info_outline_rounded, color: colors.secondary),
+                    title: Text(
+                      'Version',
+                      style: TextStyle(fontWeight: FontWeight.w600, color: colors.onSurface),
+                    ),
+                    trailing: Text(
+                      '1.0.0 (Play Store Edition)',
+                      style: TextStyle(color: colors.onSurfaceVariant),
+                    ),
                   ),
                 ],
               ),
@@ -492,6 +613,7 @@ class _ThemeStyleOptionCard extends StatelessWidget {
   final Color bgColor;
   final Color accentColor;
   final bool isSelected;
+  final bool isProLocked;
   final VoidCallback onTap;
 
   const _ThemeStyleOptionCard({
@@ -500,6 +622,7 @@ class _ThemeStyleOptionCard extends StatelessWidget {
     required this.bgColor,
     required this.accentColor,
     required this.isSelected,
+    this.isProLocked = false,
     required this.onTap,
   });
 
@@ -544,7 +667,27 @@ class _ThemeStyleOptionCard extends StatelessWidget {
                           : null,
                     ),
                   ),
-                  if (isSelected)
+                  if (isProLocked)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFADC6FF).withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: const Color(0xFFADC6FF), width: 0.6),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.lock_rounded, color: Color(0xFFADC6FF), size: 10),
+                          const SizedBox(width: 2),
+                          Text(
+                            'PRO',
+                            style: GoogleFonts.orbitron(fontSize: 8, fontWeight: FontWeight.w900, color: const Color(0xFFADC6FF)),
+                          ),
+                        ],
+                      ),
+                    )
+                  else if (isSelected)
                     Icon(Icons.check_circle_rounded, color: accentColor, size: 18),
                 ],
               ),

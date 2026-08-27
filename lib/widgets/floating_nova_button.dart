@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../features/pro/plan_selection_screen.dart';
+import '../features/pro/pro_plan_provider.dart';
 import '../services/gemini_service.dart';
 import '../services/nova_voice_service.dart';
 import '../theme/app_colors.dart';
@@ -159,6 +161,15 @@ class _GlobalFloatingNovaButtonState extends ConsumerState<GlobalFloatingNovaBut
 
   void _onOrbTap() {
     HapticFeedback.mediumImpact();
+
+    final proState = ref.read(proPlanProvider);
+    if (!proState.isPro && (proState.geminiApiKey == null || proState.geminiApiKey!.isEmpty)) {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const PlanSelectionScreen()),
+      );
+      return;
+    }
+
     if (_isExpanded) {
       _closeOverlay();
     } else {

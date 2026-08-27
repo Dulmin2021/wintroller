@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Select Language</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary": "#003824",
+                    "surface-tint": "#adc6ff",
+                    "primary-fixed": "#d8e2ff",
+                    "surface-container-highest": "#2d3449",
+                    "on-primary-container": "#00285d",
+                    "surface-dim": "#0b1326",
+                    "surface-container-low": "#131b2e",
+                    "surface-variant": "#2d3449",
+                    "on-primary-fixed": "#001a42",
+                    "on-tertiary-fixed": "#002113",
+                    "on-secondary-fixed": "#0b1c30",
+                    "secondary-container": "#3a4a5f",
+                    "on-primary-fixed-variant": "#004395",
+                    "on-primary": "#002e6a",
+                    "tertiary-container": "#00a572",
+                    "on-secondary-container": "#a9bad3",
+                    "primary-container": "#4d8eff",
+                    "tertiary-fixed-dim": "#4edea3",
+                    "on-tertiary-container": "#00311f",
+                    "primary-fixed-dim": "#adc6ff",
+                    "tertiary-fixed": "#6ffbbe",
+                    "surface-bright": "#31394d",
+                    "surface-container": "#171f33",
+                    "background": "#0b1326",
+                    "error": "#ffb4ab",
+                    "surface": "#0b1326",
+                    "surface-container-high": "#222a3d",
+                    "on-error-container": "#ffdad6",
+                    "outline": "#8c909f",
+                    "tertiary": "#4edea3",
+                    "secondary": "#b7c8e1",
+                    "on-tertiary-fixed-variant": "#005236",
+                    "on-surface": "#dae2fd",
+                    "on-secondary": "#213145",
+                    "surface-container-lowest": "#060e20",
+                    "on-secondary-fixed-variant": "#38485d",
+                    "secondary-fixed": "#d3e4fe",
+                    "inverse-on-surface": "#283044",
+                    "on-surface-variant": "#c2c6d6",
+                    "error-container": "#93000a",
+                    "primary": "#adc6ff",
+                    "inverse-surface": "#dae2fd",
+                    "inverse-primary": "#005ac2",
+                    "on-background": "#dae2fd",
+                    "on-error": "#690005",
+                    "outline-variant": "#424754",
+                    "secondary-fixed-dim": "#b7c8e1"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "16px",
+                    "margin-mobile": "20px",
+                    "stack-sm": "8px",
+                    "touch-target-min": "48px",
+                    "stack-md": "16px",
+                    "stack-lg": "24px"
+            },
+            "fontFamily": {
+                    "label-sm": ["Inter"],
+                    "headline-sm": ["Inter"],
+                    "mono-ui": ["JetBrains Mono"],
+                    "body-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "label-lg": ["Inter"],
+                    "headline-md": ["Inter"]
+            },
+            "fontSize": {
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "mono-ui": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .language-item {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .language-item:hover {
+            background-color: theme('colors.surface-container-highest');
+        }
+        
+        .language-item.selected {
+            background-color: theme('colors.surface-container-highest');
+            border-color: theme('colors.primary');
+        }
+        
+        .language-item.selected .check-icon {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .check-icon {
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: theme('colors.surface-variant');
+            border-radius: theme('borderRadius.full');
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: theme('colors.outline-variant');
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col min-h-screen bg-background text-on-background overflow-hidden relative">
+<!-- Top Nav: Excluded as per context rules (transactional screen) -->
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col items-center w-full max-w-4xl mx-auto px-margin-mobile pt-stack-lg pb-32 h-screen overflow-hidden">
+<!-- Header -->
+<header class="w-full text-center mb-stack-lg shrink-0 pt-8">
+<h1 class="font-headline-lg text-headline-lg text-on-background mb-stack-sm">Select Language</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-md mx-auto">
+                Choose your preferred language for the interface. You can change this later in settings.
+            </p>
+</header>
+<!-- Search / Filter (Optional enhancement for long lists) -->
+<div class="w-full max-w-2xl mb-stack-md shrink-0 relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">search</span>
+<input class="w-full bg-surface-container border border-outline-variant rounded-lg py-3 pl-12 pr-4 font-body-md text-body-md text-on-surface placeholder:text-outline-variant focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all shadow-sm" id="languageSearch" placeholder="Search languages..." type="text"/>
+</div>
+<!-- Language List Container (Scrollable) -->
+<div class="w-full max-w-2xl flex-1 overflow-y-auto pr-2 rounded-xl" id="languageListContainer">
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-stack-sm pb-safe">
+<!-- Language Item: English (Selected) -->
+<div class="language-item selected flex items-center justify-between p-4 rounded-xl border-2 border-primary bg-surface-container shadow-sm" data-lang="en">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center overflow-hidden shrink-0">
+<!-- Using a simple geometric representation for 'globe/flag' to keep it clean and robust -->
+<span class="material-symbols-outlined text-on-surface-variant" style="font-variation-settings: 'FILL' 1;">language</span>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm text-on-surface">English</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">United States</div>
+</div>
+</div>
+<span class="material-symbols-outlined check-icon text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<!-- Language Item: Spanish -->
+<div class="language-item flex items-center justify-between p-4 rounded-xl border border-outline-variant bg-surface-container-low shadow-sm" data-lang="es">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center overflow-hidden shrink-0">
+<span class="material-symbols-outlined text-on-surface-variant">language</span>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm text-on-surface">Español</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Spanish</div>
+</div>
+</div>
+<span class="material-symbols-outlined check-icon text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<!-- Language Item: French -->
+<div class="language-item flex items-center justify-between p-4 rounded-xl border border-outline-variant bg-surface-container-low shadow-sm" data-lang="fr">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center overflow-hidden shrink-0">
+<span class="material-symbols-outlined text-on-surface-variant">language</span>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm text-on-surface">Français</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">French</div>
+</div>
+</div>
+<span class="material-symbols-outlined check-icon text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<!-- Language Item: German -->
+<div class="language-item flex items-center justify-between p-4 rounded-xl border border-outline-variant bg-surface-container-low shadow-sm" data-lang="de">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center overflow-hidden shrink-0">
+<span class="material-symbols-outlined text-on-surface-variant">language</span>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm text-on-surface">Deutsch</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">German</div>
+</div>
+</div>
+<span class="material-symbols-outlined check-icon text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<!-- Language Item: Japanese -->
+<div class="language-item flex items-center justify-between p-4 rounded-xl border border-outline-variant bg-surface-container-low shadow-sm" data-lang="ja">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center overflow-hidden shrink-0">
+<span class="material-symbols-outlined text-on-surface-variant">language</span>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm text-on-surface">日本語</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Japanese</div>
+</div>
+</div>
+<span class="material-symbols-outlined check-icon text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<!-- Language Item: Korean -->
+<div class="language-item flex items-center justify-between p-4 rounded-xl border border-outline-variant bg-surface-container-low shadow-sm" data-lang="ko">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center overflow-hidden shrink-0">
+<span class="material-symbols-outlined text-on-surface-variant">language</span>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm text-on-surface">한국어</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Korean</div>
+</div>
+</div>
+<span class="material-symbols-outlined check-icon text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<!-- Language Item: Chinese (Simplified) -->
+<div class="language-item flex items-center justify-between p-4 rounded-xl border border-outline-variant bg-surface-container-low shadow-sm" data-lang="zh">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center overflow-hidden shrink-0">
+<span class="material-symbols-outlined text-on-surface-variant">language</span>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm text-on-surface">简体中文</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Chinese (Simplified)</div>
+</div>
+</div>
+<span class="material-symbols-outlined check-icon text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<!-- Language Item: Italian -->
+<div class="language-item flex items-center justify-between p-4 rounded-xl border border-outline-variant bg-surface-container-low shadow-sm" data-lang="it">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center overflow-hidden shrink-0">
+<span class="material-symbols-outlined text-on-surface-variant">language</span>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm text-on-surface">Italiano</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Italian</div>
+</div>
+</div>
+<span class="material-symbols-outlined check-icon text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Fixed Bottom Action Area (Glassmorphism) -->
+<div class="fixed bottom-0 left-0 w-full z-50 bg-surface/80 backdrop-blur-xl border-t border-outline-variant px-margin-mobile py-4 pb-safe flex justify-center">
+<div class="w-full max-w-2xl">
+<button class="w-full h-[56px] rounded-xl bg-primary text-on-primary font-headline-sm text-headline-sm flex items-center justify-center gap-2 hover:bg-primary-fixed active:scale-95 transition-all shadow-md" id="confirmBtn">
+                Confirm Language
+                <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const items = document.querySelectorAll('.language-item');
+            const searchInput = document.getElementById('languageSearch');
+            
+            // Selection Logic
+            items.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Remove selected state from all
+                    items.forEach(i => {
+                        i.classList.remove('selected');
+                        i.classList.remove('border-2');
+                        i.classList.remove('border-primary');
+                        i.classList.add('border');
+                        i.classList.add('border-outline-variant');
+                        i.classList.remove('bg-surface-container');
+                        i.classList.add('bg-surface-container-low');
+                    });
+                    
+                    // Add selected state to clicked
+                    this.classList.add('selected');
+                    this.classList.remove('border');
+                    this.classList.remove('border-outline-variant');
+                    this.classList.add('border-2');
+                    this.classList.add('border-primary');
+                    this.classList.remove('bg-surface-container-low');
+                    this.classList.add('bg-surface-container');
+                });
+            });
+
+            // Basic Search Filtering
+            searchInput.addEventListener('input', function(e) {
+                const term = e.target.value.toLowerCase();
+                items.forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    if (text.includes(term)) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+
+            // Confirm Button Action
+            const confirmBtn = document.getElementById('confirmBtn');
+            confirmBtn.addEventListener('click', () => {
+                const selected = document.querySelector('.language-item.selected');
+                if(selected) {
+                    const langCode = selected.getAttribute('data-lang');
+                    // Add a brief animation to button before conceptual navigation
+                    confirmBtn.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                         confirmBtn.style.transform = 'scale(1)';
+                         console.log('Language confirmed:', langCode);
+                    }, 150);
+                }
+            });
+        });
+    </script>
+</body></html>

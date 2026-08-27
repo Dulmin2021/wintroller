@@ -17,6 +17,8 @@ import '../media/media_control_screen.dart';
 import '../mouse/mouse_trackpad_screen.dart';
 import '../nova/nova_assistant_screen.dart';
 import '../power/power_control_screen.dart';
+import '../pro/plan_selection_screen.dart';
+import '../pro/pro_plan_provider.dart';
 import '../pro/pro_upgrade_screen.dart';
 import '../settings/settings_screen.dart';
 
@@ -28,6 +30,18 @@ class DashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  void _openNova(BuildContext context) {
+    final proState = ref.read(proPlanProvider);
+    if (!proState.isPro && (proState.geminiApiKey == null || proState.geminiApiKey!.isEmpty)) {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const PlanSelectionScreen()),
+      );
+    } else {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const NovaAssistantScreen()),
+      );
+    }
+  }
   bool _wifiEnabled = true;
   bool _bluetoothEnabled = false;
   bool _displayOn = true;
@@ -232,11 +246,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
                   // Nova AI Copilot Launcher Button
                   GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const NovaAssistantScreen()),
-                      );
-                    },
+                    onTap: () => _openNova(context),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
@@ -784,11 +794,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       ),
                       // Floating Giant Alien Core -> Launches Nova AI Co-Pilot
                       GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const NovaAssistantScreen()),
-                          );
-                        },
+                        onTap: () => _openNova(context),
                         child: HudRadarCircle(
                           size: 48,
                           color: colors.primary,
@@ -844,11 +850,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     ),
                     // Central Nova AI Floating Button
                     GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const NovaAssistantScreen()),
-                        );
-                      },
+                      onTap: () => _openNova(context),
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(

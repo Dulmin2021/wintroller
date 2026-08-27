@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'features/dashboard/dashboard_screen.dart';
+import 'features/language/language_selection_screen.dart';
 import 'features/onboarding/onboarding_screen.dart';
 import 'features/pairing/pairing_discover_screen.dart';
+import 'features/pro/plan_selection_screen.dart';
 import 'providers/app_providers.dart';
+import 'services/language_service.dart';
 import 'services/storage_service.dart';
 import 'theme/app_theme.dart';
 import 'widgets/floating_nova_button.dart';
@@ -66,15 +69,29 @@ class _WintrollerAppState extends ConsumerState<WintrollerApp> {
 
   Widget _getInitialHome() {
     final storage = ref.read(storageServiceProvider);
+
+    // 1. First Launch Step 1: Select Language
+    if (!storage.isLanguageSelected()) {
+      return const LanguageSelectionScreen(isInitialOnboarding: true);
+    }
+
+    // 2. First Launch Step 2: Choose Plan (Free vs Pro $0.99/mo)
+    if (!storage.isPlanSelected()) {
+      return const PlanSelectionScreen(isInitialOnboarding: true);
+    }
+
+    // 3. First Launch Step 3: Onboarding Guide
     if (!storage.isOnboardingDone()) {
       return const OnboardingScreen();
     }
 
+    // 4. Returning User with Paired PC: Dashboard
     final devices = storage.getPairedDevices();
     if (devices.isNotEmpty) {
       return const DashboardScreen();
     }
 
+    // 5. Discover & Pair PC
     return const PairingDiscoverScreen();
   }
 
@@ -82,6 +99,7 @@ class _WintrollerAppState extends ConsumerState<WintrollerApp> {
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeModeProvider);
     final themeStyle = ref.watch(themeStyleProvider);
+    final locale = ref.watch(languageProvider);
 
     final ThemeData activeDarkTheme;
     switch (themeStyle) {
@@ -99,6 +117,7 @@ class _WintrollerAppState extends ConsumerState<WintrollerApp> {
     return MaterialApp(
       navigatorKey: appNavigatorKey,
       title: 'Wintroller',
+      locale: locale,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: activeDarkTheme,
