@@ -8,6 +8,7 @@ import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 final voiceMutedProvider = StateProvider<bool>((ref) => false);
+final wakeWordEnabledProvider = StateProvider<bool>((ref) => true);
 
 class NovaVoiceService {
   final SpeechToText _speechToText = SpeechToText();
@@ -17,20 +18,24 @@ class NovaVoiceService {
   bool _isTtsInitialized = false;
   bool _isListening = false;
   bool _isSpeaking = false;
+  bool _isWakeWordMode = false;
 
   final _recognizedTextController = StreamController<String>.broadcast();
   final _soundLevelController = StreamController<double>.broadcast();
   final _listeningStateController = StreamController<bool>.broadcast();
   final _speakingStateController = StreamController<bool>.broadcast();
+  final _wakeWordTriggerController = StreamController<String?>.broadcast();
 
   Stream<String> get recognizedTextStream => _recognizedTextController.stream;
   Stream<double> get soundLevelStream => _soundLevelController.stream;
   Stream<bool> get listeningStateStream => _listeningStateController.stream;
   Stream<bool> get speakingStateStream => _speakingStateController.stream;
+  Stream<String?> get wakeWordTriggerStream => _wakeWordTriggerController.stream;
 
   bool get isListening => _isListening;
   bool get isSpeaking => _isSpeaking;
   bool get isSpeechAvailable => _isSpeechInitialized;
+  bool get isWakeWordMode => _isWakeWordMode;
 
   NovaVoiceService() {
     _initTts();
@@ -95,6 +100,7 @@ class NovaVoiceService {
     }
   }
 
+  // Active Voice Command Listening
   Future<void> startListening({
     required Function(String text, bool isFinal) onResult,
   }) async {
@@ -104,6 +110,8 @@ class NovaVoiceService {
     if (_isSpeaking) {
       await stopSpeaking();
     }
+
+    _isWakeWordMode = false;
 
     try {
       _isListening = true;
@@ -130,12 +138,62 @@ class NovaVoiceService {
     }
   }
 
+  // Continuous "Hey Nova" Wake Word Detection
+  Future<void> startWakeWordListening({
+    required Function(String? followUpCommand) onWakeWord,
+  }) async {
+    final hasInit = await initSpeech();
+    if (!hasInit) return;
+
+    if (_isListening) {
+      await stopListening();
+    }
+
+    _isWakeWordMode = true;
+
+    try {
+      _isListening = true;
+      _listeningStateController.add(true);
+
+      await _speechToText.listen(
+        onResult: (SpeechRecognitionResult result) {
+          final words = result.recognizedWords.toLowerCase().trim();
+          _recognizedTextController.add(words);
+
+          final wakeWordRegex = RegExp(r'\b(?:hey|hi|hello|ok|yo)?\s*nova\b', caseSensitive: false);
+          if (wakeWordRegex.hasMatch(words)) {
+            // Wake word detected!
+            final match = wakeWordRegex.firstMatch(words)!;
+            final remainder = words.substring(match.end).replaceAll(RegExp(r'^[,.\s]+'), '').trim();
+            final followUp = remainder.isNotEmpty ? remainder : null;
+
+            _wakeWordTriggerController.add(followUp);
+            onWakeWord(followUp);
+          }
+        },
+        onSoundLevelChange: (level) {
+          _soundLevelController.add(level);
+        },
+        listenFor: const Duration(minutes: 5),
+        pauseFor: const Duration(seconds: 4),
+        localeId: 'en_US',
+        cancelOnError: false,
+        partialResults: true,
+      );
+    } catch (e) {
+      debugPrint('startWakeWordListening error: $e');
+      _isListening = false;
+      _listeningStateController.add(false);
+    }
+  }
+
   Future<void> stopListening() async {
     try {
       if (_speechToText.isListening) {
         await _speechToText.stop();
       }
       _isListening = false;
+      _isWakeWordMode = false;
       _listeningStateController.add(false);
     } catch (e) {
       debugPrint('stopListening error: $e');
@@ -150,7 +208,6 @@ class NovaVoiceService {
         await _initTts();
       }
 
-      // Clean markdown, JSON brackets, and badge indicators from spoken text
       final cleanText = _sanitizeSpokenText(text);
       if (cleanText.isEmpty) return;
 
@@ -176,11 +233,8 @@ class NovaVoiceService {
 
   String _sanitizeSpokenText(String raw) {
     var s = raw;
-    // Remove bracket notes like [Offline Tactical Core Engaged] or [Note: ...]
     s = s.replaceAll(RegExp(r'\[.*?\]'), '');
-    // Remove markdown symbols (asterisks, backticks, hashes, bullet points)
     s = s.replaceAll(RegExp(r'[*_`#|>]'), '');
-    // Replace multiple spaces/newlines
     s = s.replaceAll(RegExp(r'\s+'), ' ').trim();
     return s;
   }
@@ -192,6 +246,7 @@ class NovaVoiceService {
     _soundLevelController.close();
     _listeningStateController.close();
     _speakingStateController.close();
+    _wakeWordTriggerController.close();
   }
 }
 

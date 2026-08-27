@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../providers/app_providers.dart';
+import '../../services/nova_voice_service.dart';
 import '../../theme/app_colors.dart';
 import '../nova/nova_assistant_screen.dart';
 import '../onboarding/onboarding_screen.dart';
@@ -132,6 +133,23 @@ class SettingsScreen extends ConsumerWidget {
                         );
                       },
                     ),
+                  ),
+                  Divider(color: colors.outlineVariant, height: 1),
+                  SwitchListTile(
+                    secondary: Icon(Icons.record_voice_over_rounded, color: colors.primary),
+                    title: Text(
+                      '"Hey Nova" Voice Wake Word',
+                      style: TextStyle(fontWeight: FontWeight.w600, color: colors.onSurface),
+                    ),
+                    subtitle: Text(
+                      'Wake up Nova hands-free by saying "Hey Nova"',
+                      style: TextStyle(color: colors.onSurfaceVariant, fontSize: 12),
+                    ),
+                    value: ref.watch(wakeWordEnabledProvider),
+                    activeColor: colors.primary,
+                    onChanged: (val) {
+                      ref.read(wakeWordEnabledProvider.notifier).state = val;
+                    },
                   ),
                 ],
               ),

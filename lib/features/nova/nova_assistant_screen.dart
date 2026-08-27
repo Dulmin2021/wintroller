@@ -50,6 +50,7 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
   StreamSubscription? _soundSub;
   StreamSubscription? _listeningSub;
   StreamSubscription? _speakingSub;
+  StreamSubscription? _wakeWordSub;
 
   final List<String> _quickPrompts = [
     'NIGHT MODE',
@@ -71,7 +72,7 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
     // Initial greeting
     _messages.add(
       NovaMessage(
-        text: 'Nova Tactical Voice & AI Co-Pilot online. Standing by for voice and text commands.',
+        text: 'Nova Tactical Voice & AI Co-Pilot online. Say "Hey Nova" or tap the mic to command.',
         isUser: false,
         timestamp: DateTime.now(),
       ),
@@ -82,7 +83,25 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
       final isMuted = ref.read(voiceMutedProvider);
       voice.speak('Nova Voice Co-Pilot online. Standing by.', isMuted: isMuted);
       _initVoiceSubscriptions();
+      _startWakeWordIfEnabled();
     });
+  }
+
+  void _startWakeWordIfEnabled() {
+    final voice = ref.read(novaVoiceServiceProvider);
+    final isEnabled = ref.read(wakeWordEnabledProvider);
+    if (isEnabled && !_isListening && !_isProcessing) {
+      voice.startWakeWordListening(onWakeWord: (followUp) {
+        if (mounted) {
+          if (followUp != null && followUp.trim().isNotEmpty) {
+            _handleSend(followUp.trim());
+          } else {
+            voice.speak('Nova online. Standing by.', isMuted: ref.read(voiceMutedProvider));
+            _toggleVoiceListening();
+          }
+        }
+      });
+    }
   }
 
   void _initVoiceSubscriptions() {
@@ -115,6 +134,17 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
         });
       }
     });
+
+    _wakeWordSub = voice.wakeWordTriggerStream.listen((followUp) {
+      if (mounted) {
+        if (followUp != null && followUp.trim().isNotEmpty) {
+          _handleSend(followUp.trim());
+        } else {
+          voice.speak('Nova online. How can I help?', isMuted: ref.read(voiceMutedProvider));
+          _toggleVoiceListening();
+        }
+      }
+    });
   }
 
   @override
@@ -122,6 +152,7 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
     _soundSub?.cancel();
     _listeningSub?.cancel();
     _speakingSub?.cancel();
+    _wakeWordSub?.cancel();
     _inputController.dispose();
     _scrollController.dispose();
     _pulseController.dispose();
@@ -336,11 +367,59 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
           ],
         ),
         actions: [
+          // Hey Nova Wake Word Toggle Chip
+          Consumer(
+            builder: (context, ref, child) {
+              final isWakeWordEnabled = ref.watch(wakeWordEnabledProvider);
+              return GestureDetector(
+                onTap: () {
+                  final next = !isWakeWordEnabled;
+                  ref.read(wakeWordEnabledProvider.notifier).state = next;
+                  if (next) {
+                    _startWakeWordIfEnabled();
+                  } else {
+                    ref.read(novaVoiceServiceProvider).stopListening();
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+                  margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 2),
+                  decoration: BoxDecoration(
+                    color: isWakeWordEnabled ? colors.primary.withOpacity(0.15) : const Color(0xFF13171F),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: isWakeWordEnabled ? colors.primary : colors.outlineVariant.withOpacity(0.5),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.bolt_rounded,
+                        color: isWakeWordEnabled ? colors.primary : colors.onSurfaceVariant,
+                        size: 14,
+                      ),
+                      const SizedBox(width: 2),
+                      Text(
+                        'HEY NOVA',
+                        style: GoogleFonts.orbitron(
+                          fontSize: 8.5,
+                          fontWeight: FontWeight.w900,
+                          color: isWakeWordEnabled ? colors.primary : colors.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: Icon(
               isVoiceMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
               color: isVoiceMuted ? colors.onSurfaceVariant : colors.primary,
-              size: 22,
+              size: 20,
             ),
             tooltip: isVoiceMuted ? 'Voice Responses Muted' : 'Voice Responses Active',
             onPressed: () {
@@ -351,7 +430,7 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
             },
           ),
           IconButton(
-            icon: Icon(Icons.tune_rounded, color: colors.primary, size: 22),
+            icon: Icon(Icons.tune_rounded, color: colors.primary, size: 20),
             tooltip: 'Pro Configuration',
             onPressed: () {
               Navigator.of(context).push(
