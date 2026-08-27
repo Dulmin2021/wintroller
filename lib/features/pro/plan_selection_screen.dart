@@ -41,10 +41,15 @@ class _PlanSelectionScreenState extends ConsumerState<PlanSelectionScreen> {
 
   void _onChoosePro() async {
     HapticFeedback.mediumImpact();
+    final storage = ref.read(storageServiceProvider);
+    await storage.setPlanSelected(true);
+
+    if (!mounted) return;
+
     // Open Pro upgrade / API key configuration
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => const ProUpgradeScreen(),
+        builder: (_) => ProUpgradeScreen(isInitialOnboarding: widget.isInitialOnboarding),
       ),
     );
   }
@@ -96,6 +101,16 @@ class _PlanSelectionScreenState extends ConsumerState<PlanSelectionScreen> {
           ),
         ),
         centerTitle: true,
+        actions: [
+          if (widget.isInitialOnboarding)
+            TextButton(
+              onPressed: _onChooseFree,
+              child: Text(
+                'Skip',
+                style: GoogleFonts.inter(color: const Color(0xFFADC6FF), fontWeight: FontWeight.w700),
+              ),
+            ),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(

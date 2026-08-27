@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../providers/app_providers.dart';
+import '../../services/storage_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/alien_icons.dart';
 import '../../widgets/hud_frame.dart';
+import '../dashboard/dashboard_screen.dart';
+import '../onboarding/onboarding_screen.dart';
+import '../pairing/pairing_discover_screen.dart';
 import 'pro_plan_provider.dart';
 
 class ProUpgradeScreen extends ConsumerStatefulWidget {
-  const ProUpgradeScreen({super.key});
+  final bool isInitialOnboarding;
+
+  const ProUpgradeScreen({
+    super.key,
+    this.isInitialOnboarding = false,
+  });
 
   @override
   ConsumerState<ProUpgradeScreen> createState() => _ProUpgradeScreenState();
@@ -33,6 +43,35 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
     super.dispose();
   }
 
+  void _navigateToControls() async {
+    final storage = ref.read(storageServiceProvider);
+    await storage.setPlanSelected(true);
+
+    if (!mounted) return;
+
+    if (widget.isInitialOnboarding) {
+      if (!storage.isOnboardingDone()) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+        );
+        return;
+      }
+
+      final devices = storage.getPairedDevices();
+      if (devices.isNotEmpty) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const DashboardScreen()),
+        );
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const PairingDiscoverScreen()),
+        );
+      }
+    } else {
+      Navigator.of(context).pop();
+    }
+  }
+
   Future<void> _saveApiKey() async {
     setState(() {
       _isSavingKey = true;
@@ -53,6 +92,7 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
       });
     } else {
       await ref.read(proPlanProvider.notifier).setGeminiApiKey(key);
+      await ref.read(proPlanProvider.notifier).setProStatus(true, tier: ProPlanTier.proMonthly);
       setState(() {
         _isSavingKey = false;
         _statusMessage = 'Gemini API Key saved! Nova Pro Assistant unlocked.';
@@ -62,9 +102,12 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
 
   void _activateProDemo() async {
     await ref.read(proPlanProvider.notifier).setProStatus(true, tier: ProPlanTier.proLifetime);
+    final storage = ref.read(storageServiceProvider);
+    await storage.setPlanSelected(true);
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Wintroller Pro Lifetime Activated (Developer / Demo Mode)'),
+        content: Text('Wintroller Pro Lifetime Activated! Full controls unlocked.'),
         duration: Duration(seconds: 2),
       ),
     );
@@ -82,7 +125,13 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: colors.primary, size: 20),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            if (widget.isInitialOnboarding) {
+              _navigateToControls();
+            } else {
+              Navigator.of(context).pop();
+            }
+          },
         ),
         title: Text(
           'WINTROLLER PRO',
@@ -93,6 +142,15 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
             letterSpacing: 1.5,
           ),
         ),
+        actions: [
+          TextButton(
+            onPressed: _navigateToControls,
+            child: Text(
+              'Skip to Controls',
+              style: TextStyle(color: colors.primary, fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -327,6 +385,33 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 onPressed: _activateProDemo,
+              ),
+
+              const SizedBox(height: 20),
+
+              // Continue to Control Menu Primary Button
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.dashboard_rounded, color: Colors.black, size: 20),
+                  label: Text(
+                    'PROCEED TO CONTROL MENU',
+                    style: GoogleFonts.orbitron(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.black,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colors.primary,
+                    elevation: 8,
+                    shadowColor: colors.primary.withOpacity(0.4),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: _navigateToControls,
+                ),
               ),
 
               const SizedBox(height: 20),
