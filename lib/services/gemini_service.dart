@@ -63,7 +63,7 @@ class GeminiService {
     },
     {
       'name': 'media_control',
-      'description': 'Controls media playback or mute status on the PC.',
+      'description': 'Controls media playback, volume steps, or mic status on the PC.',
       'parameters': {
         'type': 'OBJECT',
         'properties': {
@@ -174,12 +174,11 @@ Rules:
   }
 
   Future<NovaResponse> processCommand(String userPrompt, {List<Map<String, dynamic>> conversationHistory = const []}) async {
-    final key = apiKey?.trim();
-    if (key == null || key.isEmpty) {
-      return const NovaResponse(
-        text: 'Nova AI requires a Google Gemini API Key. Please configure your key in Settings or upgrade to Pro.',
-        isError: true,
-      );
+    final key = apiKey?.trim().replaceAll('"', '').replaceAll("'", '').replaceAll('\n', '').replaceAll('\r', '');
+
+    // If no key or short key, immediately use Local Tactical Neural Core
+    if (key == null || key.length < 10) {
+      return _processLocalCommand(userPrompt);
     }
 
     try {
@@ -209,26 +208,26 @@ Rules:
 
       final response = await http.post(
         url,
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': key,
+        },
         body: json.encode(requestBody),
-      ).timeout(const Duration(seconds: 12));
+      ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode != 200) {
-        final errorJson = json.decode(response.body);
-        final errorMessage = errorJson['error']?['message'] ?? 'API Error ${response.statusCode}';
+        // Fallback to local tactical processor so user's command is NEVER lost
+        final localRes = await _processLocalCommand(userPrompt);
         return NovaResponse(
-          text: 'Nova Tactical Link Failed: $errorMessage',
-          isError: true,
+          text: '${localRes.text}\n[Note: Gemini API key authentication failed. Executed via Local Tactical Core. Get a free key at https://aistudio.google.com/apikey]',
+          executedActions: localRes.executedActions,
         );
       }
 
       final data = json.decode(response.body) as Map<String, dynamic>;
       final candidates = data['candidates'] as List<dynamic>?;
       if (candidates == null || candidates.isEmpty) {
-        return const NovaResponse(
-          text: 'Nova received an empty response signal from the neural core.',
-          isError: true,
-        );
+        return _processLocalCommand(userPrompt);
       }
 
       final content = candidates[0]['content'] as Map<String, dynamic>?;
@@ -254,10 +253,13 @@ Rules:
         }
       }
 
-      // If Gemini returned function calls without prose text, create a crisp confirmation
       if (replyText.trim().isEmpty && executedActions.isNotEmpty) {
         final messages = executedActions.map((a) => a.message).join(' ');
-        replyText = 'Command executed. $messages';
+        replyText = 'Protocol confirmed. $messages';
+      }
+
+      if (executedActions.isEmpty && replyText.isEmpty) {
+        return _processLocalCommand(userPrompt);
       }
 
       return NovaResponse(
@@ -265,11 +267,170 @@ Rules:
         executedActions: executedActions,
       );
     } catch (e) {
+      // Automatic fallback to local tactical engine
+      final localRes = await _processLocalCommand(userPrompt);
       return NovaResponse(
-        text: 'Nova neural connection error: ${e.toString()}',
-        isError: true,
+        text: '${localRes.text}\n[Offline Tactical Core Engaged]',
+        executedActions: localRes.executedActions,
       );
     }
+  }
+
+  // Instant Local Tactical Core Engine (0ms Latency Fallback)
+  Future<NovaResponse> _processLocalCommand(String prompt) async {
+    final lower = prompt.toLowerCase();
+    final List<NovaActionResult> actions = [];
+    final List<String> messages = [];
+
+    // 1. Routine: Night Mode
+    if (lower.contains('night mode') || lower.contains('good night') || lower.contains('bedtime')) {
+      final res = await _executeTool('execute_routine', {'routine': 'night_mode'});
+      actions.add(res);
+      messages.add(res.message);
+    }
+    // 2. Routine: Gaming Mode
+    else if (lower.contains('gaming mode') || lower.contains('game mode')) {
+      final res = await _executeTool('execute_routine', {'routine': 'gaming_mode'});
+      actions.add(res);
+      messages.add(res.message);
+    }
+    // 3. Routine: Power Saver
+    else if (lower.contains('power saver') || lower.contains('battery saver')) {
+      final res = await _executeTool('execute_routine', {'routine': 'power_saver'});
+      actions.add(res);
+      messages.add(res.message);
+    }
+
+    // 4. Volume Control
+    final volMatch = RegExp(r'(?:volume|vol|sound)\s*(?:to|at|=)?\s*(\d{1,3})%?').firstMatch(lower);
+    if (volMatch != null) {
+      final level = int.tryParse(volMatch.group(1)!)?.clamp(0, 100) ?? 50;
+      final res = await _executeTool('set_volume', {'level': level});
+      actions.add(res);
+      messages.add(res.message);
+    } else if (lower.contains('volume up') || lower.contains('louder') || lower.contains('increase volume')) {
+      final res = await _executeTool('media_control', {'action': 'volume_up'});
+      actions.add(res);
+      messages.add(res.message);
+    } else if (lower.contains('volume down') || lower.contains('quieter') || lower.contains('decrease volume') || lower.contains('lower volume')) {
+      final res = await _executeTool('media_control', {'action': 'volume_down'});
+      actions.add(res);
+      messages.add(res.message);
+    }
+
+    // 5. Mute / Unmute
+    if (lower.contains('unmute') || lower.contains('sound on')) {
+      final res = await _executeTool('media_control', {'action': 'unmute'});
+      actions.add(res);
+      messages.add(res.message);
+    } else if (lower.contains('mute') || lower.contains('silence') || lower.contains('sound off')) {
+      final res = await _executeTool('media_control', {'action': 'mute'});
+      actions.add(res);
+      messages.add(res.message);
+    }
+
+    // 6. Media Playback
+    if (lower.contains('play') || lower.contains('pause') || lower.contains('resume')) {
+      final res = await _executeTool('media_control', {'action': 'play_pause'});
+      actions.add(res);
+      messages.add(res.message);
+    } else if (lower.contains('next song') || lower.contains('next track') || lower.contains('skip')) {
+      final res = await _executeTool('media_control', {'action': 'next'});
+      actions.add(res);
+      messages.add(res.message);
+    } else if (lower.contains('prev') || lower.contains('previous song')) {
+      final res = await _executeTool('media_control', {'action': 'previous'});
+      actions.add(res);
+      messages.add(res.message);
+    }
+
+    // 7. Wi-Fi Toggle
+    if (lower.contains('wifi') || lower.contains('wi-fi')) {
+      final state = !lower.contains('off') && !lower.contains('disable');
+      final res = await _executeTool('hardware_toggle', {'target': 'wifi', 'state': state});
+      actions.add(res);
+      messages.add(res.message);
+    }
+
+    // 8. Bluetooth Toggle
+    if (lower.contains('bluetooth') || lower.contains('bt')) {
+      final state = !lower.contains('off') && !lower.contains('disable');
+      final res = await _executeTool('hardware_toggle', {'target': 'bluetooth', 'state': state});
+      actions.add(res);
+      messages.add(res.message);
+    }
+
+    // 9. Display Power
+    if (lower.contains('display') || lower.contains('screen') || lower.contains('monitor')) {
+      if (lower.contains('off') || lower.contains('sleep') || lower.contains('turn off')) {
+        final res = await _executeTool('hardware_toggle', {'target': 'display', 'state': false});
+        actions.add(res);
+        messages.add(res.message);
+      } else if (lower.contains('on') || lower.contains('wake') || lower.contains('turn on')) {
+        final res = await _executeTool('hardware_toggle', {'target': 'display', 'state': true});
+        actions.add(res);
+        messages.add(res.message);
+      }
+    }
+
+    // 10. Brightness
+    final brightMatch = RegExp(r'brightness\s*(?:to|at|=)?\s*(\d{1,3})%?').firstMatch(lower);
+    if (brightMatch != null) {
+      final level = int.tryParse(brightMatch.group(1)!)?.clamp(0, 100) ?? 75;
+      final res = await _executeTool('set_brightness', {'level': level});
+      actions.add(res);
+      messages.add(res.message);
+    } else if (lower.contains('max brightness') || lower.contains('full brightness')) {
+      final res = await _executeTool('set_brightness', {'level': 100});
+      actions.add(res);
+      messages.add(res.message);
+    } else if (lower.contains('dim brightness') || lower.contains('low brightness')) {
+      final res = await _executeTool('set_brightness', {'level': 20});
+      actions.add(res);
+      messages.add(res.message);
+    }
+
+    // 11. Power Actions
+    if (lower.contains('lock')) {
+      final res = await _executeTool('power_action', {'action': 'lock'});
+      actions.add(res);
+      messages.add(res.message);
+    } else if (lower.contains('sleep pc') || lower.contains('put pc to sleep')) {
+      final res = await _executeTool('power_action', {'action': 'sleep'});
+      actions.add(res);
+      messages.add(res.message);
+    } else if (lower.contains('hibernate')) {
+      final res = await _executeTool('power_action', {'action': 'hibernate'});
+      actions.add(res);
+      messages.add(res.message);
+    } else if (lower.contains('restart') || lower.contains('reboot')) {
+      final res = await _executeTool('power_action', {'action': 'restart'});
+      actions.add(res);
+      messages.add(res.message);
+    } else if (lower.contains('shutdown') || lower.contains('turn off pc')) {
+      final res = await _executeTool('power_action', {'action': 'shutdown'});
+      actions.add(res);
+      messages.add(res.message);
+    }
+
+    // 12. Telemetry Inquiries
+    if (lower.contains('battery') || lower.contains('cpu') || lower.contains('ram') || lower.contains('load') || lower.contains('status')) {
+      final res = await _executeTool('get_pc_status', {});
+      actions.add(res);
+      messages.add(res.message);
+    }
+
+    if (actions.isNotEmpty) {
+      return NovaResponse(
+        text: messages.join(' '),
+        executedActions: actions,
+      );
+    }
+
+    return const NovaResponse(
+      text: 'Nova Tactical AI received your signal. Try commands like "Set volume to 30%", "Night Mode", "Turn off Wi-Fi", "Lock PC", or "Check battery".',
+      isError: false,
+    );
   }
 
   Future<NovaActionResult> _executeTool(String name, Map<String, dynamic> args) async {

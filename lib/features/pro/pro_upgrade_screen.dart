@@ -277,6 +277,32 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
                         onPressed: _isSavingKey ? null : _saveApiKey,
                       ),
                     ),
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: colors.primary.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: colors.primary.withOpacity(0.3), width: 0.8),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.lightbulb_outline_rounded, color: colors.primary, size: 16),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Get a 100% free Gemini API key in 5 seconds from Google AI Studio: aistudio.google.com/apikey (Keys created in Google Cloud Console must have Generative Language API enabled).',
+                              style: GoogleFonts.rajdhani(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600,
+                                color: colors.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
