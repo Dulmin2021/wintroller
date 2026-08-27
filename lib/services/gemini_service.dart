@@ -37,7 +37,15 @@ class GeminiService {
   final PCRemoteRepository repository;
   final HostSystemInfo systemInfo;
 
-  static const String _model = 'gemini-1.5-flash';
+  static const String _model = 'gemini-3.1-flash-lite';
+  static const List<String> _fallbackModels = [
+    'gemini-3.1-flash-lite',
+    'gemma-4-26b-a4b-it',
+    'gemini-3.5-flash',
+    'gemini-flash-lite-latest',
+    'gemini-1.5-flash',
+    'gemini-2.0-flash',
+  ];
   static const String _baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
 
   GeminiService({
@@ -181,99 +189,89 @@ Rules:
       return _processLocalCommand(userPrompt);
     }
 
-    try {
-      final url = Uri.parse('$_baseUrl/$_model:generateContent?key=$key');
-
-      final contents = [
-        ...conversationHistory,
-        {
-          'role': 'user',
-          'parts': [{'text': userPrompt}]
-        }
-      ];
-
-      final requestBody = {
-        'contents': contents,
-        'systemInstruction': {
-          'parts': [{'text': _buildSystemPrompt()}]
-        },
-        'tools': [
-          {'functionDeclarations': _toolDeclarations}
-        ],
-        'generationConfig': {
-          'temperature': 0.2,
-          'maxOutputTokens': 500,
-        }
-      };
-
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'x-goog-api-key': key,
-        },
-        body: json.encode(requestBody),
-      ).timeout(const Duration(seconds: 10));
-
-      if (response.statusCode != 200) {
-        // Fallback to local tactical processor so user's command is NEVER lost
-        final localRes = await _processLocalCommand(userPrompt);
-        return NovaResponse(
-          text: '${localRes.text}\n[Note: Gemini API key authentication failed. Executed via Local Tactical Core. Get a free key at https://aistudio.google.com/apikey]',
-          executedActions: localRes.executedActions,
-        );
+    final contents = [
+      ...conversationHistory,
+      {
+        'role': 'user',
+        'parts': [{'text': userPrompt}]
       }
+    ];
 
-      final data = json.decode(response.body) as Map<String, dynamic>;
-      final candidates = data['candidates'] as List<dynamic>?;
-      if (candidates == null || candidates.isEmpty) {
-        return _processLocalCommand(userPrompt);
+    final requestBody = {
+      'contents': contents,
+      'systemInstruction': {
+        'parts': [{'text': _buildSystemPrompt()}]
+      },
+      'tools': [
+        {'functionDeclarations': _toolDeclarations}
+      ],
+      'generationConfig': {
+        'temperature': 0.2,
+        'maxOutputTokens': 500,
       }
+    };
 
-      final content = candidates[0]['content'] as Map<String, dynamic>?;
-      final parts = content?['parts'] as List<dynamic>? ?? [];
+    for (final model in _fallbackModels) {
+      try {
+        final url = Uri.parse('$_baseUrl/$model:generateContent?key=$key');
+        final response = await http.post(
+          url,
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': key,
+          },
+          body: json.encode(requestBody),
+        ).timeout(const Duration(seconds: 8));
 
-      String replyText = '';
-      final List<NovaActionResult> executedActions = [];
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body) as Map<String, dynamic>;
+          final candidates = data['candidates'] as List<dynamic>?;
+          if (candidates != null && candidates.isNotEmpty) {
+            final content = candidates[0]['content'] as Map<String, dynamic>?;
+            final parts = content?['parts'] as List<dynamic>? ?? [];
 
-      for (final part in parts) {
-        if (part is Map<String, dynamic>) {
-          if (part.containsKey('text')) {
-            replyText += part['text'] as String;
+            String replyText = '';
+            final List<NovaActionResult> executedActions = [];
+
+            for (final part in parts) {
+              if (part is Map<String, dynamic>) {
+                if (part.containsKey('text') && !(part['thought'] == true)) {
+                  replyText += part['text'] as String;
+                }
+
+                if (part.containsKey('functionCall')) {
+                  final functionCall = part['functionCall'] as Map<String, dynamic>;
+                  final name = functionCall['name'] as String;
+                  final args = (functionCall['args'] as Map<String, dynamic>?) ?? {};
+
+                  final actionResult = await _executeTool(name, args);
+                  executedActions.add(actionResult);
+                }
+              }
+            }
+
+            if (replyText.trim().isEmpty && executedActions.isNotEmpty) {
+              final messages = executedActions.map((a) => a.message).join(' ');
+              replyText = 'Protocol confirmed. $messages';
+            }
+
+            if (executedActions.isNotEmpty || replyText.isNotEmpty) {
+              return NovaResponse(
+                text: replyText.trim(),
+                executedActions: executedActions,
+              );
+            }
           }
-
-          if (part.containsKey('functionCall')) {
-            final functionCall = part['functionCall'] as Map<String, dynamic>;
-            final name = functionCall['name'] as String;
-            final args = (functionCall['args'] as Map<String, dynamic>?) ?? {};
-
-            final actionResult = await _executeTool(name, args);
-            executedActions.add(actionResult);
-          }
         }
-      }
-
-      if (replyText.trim().isEmpty && executedActions.isNotEmpty) {
-        final messages = executedActions.map((a) => a.message).join(' ');
-        replyText = 'Protocol confirmed. $messages';
-      }
-
-      if (executedActions.isEmpty && replyText.isEmpty) {
-        return _processLocalCommand(userPrompt);
-      }
-
-      return NovaResponse(
-        text: replyText.trim(),
-        executedActions: executedActions,
-      );
-    } catch (e) {
-      // Automatic fallback to local tactical engine
-      final localRes = await _processLocalCommand(userPrompt);
-      return NovaResponse(
-        text: '${localRes.text}\n[Offline Tactical Core Engaged]',
-        executedActions: localRes.executedActions,
-      );
+      } catch (_) {}
     }
+
+    // If all remote models fail, run via Local Tactical Core
+    final localRes = await _processLocalCommand(userPrompt);
+    return NovaResponse(
+      text: localRes.text,
+      executedActions: localRes.executedActions,
+    );
   }
 
   // Instant Local Tactical Core Engine (0ms Latency Fallback)
