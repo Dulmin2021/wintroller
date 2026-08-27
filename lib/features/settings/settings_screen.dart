@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../providers/app_providers.dart';
 import '../../theme/app_colors.dart';
+import '../nova/nova_assistant_screen.dart';
 import '../onboarding/onboarding_screen.dart';
+import '../pro/pro_plan_provider.dart';
+import '../pro/pro_upgrade_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -16,6 +20,7 @@ class SettingsScreen extends ConsumerWidget {
     final autoReconnect = ref.watch(autoReconnectProvider);
     final activeDevice = ref.watch(activeDeviceProvider);
     final ws = ref.watch(webSocketServiceProvider);
+    final proState = ref.watch(proPlanProvider);
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -30,6 +35,110 @@ class SettingsScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           children: [
+            // Preference Section: Nova AI & Pro Plan
+            Text(
+              'NOVA AI & PRO PLAN',
+              style: GoogleFonts.orbitron(
+                fontSize: 13,
+                fontWeight: FontWeight.w900,
+                color: colors.primary,
+                letterSpacing: 1.0,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              decoration: BoxDecoration(
+                color: colors.surfaceContainer,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: proState.isPro ? colors.primary : const Color(0xFFFFD600).withOpacity(0.6),
+                  width: 1.2,
+                ),
+              ),
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: colors.primary.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(Icons.psychology_rounded, color: colors.primary, size: 22),
+                    ),
+                    title: Row(
+                      children: [
+                        Text(
+                          'Nova Virtual Co-Pilot',
+                          style: TextStyle(fontWeight: FontWeight.w700, color: colors.onSurface),
+                        ),
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                          decoration: BoxDecoration(
+                            color: colors.primary.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: colors.primary, width: 0.8),
+                          ),
+                          child: Text(
+                            'PRO',
+                            style: GoogleFonts.orbitron(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w900,
+                              color: colors.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    subtitle: Text(
+                      proState.isPro
+                          ? 'Active (Powered by Gemini API)'
+                          : 'Automated PC voice & text controls',
+                      style: TextStyle(color: colors.onSurfaceVariant, fontSize: 12),
+                    ),
+                    trailing: Icon(Icons.chevron_right_rounded, color: colors.primary),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const NovaAssistantScreen()),
+                      );
+                    },
+                  ),
+                  Divider(color: colors.outlineVariant, height: 1),
+                  ListTile(
+                    leading: Icon(
+                      proState.isPro ? Icons.verified_rounded : Icons.star_border_rounded,
+                      color: proState.isPro ? colors.primary : const Color(0xFFFFD600),
+                    ),
+                    title: Text(
+                      'Wintroller Pro Status',
+                      style: TextStyle(fontWeight: FontWeight.w600, color: colors.onSurface),
+                    ),
+                    subtitle: Text(
+                      proState.isPro ? 'Pro Lifetime Active' : 'Free Tier (Tap to configure Gemini Key)',
+                      style: TextStyle(color: colors.onSurfaceVariant, fontSize: 12),
+                    ),
+                    trailing: TextButton(
+                      child: Text(
+                        proState.isPro ? 'Manage' : 'Upgrade',
+                        style: TextStyle(
+                          color: colors.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const ProUpgradeScreen()),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
             // Preference Section: Appearance
             Text(
               'Appearance & Theme Style',

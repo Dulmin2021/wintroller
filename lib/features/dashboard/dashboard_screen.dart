@@ -15,7 +15,9 @@ import '../files/file_manager_screen.dart';
 import '../keyboard/keyboard_control_screen.dart';
 import '../media/media_control_screen.dart';
 import '../mouse/mouse_trackpad_screen.dart';
+import '../nova/nova_assistant_screen.dart';
 import '../power/power_control_screen.dart';
+import '../pro/pro_upgrade_screen.dart';
 import '../settings/settings_screen.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -228,8 +230,47 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           ),
                   ),
 
+                  // Nova AI Copilot Launcher Button
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const NovaAssistantScreen()),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: colors.primary.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: colors.primary, width: 1.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: colors.primary.withOpacity(0.25),
+                            blurRadius: 8,
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.psychology_rounded, color: colors.primary, size: 16),
+                          const SizedBox(width: 4),
+                          Text(
+                            'NOVA',
+                            style: GoogleFonts.orbitron(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                              color: colors.primary,
+                              letterSpacing: 1.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
                   if (isAlienHud) ...[
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                     IconButton(
                       icon: HudRadarCircle(
                         size: 26,
@@ -741,15 +782,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         icon: const AlienEmblem(size: 22, hasGlow: false),
                         onPressed: () {},
                       ),
-                      // Floating Giant Alien Core
+                      // Floating Giant Alien Core -> Launches Nova AI Co-Pilot
                       GestureDetector(
                         onTap: () {
-                          ref.read(pcRemoteRepositoryProvider).mediaPlayPause();
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const NovaAssistantScreen()),
+                          );
                         },
                         child: HudRadarCircle(
-                          size: 46,
+                          size: 48,
                           color: colors.primary,
-                          child: const AlienEmblem(size: 28, hasGlow: true),
+                          child: const AlienEmblem(size: 30, hasGlow: true),
                         ),
                       ),
                       IconButton(
@@ -799,12 +842,27 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         );
                       },
                     ),
-                    IconButton(
-                      icon: Icon(Icons.play_circle_fill_rounded, color: colors.primary, size: 36),
-                      tooltip: 'Play/Pause',
-                      onPressed: () {
-                        ref.read(pcRemoteRepositoryProvider).mediaPlayPause();
+                    // Central Nova AI Floating Button
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const NovaAssistantScreen()),
+                        );
                       },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: colors.primary,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: colors.primary.withOpacity(0.4),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                        child: const Icon(Icons.psychology_rounded, color: Colors.black, size: 24),
+                      ),
                     ),
                     IconButton(
                       icon: Icon(Icons.keyboard_rounded, color: colors.primary),

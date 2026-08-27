@@ -3,6 +3,8 @@ import 'package:pcremote/protocol/command_protocol.dart';
 import 'package:pcremote/models/device_models.dart';
 import 'package:pcremote/models/system_models.dart';
 import 'package:pcremote/models/file_models.dart';
+import 'package:pcremote/features/pro/pro_plan_provider.dart';
+import 'package:pcremote/services/gemini_service.dart';
 
 void main() {
   group('PCRemote Protocol and Models Tests', () {
@@ -110,6 +112,35 @@ void main() {
         modifiedAt: DateTime.now(),
       );
       expect(mbFile.formattedSize, '15.0 MB');
+    });
+
+    test('ProPlanState and NovaResponse structure validation', () {
+      const state = ProPlanState(
+        isPro: true,
+        tier: ProPlanTier.proLifetime,
+        geminiApiKey: 'AIzaSyTest1234567890',
+        isApiKeyValid: true,
+      );
+
+      expect(state.isPro, true);
+      expect(state.tier, ProPlanTier.proLifetime);
+      expect(state.isApiKeyValid, true);
+
+      const action = NovaActionResult(
+        toolName: 'set_volume',
+        arguments: {'level': 40},
+        success: true,
+        message: 'Master volume calibrated to 40%.',
+      );
+
+      const response = NovaResponse(
+        text: 'Volume set to 40%.',
+        executedActions: [action],
+      );
+
+      expect(response.text, 'Volume set to 40%.');
+      expect(response.executedActions.length, 1);
+      expect(response.executedActions.first.toolName, 'set_volume');
     });
   });
 }
