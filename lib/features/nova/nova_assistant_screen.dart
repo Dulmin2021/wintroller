@@ -89,8 +89,10 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
     final voice = ref.read(novaVoiceServiceProvider);
     _soundSub = voice.soundLevelStream.listen((level) {
       if (mounted) {
+        // Noise Gate: filter ambient background hiss below 2.0 dB
+        final cleanLevel = level > 2.0 ? level : 0.0;
         setState(() {
-          _soundLevel = level;
+          _soundLevel = cleanLevel;
         });
       }
     });
@@ -428,7 +430,9 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
                               height: 6,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: _isListening ? const Color(0xFFFF3366) : colors.primary,
+                                color: _isListening
+                                    ? (_soundLevel > 0 ? const Color(0xFF00FF66) : colors.primary)
+                                    : colors.primary.withOpacity(0.5),
                               ),
                             ),
                             const SizedBox(width: 6),
@@ -437,7 +441,7 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
                               style: GoogleFonts.orbitron(
                                 fontSize: 9.5,
                                 fontWeight: FontWeight.w900,
-                                color: _isListening ? const Color(0xFFFF3366) : colors.primary.withOpacity(0.8),
+                                color: _isListening ? const Color(0xFF00FF66) : colors.primary.withOpacity(0.8),
                                 letterSpacing: 1.2,
                               ),
                             ),
@@ -450,11 +454,14 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
                         right: 12,
                         child: Text(
                           _isListening
-                              ? 'MIC: ACTIVE (${_soundLevel.toStringAsFixed(1)} dB)'
+                              ? (_soundLevel > 0 ? 'VOICE: ACTIVE' : 'MIC: LISTENING')
                               : (_isSpeaking ? 'TTS: SPEAKING' : 'STANDBY'),
                           style: GoogleFonts.shareTechMono(
                             fontSize: 9.5,
-                            color: _isListening ? const Color(0xFFFF3366) : colors.onSurfaceVariant,
+                            fontWeight: FontWeight.w700,
+                            color: _isListening
+                                ? (_soundLevel > 0 ? const Color(0xFF00FF66) : colors.primary.withOpacity(0.7))
+                                : colors.onSurfaceVariant,
                           ),
                         ),
                       ),
@@ -465,7 +472,7 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
                           soundLevel: _soundLevel,
                           isListening: _isListening,
                           isSpeaking: _isSpeaking,
-                          primaryColor: _isListening ? const Color(0xFFFF3366) : colors.primary,
+                          primaryColor: const Color(0xFF00FF66),
                           height: 120,
                         ),
                       ),
