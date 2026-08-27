@@ -29,7 +29,12 @@ class NovaMessage {
 }
 
 class NovaAssistantScreen extends ConsumerStatefulWidget {
-  const NovaAssistantScreen({super.key});
+  final String? initialCommand;
+
+  const NovaAssistantScreen({
+    super.key,
+    this.initialCommand,
+  });
 
   @override
   ConsumerState<NovaAssistantScreen> createState() => _NovaAssistantScreenState();
@@ -81,9 +86,14 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final voice = ref.read(novaVoiceServiceProvider);
       final isMuted = ref.read(voiceMutedProvider);
-      voice.speak('Nova Voice Co-Pilot online. Standing by.', isMuted: isMuted);
       _initVoiceSubscriptions();
-      _startWakeWordIfEnabled();
+
+      if (widget.initialCommand != null && widget.initialCommand!.trim().isNotEmpty) {
+        _handleSend(widget.initialCommand!.trim());
+      } else {
+        voice.speak('Nova Voice Co-Pilot online. Standing by.', isMuted: isMuted);
+        _startWakeWordIfEnabled();
+      }
     });
   }
 
@@ -91,16 +101,7 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
     final voice = ref.read(novaVoiceServiceProvider);
     final isEnabled = ref.read(wakeWordEnabledProvider);
     if (isEnabled && !_isListening && !_isProcessing) {
-      voice.startWakeWordListening(onWakeWord: (followUp) {
-        if (mounted) {
-          if (followUp != null && followUp.trim().isNotEmpty) {
-            _handleSend(followUp.trim());
-          } else {
-            voice.speak('Nova online. Standing by.', isMuted: ref.read(voiceMutedProvider));
-            _toggleVoiceListening();
-          }
-        }
-      });
+      voice.startGlobalWakeWordMonitoring();
     }
   }
 
@@ -156,6 +157,15 @@ class _NovaAssistantScreenState extends ConsumerState<NovaAssistantScreen> with 
     _inputController.dispose();
     _scrollController.dispose();
     _pulseController.dispose();
+
+    // Resume global continuous wake word monitoring for other screens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final isEnabled = ref.read(wakeWordEnabledProvider);
+      if (isEnabled) {
+        ref.read(novaVoiceServiceProvider).startGlobalWakeWordMonitoring();
+      }
+    });
+
     super.dispose();
   }
 

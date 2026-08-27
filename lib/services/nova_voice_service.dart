@@ -18,7 +18,10 @@ class NovaVoiceService {
   bool _isTtsInitialized = false;
   bool _isListening = false;
   bool _isSpeaking = false;
+  bool _isWakeWordLoopActive = false;
   bool _isWakeWordMode = false;
+
+  Timer? _wakeWordRestartTimer;
 
   final _recognizedTextController = StreamController<String>.broadcast();
   final _soundLevelController = StreamController<double>.broadcast();
@@ -56,11 +59,18 @@ class NovaVoiceService {
       _flutterTts.setCompletionHandler(() {
         _isSpeaking = false;
         _speakingStateController.add(false);
+        // After speaking ends, resume wake word loop if enabled
+        if (_isWakeWordLoopActive) {
+          _scheduleWakeWordRestart(const Duration(milliseconds: 400));
+        }
       });
 
       _flutterTts.setErrorHandler((msg) {
         _isSpeaking = false;
         _speakingStateController.add(false);
+        if (_isWakeWordLoopActive) {
+          _scheduleWakeWordRestart(const Duration(milliseconds: 400));
+        }
       });
 
       _isTtsInitialized = true;
@@ -85,11 +95,17 @@ class NovaVoiceService {
           debugPrint('STT error: ${error.errorMsg}');
           _isListening = false;
           _listeningStateController.add(false);
+          if (_isWakeWordLoopActive && !_isSpeaking) {
+            _scheduleWakeWordRestart(const Duration(milliseconds: 800));
+          }
         },
         onStatus: (String status) {
           if (status == 'notListening' || status == 'done') {
             _isListening = false;
             _listeningStateController.add(false);
+            if (_isWakeWordLoopActive && !_isSpeaking) {
+              _scheduleWakeWordRestart(const Duration(milliseconds: 300));
+            }
           }
         },
       );
@@ -100,10 +116,20 @@ class NovaVoiceService {
     }
   }
 
-  // Active Voice Command Listening
+  void _scheduleWakeWordRestart(Duration delay) {
+    _wakeWordRestartTimer?.cancel();
+    _wakeWordRestartTimer = Timer(delay, () {
+      if (_isWakeWordLoopActive && !_isListening && !_isSpeaking) {
+        _startWakeWordListenSession();
+      }
+    });
+  }
+
+  // Active User Command Listening (Direct recording inside Nova screen)
   Future<void> startListening({
     required Function(String text, bool isFinal) onResult,
   }) async {
+    _wakeWordRestartTimer?.cancel();
     final hasInit = await initSpeech();
     if (!hasInit) return;
 
@@ -138,16 +164,25 @@ class NovaVoiceService {
     }
   }
 
-  // Continuous "Hey Nova" Wake Word Detection
-  Future<void> startWakeWordListening({
-    required Function(String? followUpCommand) onWakeWord,
-  }) async {
-    final hasInit = await initSpeech();
-    if (!hasInit) return;
+  // Start Global Continuous "Hey Nova" Wake Word Daemon
+  Future<void> startGlobalWakeWordMonitoring() async {
+    _isWakeWordLoopActive = true;
+    _startWakeWordListenSession();
+  }
 
-    if (_isListening) {
+  Future<void> stopGlobalWakeWordMonitoring() async {
+    _isWakeWordLoopActive = false;
+    _wakeWordRestartTimer?.cancel();
+    if (_isWakeWordMode && _isListening) {
       await stopListening();
     }
+  }
+
+  Future<void> _startWakeWordListenSession() async {
+    final hasInit = await initSpeech();
+    if (!hasInit || !_isWakeWordLoopActive || _isSpeaking) return;
+
+    if (_isListening) return;
 
     _isWakeWordMode = true;
 
@@ -168,7 +203,6 @@ class NovaVoiceService {
             final followUp = remainder.isNotEmpty ? remainder : null;
 
             _wakeWordTriggerController.add(followUp);
-            onWakeWord(followUp);
           }
         },
         onSoundLevelChange: (level) {
@@ -181,14 +215,18 @@ class NovaVoiceService {
         partialResults: true,
       );
     } catch (e) {
-      debugPrint('startWakeWordListening error: $e');
+      debugPrint('wakeWordSession error: $e');
       _isListening = false;
       _listeningStateController.add(false);
+      if (_isWakeWordLoopActive && !_isSpeaking) {
+        _scheduleWakeWordRestart(const Duration(milliseconds: 1000));
+      }
     }
   }
 
   Future<void> stopListening() async {
     try {
+      _wakeWordRestartTimer?.cancel();
       if (_speechToText.isListening) {
         await _speechToText.stop();
       }
@@ -240,6 +278,7 @@ class NovaVoiceService {
   }
 
   void dispose() {
+    _wakeWordRestartTimer?.cancel();
     _speechToText.cancel();
     _flutterTts.stop();
     _recognizedTextController.close();
