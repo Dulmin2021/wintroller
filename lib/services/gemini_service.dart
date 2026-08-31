@@ -125,7 +125,7 @@ class GeminiService {
         'properties': {
           'action': {
             'type': 'STRING',
-            'enum': ['lock', 'sleep', 'hibernate', 'logoff', 'restart', 'shutdown', 'display_off', 'display_wake'],
+            'enum': ['lock', 'unlock', 'sleep', 'hibernate', 'logoff', 'restart', 'shutdown', 'display_off', 'display_wake'],
             'description': 'Power action to execute',
           }
         },
@@ -389,7 +389,11 @@ Rules:
     }
 
     // 11. Power Actions
-    if (lower.contains('lock')) {
+    if (lower.contains('unlock')) {
+      final res = await _executeTool('power_action', {'action': 'unlock'});
+      actions.add(res);
+      messages.add(res.message);
+    } else if (lower.contains('lock')) {
       final res = await _executeTool('power_action', {'action': 'lock'});
       actions.add(res);
       messages.add(res.message);
@@ -527,6 +531,9 @@ Rules:
           switch (action) {
             case 'lock':
               repository.lock();
+              break;
+            case 'unlock':
+              repository.unlockPc('');
               break;
             case 'sleep':
               repository.sleep();

@@ -9,6 +9,7 @@ import 'providers/app_providers.dart';
 import 'services/language_service.dart';
 import 'services/storage_service.dart';
 import 'theme/app_theme.dart';
+import 'widgets/app_lock_wrapper.dart';
 import 'widgets/floating_nova_button.dart';
 
 final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
@@ -124,11 +125,13 @@ class _WintrollerAppState extends ConsumerState<WintrollerApp> {
       themeMode: themeMode,
       home: _initialHome,
       builder: (context, child) {
-        return Stack(
-          children: [
-            if (child != null) child,
-            const GlobalFloatingNovaButton(),
-          ],
+        return AppLockWrapper(
+          child: Stack(
+            children: [
+              if (child != null) child,
+              const GlobalFloatingNovaButton(),
+            ],
+          ),
         );
       },
     );

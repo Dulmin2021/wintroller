@@ -14,8 +14,101 @@ import '../pro/plan_selection_screen.dart';
 import '../pro/pro_plan_provider.dart';
 import '../pro/pro_upgrade_screen.dart';
 
+final biometricAppLockProvider = StateProvider<bool>((ref) {
+  final storage = ref.watch(storageServiceProvider);
+  return storage.isBiometricAppLockEnabled();
+});
+
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
+
+  void _showConfigureWindowsPinDialog(BuildContext context, WidgetRef ref) async {
+    final storage = ref.read(storageServiceProvider);
+    final currentPin = await storage.getWindowsPin();
+    final pinController = TextEditingController(text: currentPin ?? '');
+
+    if (!context.mounted) return;
+
+    await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF131B2E),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            const Icon(Icons.fingerprint_rounded, color: Color(0xFF00FF66)),
+            const SizedBox(width: 8),
+            Text(
+              'Windows Unlock PIN',
+              style: GoogleFonts.orbitron(fontSize: 14, fontWeight: FontWeight.w800, color: const Color(0xFFDAE2FD)),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Store your Windows login PIN or password encrypted in your phone\'s secure hardware keystore. You can then unlock your PC with your fingerprint.',
+              style: GoogleFonts.inter(fontSize: 12.5, color: const Color(0xFFC2C6D6)),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: pinController,
+              obscureText: true,
+              style: GoogleFonts.shareTechMono(color: Colors.white, fontSize: 16),
+              decoration: InputDecoration(
+                hintText: 'Enter Windows PIN / Password',
+                hintStyle: const TextStyle(color: Color(0xFF8C909F), fontSize: 13),
+                filled: true,
+                fillColor: const Color(0xFF222A3D),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.clear_rounded, color: Color(0xFF8C909F), size: 18),
+                  onPressed: () => pinController.clear(),
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          if (currentPin != null && currentPin.isNotEmpty)
+            TextButton(
+              onPressed: () async {
+                await storage.setWindowsPin(null);
+                if (ctx.mounted) Navigator.of(ctx).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Windows PIN cleared')),
+                );
+              },
+              child: const Text('Remove PIN', style: TextStyle(color: Color(0xFFFF5252))),
+            ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel', style: TextStyle(color: Color(0xFF8C909F))),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF00FF66),
+              foregroundColor: Colors.black,
+            ),
+            onPressed: () async {
+              final newPin = pinController.text.trim();
+              await storage.setWindowsPin(newPin.isEmpty ? null : newPin);
+              if (ctx.mounted) Navigator.of(ctx).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(newPin.isEmpty ? 'PIN cleared' : 'Windows PIN saved securely!'),
+                  backgroundColor: const Color(0xFF131B2E),
+                ),
+              );
+            },
+            child: const Text('Save PIN', style: TextStyle(fontWeight: FontWeight.w700)),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -457,6 +550,81 @@ class SettingsScreen extends ConsumerWidget {
                     value: autoReconnect,
                     activeColor: colors.primaryContainer,
                     onChanged: (_) => ref.read(autoReconnectProvider.notifier).toggle(),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Security & PC Unlock Section
+            Text(
+              'SECURITY & PC UNLOCK',
+              style: GoogleFonts.orbitron(
+                fontSize: 13,
+                fontWeight: FontWeight.w900,
+                color: colors.primary,
+                letterSpacing: 1.0,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              decoration: BoxDecoration(
+                color: colors.surfaceContainer,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: colors.outlineVariant, width: 0.8),
+              ),
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF00FF66).withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.fingerprint_rounded, color: Color(0xFF00FF66), size: 22),
+                    ),
+                    title: Text(
+                      'Windows Remote Unlock PIN',
+                      style: TextStyle(fontWeight: FontWeight.w700, color: colors.onSurface),
+                    ),
+                    subtitle: FutureBuilder<String?>(
+                      future: ref.watch(storageServiceProvider).getWindowsPin(),
+                      builder: (context, snapshot) {
+                        final hasPin = snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty;
+                        return Text(
+                          hasPin ? 'PIN Configured (AES Encrypted)' : 'Not Configured (Tap to setup)',
+                          style: TextStyle(
+                            color: hasPin ? const Color(0xFF00FF66) : colors.onSurfaceVariant,
+                            fontSize: 12,
+                          ),
+                        );
+                      },
+                    ),
+                    trailing: TextButton(
+                      child: Text('Configure', style: TextStyle(color: colors.primary, fontWeight: FontWeight.w700)),
+                      onPressed: () => _showConfigureWindowsPinDialog(context, ref),
+                    ),
+                  ),
+                  Divider(color: colors.outlineVariant, height: 1),
+                  SwitchListTile(
+                    secondary: Icon(Icons.security_rounded, color: colors.primary),
+                    title: Text(
+                      'Biometric App Lock',
+                      style: TextStyle(fontWeight: FontWeight.w600, color: colors.onSurface),
+                    ),
+                    subtitle: Text(
+                      'Require fingerprint or Face ID to open Wintroller',
+                      style: TextStyle(color: colors.onSurfaceVariant, fontSize: 12),
+                    ),
+                    value: ref.watch(biometricAppLockProvider),
+                    activeColor: const Color(0xFF00FF66),
+                    onChanged: (val) async {
+                      final storage = ref.read(storageServiceProvider);
+                      await storage.setBiometricAppLockEnabled(val);
+                      ref.read(biometricAppLockProvider.notifier).state = val;
+                    },
                   ),
                 ],
               ),

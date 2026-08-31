@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../providers/app_providers.dart';
+import '../../services/biometric_service.dart';
+import '../../services/storage_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/alien_icons.dart';
 import '../../widgets/app_dialog.dart';
@@ -16,6 +19,147 @@ class PowerControlScreen extends ConsumerStatefulWidget {
 
 class _PowerControlScreenState extends ConsumerState<PowerControlScreen> {
   bool _isBusy = false;
+
+  void _handleUnlockPc() async {
+    final storage = ref.read(storageServiceProvider);
+    final repo = ref.read(pcRemoteRepositoryProvider);
+    final bio = ref.read(biometricServiceProvider);
+    final colors = AppColors.of(context);
+
+    final savedPin = await storage.getWindowsPin();
+
+    if (savedPin == null || savedPin.isEmpty) {
+      if (!mounted) return;
+      final pinController = TextEditingController();
+      bool saveForFuture = true;
+
+      final enteredPin = await showDialog<String>(
+        context: context,
+        builder: (ctx) => StatefulBuilder(
+          builder: (ctx, setDialogState) => AlertDialog(
+            backgroundColor: const Color(0xFF131B2E),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: Row(
+              children: [
+                const Icon(Icons.lock_open_rounded, color: Color(0xFF00FF66)),
+                const SizedBox(width: 8),
+                Text(
+                  'Unlock Windows PC',
+                  style: GoogleFonts.orbitron(fontSize: 14, fontWeight: FontWeight.w800, color: const Color(0xFFDAE2FD)),
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Enter your Windows login PIN or password to remotely unlock the desktop lock screen:',
+                  style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFFC2C6D6)),
+                ),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: pinController,
+                  obscureText: true,
+                  autofocus: true,
+                  style: GoogleFonts.shareTechMono(color: Colors.white, fontSize: 16),
+                  decoration: InputDecoration(
+                    hintText: 'Enter Windows PIN / Password',
+                    hintStyle: const TextStyle(color: Color(0xFF8C909F), fontSize: 13),
+                    filled: true,
+                    fillColor: const Color(0xFF222A3D),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: saveForFuture,
+                  title: Text(
+                    'Save PIN securely for biometric unlock',
+                    style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFFDAE2FD)),
+                  ),
+                  activeColor: const Color(0xFF00FF66),
+                  onChanged: (val) {
+                    setDialogState(() => saveForFuture = val ?? true);
+                  },
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(null),
+                child: const Text('Cancel', style: TextStyle(color: Color(0xFF8C909F))),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF00FF66),
+                  foregroundColor: Colors.black,
+                ),
+                onPressed: () {
+                  final pin = pinController.text.trim();
+                  if (saveForFuture && pin.isNotEmpty) {
+                    storage.setWindowsPin(pin);
+                  }
+                  Navigator.of(ctx).pop(pin);
+                },
+                child: const Text('Unlock PC', style: TextStyle(fontWeight: FontWeight.w700)),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      if (enteredPin == null || enteredPin.isEmpty) return;
+
+      setState(() => _isBusy = true);
+      final success = await repo.unlockPc(enteredPin);
+      if (mounted) setState(() => _isBusy = false);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(success ? 'Remote unlock sequence executed!' : 'Failed to execute unlock sequence'),
+          backgroundColor: success ? colors.tertiaryContainer : colors.errorContainer,
+        ),
+      );
+    } else {
+      // Prompt Biometric Authentication
+      final authenticated = await bio.authenticate(
+        localizedReason: 'Scan fingerprint or Face ID to unlock your Windows PC',
+      );
+
+      if (!authenticated) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Biometric authentication cancelled or failed'),
+            backgroundColor: Color(0xFF93000A),
+          ),
+        );
+        return;
+      }
+
+      setState(() => _isBusy = true);
+      final success = await repo.unlockPc(savedPin);
+      if (mounted) setState(() => _isBusy = false);
+
+      if (!mounted) return;
+      HapticFeedback.heavyImpact();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.lock_open_rounded, color: Color(0xFF00FF66), size: 20),
+              const SizedBox(width: 8),
+              const Expanded(child: Text('PC Unlocked via Fingerprint!')),
+            ],
+          ),
+          backgroundColor: const Color(0xFF131B2E),
+        ),
+      );
+    }
+  }
 
   void _executePowerAction({
     required String title,
@@ -241,6 +385,16 @@ class _PowerControlScreenState extends ConsumerState<PowerControlScreen> {
                       children: [
                         Expanded(
                           child: _PowerActionTile(
+                            title: isAlienHud ? 'UNLOCK_PC_SESSION' : 'Unlock PC',
+                            subtitle: 'Fingerprint & PIN login',
+                            icon: Icons.fingerprint_rounded,
+                            color: const Color(0xFF00FF66),
+                            onTap: _handleUnlockPc,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _PowerActionTile(
                             title: isAlienHud ? 'LOCK_WORKSPACE' : 'Lock Screen',
                             subtitle: 'Lock Windows user session',
                             icon: Icons.lock_outline_rounded,
@@ -254,7 +408,13 @@ class _PowerControlScreenState extends ConsumerState<PowerControlScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                      ],
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    Row(
+                      children: [
                         Expanded(
                           child: _PowerActionTile(
                             title: isAlienHud ? 'SLEEP_MODE' : 'Sleep Mode',
@@ -270,13 +430,7 @@ class _PowerControlScreenState extends ConsumerState<PowerControlScreen> {
                             ),
                           ),
                         ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    Row(
-                      children: [
+                        const SizedBox(width: 12),
                         Expanded(
                           child: _PowerActionTile(
                             title: isAlienHud ? 'HIBERNATE_SYS' : 'Hibernate',
@@ -292,7 +446,13 @@ class _PowerControlScreenState extends ConsumerState<PowerControlScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                      ],
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    Row(
+                      children: [
                         Expanded(
                           child: _PowerActionTile(
                             title: isAlienHud ? 'LOG_OFF_USER' : 'Log Off',
@@ -305,6 +465,22 @@ class _PowerControlScreenState extends ConsumerState<PowerControlScreen> {
                               confirmLabel: 'Sign Out',
                               requiresConfirm: true,
                               action: () => repo.logoff(),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _PowerActionTile(
+                            title: isAlienHud ? 'DISPLAY_OFF' : 'Turn Display Off',
+                            subtitle: 'Put monitor into power-saving off mode',
+                            icon: Icons.tv_off_rounded,
+                            color: colors.primary,
+                            onTap: () => _executePowerAction(
+                              title: 'Turn Display Off',
+                              message: 'Turn off monitor power?',
+                              confirmLabel: 'Display Off',
+                              requiresConfirm: false,
+                              action: () => repo.setDisplay(false),
                             ),
                           ),
                         ),

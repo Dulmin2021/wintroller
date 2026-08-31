@@ -79,6 +79,31 @@ class PCRemoteRepository {
   Future<ResponseMessage> lock() async =>
       await _wsService.sendCommand(ProtocolActions.powerLock);
 
+  /// Automated Remote PC Windows Unlock: Wakes display, dismisses lockscreen, types PIN/Password, and presses Enter
+  Future<bool> unlockPc(String pinOrPassword) async {
+    try {
+      // 1. Wake Display monitor
+      await setDisplay(true);
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      // 2. Press Space key to dismiss the Windows lock screen clock/wallpaper
+      sendKeyboardKey('Space');
+      await Future.delayed(const Duration(milliseconds: 400));
+
+      // 3. Type Windows Login PIN or Password
+      if (pinOrPassword.isNotEmpty) {
+        sendKeyboardType(pinOrPassword);
+        await Future.delayed(const Duration(milliseconds: 200));
+
+        // 4. Press Enter to submit Windows Login
+        sendKeyboardKey('Return');
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   // Media Actions
   Future<ResponseMessage> mediaPlayPause() async =>
       await _wsService.sendCommand(ProtocolActions.mediaPlayPause);

@@ -13,6 +13,8 @@ class StorageService {
   static const String _keyLanguageCode = 'language_code';
   static const String _keyLanguageSelected = 'language_selected';
   static const String _keyPlanSelected = 'plan_selected';
+  static const String _keyWindowsPin = 'windows_unlock_pin';
+  static const String _keyBiometricAppLock = 'biometric_app_lock';
 
   final SharedPreferences _prefs;
   final FlutterSecureStorage _secureStorage;
@@ -102,4 +104,18 @@ class StorageService {
 
   bool isPlanSelected() => _prefs.getBool(_keyPlanSelected) ?? false;
   Future<void> setPlanSelected(bool selected) async => _prefs.setBool(_keyPlanSelected, selected);
+
+  // Windows PIN & Biometric Security
+  Future<String?> getWindowsPin() => _secureStorage.read(key: _keyWindowsPin);
+  Future<void> setWindowsPin(String? pin) async {
+    if (pin == null || pin.isEmpty) {
+      await _secureStorage.delete(key: _keyWindowsPin);
+    } else {
+      await _secureStorage.write(key: _keyWindowsPin, value: pin);
+    }
+  }
+
+  bool isBiometricAppLockEnabled() => _prefs.getBool(_keyBiometricAppLock) ?? false;
+  Future<void> setBiometricAppLockEnabled(bool enabled) async =>
+      _prefs.setBool(_keyBiometricAppLock, enabled);
 }
