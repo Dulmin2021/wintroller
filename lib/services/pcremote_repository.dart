@@ -84,19 +84,25 @@ class PCRemoteRepository {
     try {
       // 1. Wake Display monitor
       await setDisplay(true);
-      await Future.delayed(const Duration(milliseconds: 300));
-
-      // 2. Press Space key to dismiss the Windows lock screen clock/wallpaper
-      sendKeyboardKey('Space');
       await Future.delayed(const Duration(milliseconds: 400));
 
-      // 3. Type Windows Login PIN or Password
+      // 2. Press Space key to wake up and dismiss the Windows lock screen clock/wallpaper
+      sendKeyboardKey('Space');
+      await Future.delayed(const Duration(milliseconds: 300));
+      sendKeyboardKey('Space');
+
+      // 3. Wait for Windows LogonUI slide-up transition animation & PIN focus (1.2s)
+      await Future.delayed(const Duration(milliseconds: 1200));
+
+      // 4. Type Windows Login PIN or Password
       if (pinOrPassword.isNotEmpty) {
         sendKeyboardType(pinOrPassword);
-        await Future.delayed(const Duration(milliseconds: 200));
+        await Future.delayed(const Duration(milliseconds: 400));
 
-        // 4. Press Enter to submit Windows Login
+        // 5. Submit Windows Login (send both Return and Enter keycodes)
         sendKeyboardKey('Return');
+        await Future.delayed(const Duration(milliseconds: 200));
+        sendKeyboardKey('Enter');
       }
       return true;
     } catch (_) {
