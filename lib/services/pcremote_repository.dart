@@ -42,16 +42,18 @@ class PCRemoteRepository {
   }
 
   Future<ResponseMessage> verifyPin(String pin) async {
+    final devName = await _wsService.getClientDeviceName();
     return await _wsService.sendCommand(
       ProtocolActions.pairingVerify,
-      params: {'pin': pin},
+      params: {'pin': pin, 'deviceName': devName, 'clientDevice': devName},
     );
   }
 
   Future<ResponseMessage> verifyQrToken(String token) async {
+    final devName = await _wsService.getClientDeviceName();
     return await _wsService.sendCommand(
       ProtocolActions.pairingVerify,
-      params: {'token': token},
+      params: {'token': token, 'deviceName': devName, 'clientDevice': devName},
     );
   }
 

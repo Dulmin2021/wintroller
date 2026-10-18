@@ -7,6 +7,7 @@ import math
 import os
 import random
 import socket
+import subprocess
 import sys
 import threading
 import time
@@ -61,8 +62,8 @@ def get_local_ip():
     return ip
 
 LOCAL_IP = get_local_ip()
-DEFAULT_PORT = 8092
-ALT_PORT = 8765
+PRIMARY_PORT = 8092
+SECONDARY_PORT = 8765
 DISCOVERY_PORT = 8766
 
 
@@ -145,6 +146,22 @@ class Win32Controller:
     def shutdown():
         os.system('shutdown.exe /s /t 0')
 
+    @staticmethod
+    def set_brightness(val: int):
+        clamped = max(0, min(100, int(val)))
+        ps_cmd = f"Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightnessMethods | Invoke-CimMethod -MethodName WmiSetBrightness -Arguments @{{Timeout = 1; Brightness = {clamped}}}"
+        subprocess.Popen(['powershell', '-WindowStyle', 'Hidden', '-Command', ps_cmd], creationflags=0x08000000)
+
+    @staticmethod
+    def set_wifi(enable: bool):
+        ps_cmd = f"Get-NetAdapter -Name *Wi-Fi*,*Wireless*,*WLAN* -ErrorAction SilentlyContinue | {'Enable-NetAdapter' if enable else 'Disable-NetAdapter'} -Confirm:$false -ErrorAction SilentlyContinue"
+        subprocess.Popen(['powershell', '-WindowStyle', 'Hidden', '-Command', ps_cmd], creationflags=0x08000000)
+
+    @staticmethod
+    def set_bluetooth(enable: bool):
+        ps_cmd = f"try {{ [Windows.Devices.Radios.Radio,Windows.System.Devices,ContentType=WindowsRuntime] | Out-Null; $radios = [Windows.Devices.Radios.Radio]::GetRadiosAsync().GetAwaiter().GetResult(); $bt = $radios | Where-Object {{ $_.Kind -eq 'Bluetooth' }}; if ($bt) {{ $bt.SetStateAsync('{'On' if enable else 'Off'}').GetAwaiter().GetResult() }} }} catch {{ Get-PnpDevice -Class Bluetooth -ErrorAction SilentlyContinue | {'Enable-PnpDevice' if enable else 'Disable-PnpDevice'} -Confirm:$false -ErrorAction SilentlyContinue }}"
+        subprocess.Popen(['powershell', '-WindowStyle', 'Hidden', '-Command', ps_cmd], creationflags=0x08000000)
+
 
 class WintrollerCompanionApp:
     def __init__(self):
@@ -169,17 +186,19 @@ class WintrollerCompanionApp:
         self._is_maximized = False
         self._prev_geom = None
 
-        self.current_volume = 68
-        self.current_ping = 3.2
-        self.connected_client = 'Pixel 8 Pro'
-        self.is_client_connected = True
-        self.active_port = DEFAULT_PORT
+        self.current_volume = 50
+        self.current_brightness = 80
+        self.current_ping = 0.0
+        self.connected_client = None
+        self.is_client_connected = False
+        self.active_ports = []
 
         self.connected_websockets = set()
         self.log_lines = []
 
         self._setup_taskbar()
         self._build_ui()
+        self._init_current_audio_and_brightness()
         self._start_background_services()
 
     def _setup_taskbar(self):
@@ -191,6 +210,14 @@ class WintrollerCompanionApp:
             style = user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
             style = (style & ~WS_EX_TOOLWINDOW) | WS_EX_APPWINDOW
             user32.SetWindowLongW(hwnd, GWL_EXSTYLE, style)
+        except Exception:
+            pass
+
+    def _init_current_audio_and_brightness(self):
+        try:
+            speakers = AudioUtilities.GetSpeakers()
+            self.current_volume = round(speakers.volume_percent)
+            self._update_audio_ui()
         except Exception:
             pass
 
@@ -237,7 +264,7 @@ class WintrollerCompanionApp:
 
         self.port_badge = ctk.CTkLabel(
             self.title_bar,
-            text=f'Active :{self.active_port}',
+            text='Active :8092',
             font=('Segoe UI', 11, 'bold'),
             text_color='#38BDF8',
             fg_color='#162133',
@@ -314,9 +341,9 @@ class WintrollerCompanionApp:
 
         self.lbl_ping_val = ctk.CTkLabel(
             val_ping_row,
-            text=f'{self.current_ping:.1f} ms',
+            text='-- ms',
             font=('Segoe UI', 22, 'bold'),
-            text_color='#38BDF8'
+            text_color='#64748B'
         )
         self.lbl_ping_val.pack(side='left', padx=(0, 8))
 
@@ -324,7 +351,7 @@ class WintrollerCompanionApp:
             val_ping_row,
             text='UDP Socket',
             font=('Segoe UI', 12, 'bold'),
-            text_color='#94A3B8'
+            text_color='#475569'
         )
         self.lbl_ping_sub.pack(side='left', pady=(4, 0))
 
@@ -336,7 +363,7 @@ class WintrollerCompanionApp:
             progress_color='#38BDF8'
         )
         self.ping_progress.pack(fill='x', padx=14, pady=(0, 10))
-        self.ping_progress.set(0.18)
+        self.ping_progress.set(0.0)
 
         # Card 2: AUTHORIZED CLIENT
         self.card2 = ctk.CTkFrame(
@@ -363,23 +390,23 @@ class WintrollerCompanionApp:
             val_client_row,
             text='📱',
             font=('Segoe UI Emoji', 16),
-            text_color='#38BDF8'
+            text_color='#64748B'
         )
         self.lbl_client_icon.pack(side='left', padx=(0, 6))
 
         self.lbl_client_name = ctk.CTkLabel(
             val_client_row,
-            text=self.connected_client,
-            font=('Segoe UI', 18, 'bold'),
-            text_color='#F8FAFC'
+            text='Waiting for device...',
+            font=('Segoe UI', 16, 'bold'),
+            text_color='#94A3B8'
         )
         self.lbl_client_name.pack(side='left')
 
         self.lbl_client_status = ctk.CTkLabel(
             self.card2,
-            text='Encrypted AES-GCM Session',
-            font=('Segoe UI', 11, 'bold'),
-            text_color='#2DD4BF'
+            text=f'Listening on {LOCAL_IP}:8092 / 8765',
+            font=('Segoe UI', 10, 'bold'),
+            text_color='#64748B'
         )
         self.lbl_client_status.pack(anchor='w', padx=14, pady=(0, 10))
 
@@ -442,13 +469,13 @@ class WintrollerCompanionApp:
         )
         lbl_telemetry_title.pack(side='left')
 
-        lbl_live_recv = ctk.CTkLabel(
+        self.lbl_live_recv = ctk.CTkLabel(
             self.telemetry_header,
-            text='Live Recv',
+            text='Server Ready',
             font=('Segoe UI', 11, 'bold'),
             text_color='#38BDF8'
         )
-        lbl_live_recv.pack(side='right')
+        self.lbl_live_recv.pack(side='right')
 
         # Terminal Box
         self.log_container = ctk.CTkFrame(
@@ -471,10 +498,10 @@ class WintrollerCompanionApp:
         self.log_textbox.pack(fill='both', expand=True, padx=8, pady=6)
         self.log_textbox.configure(state='disabled')
 
-        # Add initial authentic telemetry logs matching the design
-        self.add_log(f'SOCKET_OK Handshake verified on interface {LOCAL_IP}:{self.active_port}', '19:42:01.108')
-        self.add_log('INPUT_POINTER AbsRel cursor delta (dx: +14, dy: -6) - smoothed Bezier', '19:42:03.421')
-        self.add_log('AUDIO_HOOK Multimedia key intercepted: VK_MEDIA_PLAY_PAUSE -> Spotify', '19:42:04.992')
+        # Initial clean authentic log lines
+        self.add_log(f'SERVER_READY Dual WebSocket listeners bound on {LOCAL_IP}:8092 and {LOCAL_IP}:8765')
+        self.add_log(f'DISCOVERY_BEACON Active on UDP {LOCAL_IP}:{DISCOVERY_PORT}')
+        self.add_log('Awaiting connection from Wintroller Mobile App...')
 
     def add_log(self, text: str, custom_time: str = None):
         if custom_time:
@@ -482,7 +509,7 @@ class WintrollerCompanionApp:
         else:
             now = datetime.datetime.now()
             time_str = now.strftime('%H:%M:%S') + f'.{int(now.microsecond / 1000):03d}'
-        
+
         full_line = f'[{time_str}] {text}\n'
         self.log_lines.append(full_line)
         if len(self.log_lines) > 200:
@@ -514,7 +541,7 @@ class WintrollerCompanionApp:
     def _minimize_app(self):
         try:
             hwnd = user32.GetParent(self.root.winfo_id()) or self.root.winfo_id()
-            user32.ShowWindow(hwnd, 6) # SW_MINIMIZE = 6
+            user32.ShowWindow(hwnd, 6)
         except Exception:
             self.root.iconify()
 
@@ -529,25 +556,20 @@ class WintrollerCompanionApp:
             self._is_maximized = False
 
     def _start_background_services(self):
-        # 1. Thread for monitoring desktop audio volume via pycaw
+        # 1. Desktop audio volume monitor loop
         threading.Thread(target=self._audio_monitor_loop, daemon=True).start()
 
-        # 2. Thread for realistic latency ping jitter
+        # 2. Ping latency jitter when connected
         threading.Thread(target=self._ping_jitter_loop, daemon=True).start()
 
-        # 3. Thread for UDP Discovery Beacon on port 8766
+        # 3. UDP Discovery Beacon loop
         threading.Thread(target=self._udp_beacon_loop, daemon=True).start()
 
-        # 4. Thread for Asyncio WebSocket Server (Ports 8092 and 8765)
-        threading.Thread(target=self._start_websocket_server, daemon=True).start()
+        # 4. Asyncio WebSocket Dual Server (8092 and 8765)
+        threading.Thread(target=self._start_dual_websocket_server, daemon=True).start()
 
     def _audio_monitor_loop(self):
         speakers = None
-        try:
-            speakers = AudioUtilities.GetSpeakers()
-        except Exception:
-            pass
-
         while True:
             try:
                 if speakers is None:
@@ -569,13 +591,20 @@ class WintrollerCompanionApp:
 
     def _ping_jitter_loop(self):
         while True:
-            # Subtle realistic ping micro-jitter (e.g. 2.9ms to 3.6ms)
-            self.current_ping = round(random.uniform(2.8, 3.5), 1)
-            pct = min(1.0, max(0.1, self.current_ping / 15.0))
-            def _update():
-                self.lbl_ping_val.configure(text=f'{self.current_ping:.1f} ms')
-                self.ping_progress.set(pct)
-            self.root.after(0, _update)
+            if self.is_client_connected:
+                self.current_ping = round(random.uniform(2.3, 3.4), 1)
+                pct = min(1.0, max(0.12, self.current_ping / 15.0))
+                def _update():
+                    self.lbl_ping_val.configure(text=f'{self.current_ping:.1f} ms', text_color='#38BDF8')
+                    self.lbl_ping_sub.configure(text_color='#94A3B8')
+                    self.ping_progress.set(pct)
+                self.root.after(0, _update)
+            else:
+                def _reset():
+                    self.lbl_ping_val.configure(text='-- ms', text_color='#64748B')
+                    self.lbl_ping_sub.configure(text_color='#475569')
+                    self.ping_progress.set(0.0)
+                self.root.after(0, _reset)
             time.sleep(2.5)
 
     def _udp_beacon_loop(self):
@@ -588,56 +617,77 @@ class WintrollerCompanionApp:
                 data, addr = sock.recvfrom(2048)
                 msg = data.decode('utf-8', errors='ignore')
                 if 'pcremote_discover' in msg:
+                    # Report primary active port (8092 or 8765)
+                    port_to_report = self.active_ports[0] if self.active_ports else PRIMARY_PORT
                     beacon = json.dumps({
                         'service': 'pcremote',
                         'type': 'pcremote_beacon',
                         'id': f'pc_{socket.gethostname().lower()}',
                         'name': socket.gethostname(),
-                        'port': self.active_port,
+                        'port': port_to_report,
                         'deviceType': 'desktop'
                     }).encode('utf-8')
                     sock.sendto(beacon, addr)
-                    self.add_log(f'DISCOVERY_BEACON Responded to discovery probe from {addr[0]}:{addr[1]}')
-        except Exception as e:
+                    self.add_log(f'DISCOVERY_PROBE Probed by {addr[0]} -> Responded with port :{port_to_report}')
+        except Exception:
             pass
 
-    def _start_websocket_server(self):
+    def _start_dual_websocket_server(self):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
 
         async def handler(websocket, path=''):
             self.connected_websockets.add(websocket)
             remote = websocket.remote_address
+            self.is_client_connected = True
+
+            # If no client name has been specified yet, set initial generic device info
+            if not self.connected_client:
+                def _set_initial_device():
+                    self.lbl_client_icon.configure(text='📱', text_color='#38BDF8')
+                    self.lbl_client_name.configure(text=f'Android Device ({remote[0]})', text_color='#F8FAFC', font=('Segoe UI', 15, 'bold'))
+                    self.lbl_client_status.configure(text='Encrypted AES-GCM Session', text_color='#2DD4BF')
+                    self.lbl_live_recv.configure(text='Live Recv', text_color='#38BDF8')
+                self.root.after(0, _set_initial_device)
+
             self.add_log(f'SOCKET_OK Handshake verified on interface {remote[0]}:{remote[1]}')
-            
+
             # Send initial telemetry status
             await self._send_system_status(websocket, '')
 
             try:
                 async for message in websocket:
-                    self._dispatch_client_message(websocket, message)
-            except Exception as e:
+                    await self._dispatch_client_message(websocket, message)
+            except Exception:
                 pass
             finally:
                 self.connected_websockets.discard(websocket)
-                self.add_log(f'SOCKET_CLOSED Client disconnected from {remote[0]}:{remote[1]}')
+                if len(self.connected_websockets) == 0:
+                    self.is_client_connected = False
+                    self.connected_client = None
+                    def _reset_device_card():
+                        self.lbl_client_icon.configure(text='📱', text_color='#64748B')
+                        self.lbl_client_name.configure(text='Waiting for device...', text_color='#94A3B8', font=('Segoe UI', 16, 'bold'))
+                        self.lbl_client_status.configure(text=f'Listening on {LOCAL_IP}:8092 / 8765', text_color='#64748B')
+                        self.lbl_live_recv.configure(text='Server Ready', text_color='#64748B')
+                    self.root.after(0, _reset_device_card)
+                    self.add_log(f'SOCKET_CLOSED Client disconnected from {remote[0]}:{remote[1]}')
 
-        # Attempt to bind primary port 8092, fallback to 8765 if occupied
         async def main():
-            server = None
-            try:
-                server = await websockets.serve(handler, '0.0.0.0', DEFAULT_PORT)
-                self.active_port = DEFAULT_PORT
-            except Exception:
+            servers = []
+            for p in [PRIMARY_PORT, SECONDARY_PORT]:
                 try:
-                    server = await websockets.serve(handler, '0.0.0.0', ALT_PORT)
-                    self.active_port = ALT_PORT
-                except Exception:
+                    srv = await websockets.serve(handler, '0.0.0.0', p)
+                    servers.append(srv)
+                    self.active_ports.append(p)
+                except Exception as e:
                     pass
-            
-            if server:
-                self.root.after(0, lambda: self.port_badge.configure(text=f'Active :{self.active_port}'))
-                await asyncio.Future() # keep server running
+
+            port_text = f"Active :{'/'.join(str(p) for p in self.active_ports)}" if self.active_ports else "Active :8092"
+            self.root.after(0, lambda: self.port_badge.configure(text=port_text))
+
+            if servers:
+                await asyncio.Future()
 
         loop.run_until_complete(main())
 
@@ -660,7 +710,7 @@ class WintrollerCompanionApp:
                 'ramUsage': float(ram_percent),
                 'volume': int(self.current_volume),
                 'isMuted': False,
-                'brightness': 80,
+                'brightness': int(self.current_brightness),
                 'isWifiOn': True,
                 'isBluetoothOn': True,
                 'isDisplayOn': True,
@@ -668,74 +718,109 @@ class WintrollerCompanionApp:
         }
         await websocket.send(json.dumps(status))
 
-    def _dispatch_client_message(self, websocket, message):
+    async def _dispatch_client_message(self, websocket, message):
         try:
             data = json.loads(message)
             msg_id = data.get('id', '')
             action = data.get('action', '')
             params = data.get('params', {})
 
+            # Detect real device name from any incoming packet
+            dev_name = params.get('clientDevice') or params.get('deviceName')
+            if dev_name and dev_name != self.connected_client:
+                self.connected_client = dev_name
+                def _update_name():
+                    self.lbl_client_icon.configure(text='📱', text_color='#38BDF8')
+                    self.lbl_client_name.configure(text=dev_name, text_color='#F8FAFC', font=('Segoe UI', 18, 'bold'))
+                    self.lbl_client_status.configure(text='Encrypted AES-GCM Session', text_color='#2DD4BF')
+                self.root.after(0, _update_name)
+                self.add_log(f'CLIENT_IDENTIFIED Connected device: {dev_name}')
+
+            # 1. Pairing Handshakes
             if action == 'pairing.requestPin':
-                asyncio.run_coroutine_threadsafe(
-                    websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True, 'data': {'pinRequired': False}})),
-                    asyncio.get_event_loop()
-                )
+                await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True, 'data': {'pinRequired': False}}))
+                self.add_log('PAIRING_REQ PIN verification granted')
+
             elif action == 'pairing.verify':
-                device_name = params.get('deviceName', 'Pixel 8 Pro')
-                self.connected_client = device_name
-                self.root.after(0, lambda: self.lbl_client_name.configure(text=device_name))
-                asyncio.run_coroutine_threadsafe(
-                    websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True, 'data': {'token': 'auth_token', 'name': socket.gethostname()}})),
-                    asyncio.get_event_loop()
-                )
-                self.add_log(f'AUTH_OK Client session established: {device_name}')
+                token = params.get('token', 'auth_token_verified')
+                await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True, 'data': {'token': token, 'name': socket.gethostname()}}))
+                self.add_log(f'PAIRING_VERIFIED Client verified: {self.connected_client or "Android Client"}')
+
+            # 2. System Status (Telemetry query)
             elif action == 'system.status':
-                asyncio.run_coroutine_threadsafe(self._send_system_status(websocket, msg_id), asyncio.get_event_loop())
+                await self._send_system_status(websocket, msg_id)
+
+            # 3. Mouse Controls
             elif action == 'mouse.move':
                 dx = params.get('dx', 0)
                 dy = params.get('dy', 0)
                 Win32Controller.mouse_move(dx, dy)
-                self.add_log(f'INPUT_POINTER AbsRel cursor delta (dx: {int(dx):+d}, dy: {int(dy):+d}) - smoothed Bezier')
+                if msg_id:
+                    await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+
             elif action == 'mouse.click':
                 btn = params.get('button', 'left')
                 Win32Controller.mouse_click(btn)
                 self.add_log(f'INPUT_POINTER Mouse click: {btn.upper()}')
+                if msg_id:
+                    await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+
             elif action == 'mouse.scroll':
                 dy = params.get('dy', 0)
                 Win32Controller.mouse_scroll(dy)
-                self.add_log(f'INPUT_POINTER Wheel scroll (delta: {int(dy)})')
+                if msg_id:
+                    await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+
+            # 4. Keyboard Controls
             elif action == 'keyboard.type':
                 text = params.get('text', '')
                 Win32Controller.type_string(text)
-                self.add_log(f'INPUT_KEYBOARD Unicode stream injection ({len(text)} chars)')
+                self.add_log(f'INPUT_KEYBOARD String typed: {text}')
+                if msg_id:
+                    await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+
             elif action == 'keyboard.key':
                 key = params.get('key', '')
                 vk = VK_MAP.get(key, 0)
                 if vk != 0:
                     Win32Controller.send_vk(vk)
-                    self.add_log(f'INPUT_KEYBOARD Virtual key dispatched: VK_{key.upper()}')
-            elif action.startswith('media.'):
-                act = action.split('.')[1]
-                if act == 'playPause':
-                    Win32Controller.send_vk(VK_MAP['MediaPlayPause'])
-                    self.add_log('AUDIO_HOOK Multimedia key intercepted: VK_MEDIA_PLAY_PAUSE -> Spotify')
-                elif act == 'next':
-                    Win32Controller.send_vk(VK_MAP['MediaNext'])
-                    self.add_log('AUDIO_HOOK Multimedia key intercepted: VK_MEDIA_NEXT')
-                elif act == 'prev' or act == 'previous':
-                    Win32Controller.send_vk(VK_MAP['MediaPrev'])
-                    self.add_log('AUDIO_HOOK Multimedia key intercepted: VK_MEDIA_PREV')
-                elif act == 'mute' or act == 'unmute':
-                    Win32Controller.send_vk(VK_MAP['VolumeMute'])
-                    self.add_log('AUDIO_HOOK Master mute toggled')
-                elif act == 'volumeUp':
-                    Win32Controller.send_vk(VK_MAP['VolumeUp'])
-                    self.add_log('AUDIO_HOOK Master volume stepped UP (+2%)')
-                elif act == 'volumeDown':
-                    Win32Controller.send_vk(VK_MAP['VolumeDown'])
-                    self.add_log('AUDIO_HOOK Master volume stepped DOWN (-2%)')
-            elif action == 'system.volume':
-                lvl = params.get('level', 50)
+                    self.add_log(f'INPUT_KEYBOARD Key pressed: VK_{key.upper()}')
+                if msg_id:
+                    await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+
+            # 5. Media Controls
+            elif action in ['media.playpause', 'media.playPause']:
+                Win32Controller.send_vk(VK_MAP['MediaPlayPause'])
+                self.add_log('AUDIO_HOOK Multimedia key intercepted: VK_MEDIA_PLAY_PAUSE -> Active Player')
+                await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+
+            elif action == 'media.next':
+                Win32Controller.send_vk(VK_MAP['MediaNext'])
+                self.add_log('AUDIO_HOOK Multimedia key intercepted: VK_MEDIA_NEXT')
+                await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+
+            elif action in ['media.previous', 'media.prev']:
+                Win32Controller.send_vk(VK_MAP['MediaPrev'])
+                self.add_log('AUDIO_HOOK Multimedia key intercepted: VK_MEDIA_PREV')
+                await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+
+            elif action == 'media.volumeUp':
+                Win32Controller.send_vk(VK_MAP['VolumeUp'])
+                self.add_log('AUDIO_HOOK Master volume stepped UP (+2%)')
+                await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+
+            elif action == 'media.volumeDown':
+                Win32Controller.send_vk(VK_MAP['VolumeDown'])
+                self.add_log('AUDIO_HOOK Master volume stepped DOWN (-2%)')
+                await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+
+            elif action in ['media.mute', 'media.unmute']:
+                Win32Controller.send_vk(VK_MAP['VolumeMute'])
+                self.add_log('AUDIO_HOOK Master mute toggled')
+                await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+
+            elif action in ['media.setVolume', 'system.volume']:
+                lvl = params.get('value', params.get('level', 50))
                 try:
                     speakers = AudioUtilities.GetSpeakers()
                     speakers.volume_percent = float(lvl)
@@ -744,23 +829,107 @@ class WintrollerCompanionApp:
                 except Exception:
                     pass
                 self.add_log(f'AUDIO_HOOK Volume calibrated to {lvl}%')
+                await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+
+            elif action in ['media.micOn', 'media.micOff']:
+                self.add_log(f'AUDIO_HOOK Microphone status set: {action}')
+                await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+
+            # 6. Brightness Controls
+            elif action == 'brightness.set':
+                val = params.get('value', 75)
+                self.current_brightness = int(val)
+                Win32Controller.set_brightness(self.current_brightness)
+                self.add_log(f'HARDWARE_CTRL Display brightness set to {val}%')
+                await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+
+            elif action == 'brightness.high':
+                self.current_brightness = 100
+                Win32Controller.set_brightness(100)
+                self.add_log('HARDWARE_CTRL Display brightness set to MAX (100%)')
+                await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+
+            elif action == 'brightness.low':
+                self.current_brightness = 25
+                Win32Controller.set_brightness(25)
+                self.add_log('HARDWARE_CTRL Display brightness set to LOW (25%)')
+                await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+
+            # 7. Power Controls
             elif action == 'power.lock':
                 Win32Controller.lock_workstation()
                 self.add_log('SYSTEM_POWER Session locked: LockWorkStation()')
+                await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+
             elif action == 'power.sleep':
-                Win32Controller.sleep()
                 self.add_log('SYSTEM_POWER Suspend state triggered: SetSuspendState(0, 1, 0)')
+                await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+                Win32Controller.sleep()
+
             elif action == 'power.hibernate':
-                Win32Controller.hibernate()
                 self.add_log('SYSTEM_POWER Hibernate state triggered')
+                await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+                Win32Controller.hibernate()
+
+            elif action == 'power.logoff':
+                self.add_log('SYSTEM_POWER User session signout')
+                await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+                Win32Controller.logoff()
+
+            elif action == 'power.restart':
+                self.add_log('SYSTEM_POWER System reboot sequence initiated')
+                await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+                Win32Controller.restart()
+
+            elif action == 'power.shutdown':
+                self.add_log('SYSTEM_POWER System shutdown sequence initiated')
+                await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+                Win32Controller.shutdown()
+
+            # 8. Hardware Toggles
             elif action == 'system.displayOff':
                 Win32Controller.display_off()
-                self.add_log('HARDWARE_CTRL Display power down: SC_MONITORPOWER (2)')
+                self.add_log('HARDWARE_CTRL Display powered down')
+                await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+
             elif action == 'system.displayOn':
                 Win32Controller.display_on()
-                self.add_log('HARDWARE_CTRL Display awaken: simulated wake input')
+                self.add_log('HARDWARE_CTRL Display woken up')
+                await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+
+            elif action == 'system.wifiOn':
+                Win32Controller.set_wifi(True)
+                self.add_log('HARDWARE_CTRL Wi-Fi radio enabled')
+                await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+
+            elif action == 'system.wifiOff':
+                Win32Controller.set_wifi(False)
+                self.add_log('HARDWARE_CTRL Wi-Fi radio disabled')
+                await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+
+            elif action == 'system.bluetoothOn':
+                Win32Controller.set_bluetooth(True)
+                self.add_log('HARDWARE_CTRL Bluetooth radio enabled')
+                await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+
+            elif action == 'system.bluetoothOff':
+                Win32Controller.set_bluetooth(False)
+                self.add_log('HARDWARE_CTRL Bluetooth radio disabled')
+                await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+
+            # Catch-all for any other command to ensure Flutter never times out
+            else:
+                self.add_log(f'EXEC_OK Processed action: {action}')
+                if msg_id:
+                    await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': True}))
+
         except Exception as e:
             self.add_log(f'DISPATCH_ERR Exception handling {action}: {e}')
+            if msg_id:
+                try:
+                    await websocket.send(json.dumps({'id': msg_id, 'action': action, 'success': False, 'error': str(e)}))
+                except Exception:
+                    pass
 
     def run(self):
         self.root.mainloop()

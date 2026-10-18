@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import '../models/device_models.dart';
 import '../models/system_models.dart';
@@ -8,6 +9,9 @@ import '../protocol/command_protocol.dart';
 enum ConnectionStatus { offline, connecting, connected, error }
 
 class WebSocketService {
+  static const _deviceInfoChannel = MethodChannel('com.pcremote/device_info');
+  String _cachedDeviceName = 'Android Device';
+
   WebSocketChannel? _channel;
   PairedDevice? _activeDevice;
   ConnectionStatus _status = ConnectionStatus.offline;
@@ -15,6 +19,16 @@ class WebSocketService {
   int _reconnectAttempts = 0;
   Timer? _reconnectTimer;
   Timer? _heartbeatTimer;
+
+  Future<String> getClientDeviceName() async {
+    try {
+      final name = await _deviceInfoChannel.invokeMethod<String>('getDeviceModel');
+      if (name != null && name.trim().isNotEmpty) {
+        _cachedDeviceName = name.trim();
+      }
+    } catch (_) {}
+    return _cachedDeviceName;
+  }
 
   final _statusController = StreamController<ConnectionStatus>.broadcast();
   final _systemInfoController = StreamController<HostSystemInfo>.broadcast();
@@ -74,8 +88,9 @@ class WebSocketService {
       _reconnectAttempts = 0;
       _startHeartbeat();
 
-      // Send initial status request
-      sendCommand(ProtocolActions.systemStatus);
+      // Send initial status request with client device info
+      final devName = await getClientDeviceName();
+      sendCommand(ProtocolActions.systemStatus, params: {'clientDevice': devName, 'deviceName': devName});
 
       return true;
     } catch (e) {
